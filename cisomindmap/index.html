@@ -1857,9 +1857,9 @@ function openCatPanel(cat, col){
   document.getElementById('cat-panel-desc').textContent = desc;
 
   /* Stats */
-  var leaves = countLeaves(cat);
+  var boxes = countBoxes(cat);
   var subs = cat.children ? cat.children.filter(function(c){ return c.children && c.children.length; }).length : 0;
-  document.getElementById('cat-stat-topics').textContent = leaves;
+  document.getElementById('cat-stat-topics').textContent = boxes;
   document.getElementById('cat-stat-subs').textContent = subs;
   document.getElementById('cat-stat-topics').style.color = col;
   document.getElementById('cat-stat-subs').style.color = col;
@@ -1871,7 +1871,7 @@ function openCatPanel(cat, col){
     cat.children.forEach(function(child){
       var chip = document.createElement('span');
       chip.className = 'cat-sub-chip';
-      chip.textContent = child.name + (child.children ? ' ('+countLeaves(child)+')' : '');
+      chip.textContent = child.name + (child.children ? ' ('+countBoxes(child)+')' : '');
       chip.addEventListener('click', function(){
         closeCatPanel();
         doReset();
@@ -2110,7 +2110,7 @@ function buildTree(){
 
   ROOT.children.forEach(function(cat, ci){
     var col = PAL[palIdxOf(cat) % PAL.length];
-    var leafCount = countLeaves(cat);
+    var leafCount = countBoxes(cat);
 
     var catDiv = document.createElement('div');
     catDiv.className = 'tree-cat';
@@ -2173,7 +2173,7 @@ function buildTreeChildren(nodes, container, col, cat, depth){
         '<span class="tree-toggle-icon">▶</span>' +
         '<span style="font-size:10px;color:rgba(255,255,255,0.3);margin-right:2px">●</span>' +
         '<span style="color:rgba(255,255,255,0.6);font-size:11px;font-weight:600">'+node.name+'</span>' +
-        '<span style="font-size:10px;color:rgba(255,255,255,0.2);margin-left:auto">'+countLeaves(node)+'</span>';
+        '<span style="font-size:10px;color:rgba(255,255,255,0.2);margin-left:auto">'+countBoxes(node)+'</span>';
 
       row.addEventListener('click', function(e){
         e.stopPropagation();
@@ -2184,23 +2184,41 @@ function buildTreeChildren(nodes, container, col, cat, depth){
         clearMapHighlight();
         document.querySelectorAll('.tree-node.highlighted,.tree-leaf.highlighted').forEach(function(el){ el.classList.remove('highlighted'); });
         row.classList.add('highlighted');
-        /* Drill map and highlight the bubble, THEN open panel */
+
+        /* Find full chain from ROOT to this node */
+        function findChainSub(root, target, chain){
+          if(root === target) return chain.concat(root);
+          if(!root.children) return null;
+          for(var i=0;i<root.children.length;i++){
+            var r=findChainSub(root.children[i], target, chain.concat(root));
+            if(r) return r;
+          }
+          return null;
+        }
+        var chain = findChainSub(ROOT, node, []);
+        /* drillPath = all ancestors between ROOT and node (exclusive) */
+        var drillPath = chain ? chain.slice(1, -1) : [cat];
+
+        /* Drill map through all ancestors, then highlight the node circle */
         doReset();
+        var stepDelay = 80;
+        drillPath.forEach(function(ancestor, idx){
+          setTimeout(function(){ drillInto(ancestor); }, stepDelay * (idx+1));
+        });
+
         setTimeout(function(){
-          drillInto(cat);
-          setTimeout(function(){
-            var found = false;
-            gCircles.selectAll('circle[data-name]').each(function(){
-              var el = d3.select(this);
-              if(!found && el.attr('data-name') === node.name){
-                found = true;
-                pulseCircle(el, col);
-              }
-            });
-            /* Open panel AFTER navigation so doReset doesn't close it */
-            openCatPanel(node, col);
-          }, 200);
-        }, 50);
+          /* Now find node's circle at depth=1 of current view */
+          var found = false;
+          gCircles.selectAll('circle[data-name]').each(function(){
+            var el = d3.select(this);
+            if(!found && el.attr('data-name') === node.name){
+              found = true;
+              pulseCircle(el, col);
+            }
+          });
+          /* Open panel AFTER navigation */
+          openCatPanel(node, col);
+        }, stepDelay * (drillPath.length + 1) + 150);
       });
 
       row.parentNode && row.parentNode.insertBefore(subChildren, row.nextSibling);
@@ -2487,7 +2505,7 @@ function buildCatBar(){
     pill.textContent=cat.name;
     pill.dataset.cat=cat.name;
     pill.dataset.color=col;
-    pill.title=countLeaves(cat)+' topics';
+    pill.title=countBoxes(cat)+' topics';
     /* colored dot */
     pill.innerHTML='<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+col+';margin-right:5px;vertical-align:middle"></span>'+cat.name;
     pill.addEventListener('click',function(e){
