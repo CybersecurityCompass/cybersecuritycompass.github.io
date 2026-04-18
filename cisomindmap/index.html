@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CISO MindMap 2026 (InfoSec Professionals Responsibilities)</title>
+<title>CISO MindMap 2026 — What do InfoSec Professionals Really Do?</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0e1a;overflow:hidden;width:100vw;height:100vh;font-family:'Segoe UI',system-ui,sans-serif}
@@ -167,11 +167,254 @@ svg{width:100%;height:100%}
   margin-bottom:20px;
   opacity:0.7;
 }
+
+/* ── TREE NAVIGATOR PANEL ── */
+#tree-toggle{
+  position:fixed;
+  left:0;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:250;
+  background:rgba(10,14,26,0.9);
+  border:1px solid rgba(255,255,255,0.12);
+  border-left:none;
+  border-radius:0 8px 8px 0;
+  padding:10px 6px;
+  cursor:pointer;
+  color:rgba(255,255,255,0.5);
+  font-size:13px;
+  writing-mode:vertical-rl;
+  letter-spacing:0.1em;
+  transition:color .2s, background .2s;
+  backdrop-filter:blur(8px);
+}
+#tree-toggle:hover{ color:#fff; background:rgba(10,14,26,0.98); }
+
+#tree-panel{
+  position:fixed;
+  top:0;
+  left:-320px;
+  width:300px;
+  height:100vh;
+  background:rgba(8,11,20,0.97);
+  border-right:1px solid rgba(255,255,255,0.08);
+  z-index:240;
+  display:flex;
+  flex-direction:column;
+  transition:left 0.3s cubic-bezier(.4,0,.2,1);
+  backdrop-filter:blur(16px);
+}
+#tree-panel.open{ left:0; }
+#tree-panel.open ~ #tree-toggle{ left:300px; border-radius:0 8px 8px 0; }
+
+#tree-header{
+  padding:16px 16px 10px;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  flex-shrink:0;
+}
+#tree-header h3{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.12em;
+  color:rgba(255,255,255,0.3);
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+#tree-search{
+  width:100%;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:6px;
+  color:#fff;
+  font-size:12px;
+  padding:6px 10px;
+  box-sizing:border-box;
+  outline:none;
+  font-family:inherit;
+}
+#tree-search::placeholder{ color:rgba(255,255,255,0.25); }
+#tree-search:focus{ border-color:rgba(255,255,255,0.25); }
+
+#tree-body{
+  flex:1;
+  overflow-y:auto;
+  padding:8px 0;
+}
+#tree-body::-webkit-scrollbar{ width:4px; }
+#tree-body::-webkit-scrollbar-track{ background:transparent; }
+#tree-body::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.1); border-radius:2px; }
+
+.tree-cat{
+  margin:0;
+}
+.tree-cat-header{
+  display:flex;
+  align-items:center;
+  padding:7px 14px 7px 12px;
+  cursor:pointer;
+  user-select:none;
+  gap:7px;
+  transition:background .15s;
+  border-radius:0;
+}
+.tree-cat-header:hover{ background:rgba(255,255,255,0.05); }
+.tree-cat-header.active{ background:rgba(255,255,255,0.08); }
+
+.tree-toggle-icon{
+  font-size:9px;
+  color:rgba(255,255,255,0.25);
+  width:12px;
+  flex-shrink:0;
+  transition:transform .2s;
+  display:inline-block;
+}
+.tree-toggle-icon.open{ transform:rotate(90deg); color:rgba(255,255,255,0.5); }
+
+.tree-cat-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+.tree-cat-name{
+  font-size:12px;
+  font-weight:600;
+  color:rgba(255,255,255,0.7);
+  flex:1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.tree-cat-count{
+  font-size:10px;
+  color:rgba(255,255,255,0.2);
+  flex-shrink:0;
+}
+.tree-cat-children{
+  display:none;
+  padding-left:0;
+}
+.tree-cat-children.open{ display:block; }
+
+.tree-node{
+  display:flex;
+  align-items:center;
+  padding:4px 14px 4px 28px;
+  cursor:pointer;
+  gap:6px;
+  transition:background .15s;
+  font-size:11px;
+  color:rgba(255,255,255,0.5);
+}
+.tree-node:hover{ background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.85); }
+.tree-node.highlighted{ background:rgba(255,255,255,0.1); color:#fff; font-weight:600; }
+.tree-node .tree-toggle-icon{ font-size:8px; }
+.tree-leaf{
+  padding-left:48px;
+  font-size:11px;
+  color:rgba(255,255,255,0.4);
+}
+.tree-leaf:hover{ background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.75); }
+.tree-leaf.highlighted{ background:rgba(255,255,255,0.08); color:#fff; }
+
+/* ── CATEGORY INFO PANEL (Smart Nav click) ── */
+#cat-panel{
+  position:fixed;
+  top:0;
+  right:-480px;
+  width:400px;
+  height:100vh;
+  background:rgba(8,11,20,0.98);
+  border-left:1px solid rgba(255,255,255,0.08);
+  padding:32px 28px;
+  box-sizing:border-box;
+  overflow-y:auto;
+  transition:right 0.32s cubic-bezier(.4,0,.2,1);
+  z-index:300;
+  backdrop-filter:blur(20px);
+  pointer-events:all;
+}
+#cat-panel.open{ right:0; }
+#cat-panel-close{
+  position:absolute;
+  top:20px; right:20px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  color:rgba(255,255,255,0.6);
+  font-size:16px;
+  cursor:pointer;
+  padding:6px 10px;
+  border-radius:8px;
+  pointer-events:all;
+}
+#cat-panel-close:hover{ color:#fff; background:rgba(255,255,255,0.15); }
+#cat-panel-bar{ height:4px; border-radius:4px; margin-bottom:24px; opacity:0.8; }
+#cat-panel-label{
+  font-size:10px; font-weight:700; letter-spacing:0.12em;
+  color:rgba(255,255,255,0.3); text-transform:uppercase; margin-bottom:8px;
+}
+#cat-panel-name{
+  font-size:24px; font-weight:800; color:#fff; line-height:1.2;
+  margin-bottom:16px; padding-bottom:16px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+#cat-panel-desc{
+  font-size:14px; color:rgba(255,255,255,0.72); line-height:1.75;
+  margin-bottom:24px;
+}
+#cat-panel-stats{
+  display:flex; gap:16px; margin-bottom:24px;
+}
+.cat-stat{
+  flex:1; background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px; padding:12px 14px;
+  text-align:center;
+}
+.cat-stat-num{
+  font-size:22px; font-weight:800; color:#fff;
+}
+.cat-stat-label{
+  font-size:10px; color:rgba(255,255,255,0.35);
+  text-transform:uppercase; letter-spacing:0.08em; margin-top:2px;
+}
+#cat-panel-subs-title{
+  font-size:9px; font-weight:700; letter-spacing:0.12em;
+  color:rgba(255,255,255,0.25); text-transform:uppercase; margin-bottom:10px;
+}
+#cat-panel-subs{
+  display:flex; flex-wrap:wrap; gap:7px;
+}
+.cat-sub-chip{
+  font-size:11px; padding:5px 12px; border-radius:20px;
+  border:1px solid rgba(255,255,255,0.12);
+  color:rgba(255,255,255,0.55);
+  background:rgba(255,255,255,0.04);
+  cursor:pointer; transition:all .15s;
+}
+.cat-sub-chip:hover{
+  border-color:rgba(255,255,255,0.3);
+  color:#fff; background:rgba(255,255,255,0.1);
+}
 </style>
 </head>
 <body>
 
+
 <div id="detail-overlay" onclick="closeDetailPanel(event)"></div>
+<div id="cat-panel">
+  <button id="cat-panel-close" onclick="closeCatPanel(event)">✕</button>
+  <div id="cat-panel-bar"></div>
+  <div id="cat-panel-label">Category</div>
+  <div id="cat-panel-name"></div>
+  <div id="cat-panel-desc"></div>
+  <div id="cat-panel-stats">
+    <div class="cat-stat"><div class="cat-stat-num" id="cat-stat-topics"></div><div class="cat-stat-label">Topics</div></div>
+    <div class="cat-stat"><div class="cat-stat-num" id="cat-stat-subs"></div><div class="cat-stat-label">Sub-areas</div></div>
+  </div>
+  <div id="cat-panel-subs-title">Sub-categories</div>
+  <div id="cat-panel-subs"></div>
+</div>
 <div id="detail-panel">
   <button id="detail-close" onclick="closeDetailPanel(); event.stopPropagation();">✕</button>
   <div id="detail-color-bar"></div>
@@ -181,13 +424,22 @@ svg{width:100%;height:100%}
   <div id="detail-siblings-title">Also in this group</div>
   <div id="detail-siblings"></div>
 </div>
+
+<div id="tree-panel">
+  <div id="tree-header">
+    <h3>🗂 Navigator</h3>
+    <input id="tree-search" type="text" placeholder="Search topics..." oninput="treeSearch(this.value)">
+  </div>
+  <div id="tree-body"></div>
+</div>
+<div id="tree-toggle" onclick="toggleTreePanel()" title="Toggle Navigator">Smart Nav</div>
 <div id="minimap"><div id="minimap-body"></div></div>
 <div id="app"><svg id="sv"></svg></div>
 
 <!-- Top bar: title + category pills -->
 <div id="topbar">
   <div id="topbar-title">
-    <h1>CISO MindMap <em>2026</em> <span style="font-size:0.62em;font-weight:400;opacity:0.8">(InfoSec Professionals Responsibilities)</span></h1>
+    <h1>CISO MindMap <em>2026</em> <span style="font-size:0.62em;font-weight:400;opacity:0.7">— What do InfoSec Professionals Really Do?</span></h1>
     <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;pointer-events:all;line-height:1.7">
       Original concept &amp; research by
       <a href="http://rafeeqrehman.com" target="_blank" rel="noopener"
@@ -976,6 +1228,53 @@ var ROOT={name:'CISO 2026',children:[
   });
 })();
 
+
+/* ── CATEGORY DESCRIPTIONS ─────────────────────────────────────── */
+var CAT_DESCS = {
+  "Security Operations": "The operational core of the security function — monitoring, detecting, and responding to threats in real time. Security Operations teams run the SOC, manage incident response, analyze logs, hunt threats, and keep the organisation's defences active 24/7.",
+  "Identity and Access Management": "Controls who can access what, and under what conditions. IAM covers authentication, authorisation, directory services, privileged access, and zero-trust principles — ensuring only the right people reach the right resources at the right time.",
+  "Governance": "Establishes the policies, frameworks, and accountability structures that guide the entire security programme. Governance defines roles, sets risk tolerance, drives board-level security culture, and ensures security decisions align with business objectives.",
+  "Using and Securing AI": "Addresses the dual challenge of AI in security: harnessing AI to enhance detection and automation, while defending against AI-powered attacks. Covers model security, data poisoning risks, deepfakes, and building AI governance frameworks.",
+  "Automation and Analytics": "Replaces manual, repetitive security tasks with automated workflows and data-driven insights. Includes SOAR, security metrics, threat intelligence pipelines, and dashboards that turn raw data into actionable intelligence for leadership.",
+  "Risk Management": "The process of identifying, quantifying, and prioritising security risks so the organisation can make informed decisions. Covers third-party risk, cyber insurance, risk registers, and business impact analysis.",
+  "Legal": "Bridges cybersecurity with legal obligations and protections. CISOs must understand data retention laws, attorney-client privilege in investigations, vendor contract security clauses, and how to manage digital evidence for potential litigation.",
+  "Compliance and Audits": "Ensures the organisation meets regulatory requirements, industry standards, and internal policies. Covers frameworks like ISO 27001, SOC 2, PCI-DSS, GDPR, and the audit processes that validate controls are working as designed.",
+  "Security Architecture": "Designs and maintains the technical blueprint of the security infrastructure. Security Architects define zero trust and defence-in-depth principles, evaluate new technologies, and ensure security is embedded into every system from the ground up.",
+  "SDLC and Project Delivery": "Integrates security into the software development lifecycle — from requirements through deployment. Covers secure coding standards, DevSecOps practices, security gates in CI/CD pipelines, and ensuring new projects do not introduce new vulnerabilities.",
+  "Business Enablement": "Positions security as a business partner rather than a blocker. Covers cloud adoption security, merger and acquisition due diligence, supporting digital transformation, and helping the organisation grow while managing emerging risks.",
+  "Team Management": "Builds, develops, and retains the security workforce. Includes hiring strategies, skills development, managing burnout, building a security-aware culture across the organisation, and developing the next generation of security leaders."
+};
+/* ── SUB-CATEGORY DESCRIPTIONS ─────────────────────────────────── */
+var SUBCAT_DESCS = {
+  "Threat Prevention":        "The first line of defence — controls and technologies designed to stop attacks before they succeed. Covers firewalls, identity management, patching, endpoint protection, and all proactive measures that reduce the attack surface.",
+  "Vulnerability Mgmt":       "Identifies, prioritises, and remediates weaknesses across the environment before attackers can exploit them. Combines scanning, penetration testing, patch workflows, and risk-based prioritisation to continuously shrink exposure.",
+  "Scope":                    "Defines the boundaries of the vulnerability management programme — which assets, systems, and environments are covered. Getting scope right ensures nothing critical falls through the cracks while keeping the programme manageable.",
+  "Web App Security":         "Protects web-facing applications from common attack vectors like injection, XSS, and broken authentication. Covers DAST/SAST scanning, WAF deployment, API security, and secure development practices for web platforms.",
+  "Threat Detection":         "The capability to recognise malicious activity across the environment in real time. Combines log analysis, behavioural analytics, threat intelligence, and skilled analysts to surface attacks that bypass prevention controls.",
+  "Threat Detection Assessment": "A structured evaluation of detection capabilities — identifying gaps in visibility, coverage, and response speed. Includes red team exercises, purple teaming, and regular reviews against the current threat landscape.",
+  "SOC Operations":           "The day-to-day running of the Security Operations Centre — staffing, tooling, workflows, and metrics. A well-run SOC is the nerve centre that converts raw alerts into confirmed incidents and drives rapid, consistent response.",
+  "Skills Development":       "Builds the technical and analytical capabilities of the security team. Covers training programmes, certifications, hands-on exercises, and keeping the team current with emerging threats and technologies.",
+  "AI Machine Learning":      "Applies machine learning to security challenges — anomaly detection, threat scoring, automated triage, and predictive analytics. Also covers the skills needed to build, evaluate, and responsibly deploy AI-driven security tools.",
+  "IoT Skills":               "Develops expertise in securing connected devices — understanding protocols, firmware vulnerabilities, network segmentation, and the unique challenges posed by OT and IoT environments.",
+  "Incident Management":      "The end-to-end process for responding to security incidents — from initial detection through containment, eradication, recovery, and lessons learned. Effective incident management minimises damage and accelerates return to normal operations.",
+  "Update Test IR Plan":      "Keeps incident response plans current and proven. Regular tabletop exercises and live drills expose gaps before a real incident does — ensuring the team knows exactly what to do under pressure.",
+  "Ransomware":               "Specific preparation for ransomware attacks — the most financially damaging threat facing most organisations. Covers backup strategies, negotiation considerations, recovery playbooks, and preventive controls.",
+  "Automation and SOAR":      "Uses Security Orchestration, Automation and Response platforms to speed up repetitive tasks — alert triage, enrichment, containment actions — so analysts can focus on work that requires human judgement.",
+  "Supply chain incident mgmt": "Manages incidents that originate from or affect third parties and suppliers. Covers notification workflows, joint response coordination, and the unique challenges of incidents where you don't control all the affected systems.",
+  "Identity Credentialing":   "Manages the full lifecycle of digital identities — provisioning, authentication, authorisation, and deprovisioning. Strong identity credentialing is the foundation of zero-trust architectures.",
+  "MFA":                      "Multi-Factor Authentication is one of the highest-impact controls available. Covers deployment strategies, phishing-resistant methods (FIDO2), exception management, and driving adoption across the organisation.",
+  "Securing AI":              "Addresses the unique security risks introduced by AI systems — prompt injection, model theft, data poisoning, and adversarial attacks. Covers how to secure AI pipelines and govern AI usage across the organisation.",
+  "New Vulns Adversarial Attacks": "Tracks and responds to emerging attack techniques targeting AI and ML systems. Includes adversarial examples, model inversion, membership inference, and defensive strategies against these novel threat vectors.",
+  "Cloud Computing":          "Secures the organisation's cloud infrastructure across IaaS, PaaS, and SaaS. Covers shared responsibility models, cloud-native security controls, posture management (CSPM), and building security into cloud adoption strategies.",
+  "Strategy and Guidelines":  "Defines the overarching approach to cloud security — policies, standards, and guardrails that govern how cloud services are consumed and configured across the organisation.",
+  "SaaS Strategy":            "Governs the secure adoption of Software-as-a-Service applications. Covers shadow IT discovery, CASB deployment, data classification, access controls, and vendor security assessment for SaaS providers.",
+  "Mobile Technologies":      "Secures mobile devices and the data they access — MDM/MAM policies, BYOD programmes, mobile threat defence, and ensuring corporate data stays protected regardless of device ownership.",
+  "Processes":                "The operational procedures and workflows that make cloud security programmes repeatable and scalable — change management, security reviews for new cloud services, and ongoing configuration governance.",
+  "IoT":                      "Secures the expanding ecosystem of connected devices in the enterprise — from building management systems to industrial sensors. Covers network segmentation, firmware security, asset inventory, and monitoring for IoT-specific threats.",
+  "IoT Use Cases":            "Practical security approaches for specific IoT deployment scenarios — smart building controls, industrial OT environments, connected medical devices, and consumer IoT brought into corporate environments.",
+  "Mergers and Acquisitions": "Manages cybersecurity through M&A activity — due diligence assessments, integration planning, and ensuring acquired companies don't introduce unacceptable risk into the combined organisation.",
+  "Cloud Computing (BE)":     "The Business Enablement perspective on cloud adoption — balancing speed and agility with security controls, and ensuring the security function is an enabler rather than a barrier to cloud transformation."
+};
 /* ── helpers ────────────────────────────────────────────────────── */
 function countLeaves(n){
   if(!n.children||!n.children.length)return 1;
@@ -1125,6 +1424,7 @@ function renderLevel(dataRoot, isTop){
   currentRoot = dataRoot;
   buildPackFor(dataRoot);
   gCircles.selectAll('*').remove();
+  if(typeof clearMapHighlight==='function') clearMapHighlight();
   gCatLabels.selectAll('*').remove();
   gLeafLabels.selectAll('*').remove();
   /* Also clear any stale clipPaths and arc paths from previous renders */
@@ -1160,6 +1460,7 @@ function renderLevel(dataRoot, isTop){
       var li = leaf&&d.parent?d.parent.children.indexOf(d):0;
       var lt = leaf&&d.parent?d.parent.children.length:1;
       var circ = gCircles.append('circle')
+        .datum(d)
         .attr('cx',oxF+d.x).attr('cy',oyF+d.y).attr('r',d.r)
         .attr('fill',leaf?shadeLeaf(col,li,lt):col)
         .attr('fill-opacity',leaf?1:0.25)
@@ -1187,6 +1488,8 @@ function renderLevel(dataRoot, isTop){
     var li = leaf&&d.parent ? d.parent.children.indexOf(d) : 0;
     var lt = leaf&&d.parent ? d.parent.children.length : 1;
     var circ = gCircles.append('circle')
+      .datum(d)
+      .attr('data-name', d.data.name)
       .attr('cx',ox+d.x).attr('cy',oy+d.y).attr('r',d.r)
       .attr('fill', leaf ? shadeLeaf(col,li,lt) : col)
       .attr('fill-opacity', leaf ? 1 : 0.25)
@@ -1213,8 +1516,10 @@ function renderLevel(dataRoot, isTop){
           .on('click', function(ev){
             ev.stopPropagation(); hideTip();
             if(!d.data.children || !d.data.children.length){
-              /* TRUE LEAF — open detail panel */
+              /* TRUE LEAF — highlight bubble + open detail panel */
               var col = branchColor2(d, dataRoot);
+              clearMapHighlight();
+              pulseCircle(d3.select(this), col);
               openDetailPanel(d, col, dataRoot);
             } else if(d.depth > 1 && d.parent && d.parent.data.children){
               /* Non-leaf parent at depth>1 — drill into it */
@@ -1535,10 +1840,58 @@ function zoomTo(catD){
 /* ── RESET to home ──────────────────────────────────────────────── */
 
 
+
+window.closeCatPanel = function(e){
+  if(e){ e.stopPropagation(); e.preventDefault(); }
+  document.getElementById('cat-panel').classList.remove('open');
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('detail-overlay').classList.remove('open');
+  clearMapHighlight();
+};
+
+function openCatPanel(cat, col){
+  var desc = CAT_DESCS[cat.name] || SUBCAT_DESCS[cat.name] || "Key responsibility area for CISOs covering " + cat.name + ".";
+  document.getElementById('cat-panel-bar').style.background = col;
+  document.getElementById('cat-panel-label').style.color = col;
+  document.getElementById('cat-panel-name').textContent = cat.name;
+  document.getElementById('cat-panel-desc').textContent = desc;
+
+  /* Stats */
+  var leaves = countLeaves(cat);
+  var subs = cat.children ? cat.children.filter(function(c){ return c.children && c.children.length; }).length : 0;
+  document.getElementById('cat-stat-topics').textContent = leaves;
+  document.getElementById('cat-stat-subs').textContent = subs;
+  document.getElementById('cat-stat-topics').style.color = col;
+  document.getElementById('cat-stat-subs').style.color = col;
+
+  /* Sub-category chips */
+  var subsEl = document.getElementById('cat-panel-subs');
+  subsEl.innerHTML = '';
+  if(cat.children){
+    cat.children.forEach(function(child){
+      var chip = document.createElement('span');
+      chip.className = 'cat-sub-chip';
+      chip.textContent = child.name + (child.children ? ' ('+countLeaves(child)+')' : '');
+      chip.addEventListener('click', function(){
+        closeCatPanel();
+        doReset();
+        setTimeout(function(){ drillInto(cat); setTimeout(function(){ if(child.children) drillInto(child); }, 80); }, 50);
+      });
+      subsEl.appendChild(chip);
+    });
+  }
+
+  /* Close leaf detail panel if open */
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('cat-panel').classList.add('open');
+  document.getElementById('detail-overlay').classList.add('open');
+}
 window.closeDetailPanel = function(e){
   if(e){ e.stopPropagation(); e.preventDefault(); }
   document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('cat-panel').classList.remove('open');
   document.getElementById('detail-overlay').classList.remove('open');
+  clearMapHighlight();
 };
 /* Stop panel clicks from bubbling to SVG background */
 document.addEventListener('DOMContentLoaded', function(){
@@ -1549,6 +1902,8 @@ document.addEventListener('DOMContentLoaded', function(){
 function openDetailPanel(d, col, dataRoot){
   console.log('PANEL drillStack:', drillStack.map(function(n){return n===ROOT?'ROOT':n.name;}), 'currentRoot:', currentRoot.name, 'dataRoot:', dataRoot.name, 'leaf:', d.data.name);
   var panel = document.getElementById('detail-panel');
+  /* Close cat panel if open */
+  document.getElementById('cat-panel').classList.remove('open');
   document.getElementById('detail-overlay').classList.add('open');
 
   /* ── Color bar ── */
@@ -1737,6 +2092,305 @@ function updateMinimap(){
     body.appendChild(row);
   });
 }
+
+
+/* ── TREE NAVIGATOR ────────────────────────────────────────────── */
+var treeOpen = false;
+var highlightedCircle = null;
+
+window.toggleTreePanel = function(){
+  treeOpen = !treeOpen;
+  document.getElementById('tree-panel').classList.toggle('open', treeOpen);
+  document.getElementById('tree-toggle').style.left = treeOpen ? '300px' : '0';
+};
+
+function buildTree(){
+  var body = document.getElementById('tree-body');
+  body.innerHTML = '';
+
+  ROOT.children.forEach(function(cat, ci){
+    var col = PAL[palIdxOf(cat) % PAL.length];
+    var leafCount = countLeaves(cat);
+
+    var catDiv = document.createElement('div');
+    catDiv.className = 'tree-cat';
+    catDiv.dataset.cat = cat.name;
+
+    /* Category header */
+    var header = document.createElement('div');
+    header.className = 'tree-cat-header';
+    header.innerHTML =
+      '<span class="tree-toggle-icon">▶</span>' +
+      '<span class="tree-cat-dot" style="background:'+col+'"></span>' +
+      '<span class="tree-cat-name">'+cat.name+'</span>' +
+      '<span class="tree-cat-count">'+leafCount+'</span>';
+
+    var childrenDiv = document.createElement('div');
+    childrenDiv.className = 'tree-cat-children';
+
+    /* Build children recursively */
+    buildTreeChildren(cat.children || [], childrenDiv, col, cat, 1);
+
+    header.addEventListener('click', function(e){
+      e.stopPropagation();
+      var icon = header.querySelector('.tree-toggle-icon');
+      var isOpen = childrenDiv.classList.toggle('open');
+      icon.classList.toggle('open', isOpen);
+      /* Highlight category bubble on home screen */
+      doReset();
+      /* Clear tree highlights, mark this one */
+      document.querySelectorAll('.tree-cat-header.active').forEach(function(el){ el.classList.remove('active'); });
+      header.classList.add('active');
+      setTimeout(function(){
+        highlightCatOnMap(cat, col);
+        /* Open panel after reset so it doesn't get closed */
+        openCatPanel(cat, col);
+      }, 80);
+    });
+
+    catDiv.appendChild(header);
+    catDiv.appendChild(childrenDiv);
+    body.appendChild(catDiv);
+  });
+}
+
+function buildTreeChildren(nodes, container, col, cat, depth){
+  if(!nodes || !nodes.length) return;
+  nodes.forEach(function(node){
+    var isLeaf = !node.children || !node.children.length;
+    var row = document.createElement('div');
+    row.className = isLeaf ? 'tree-node tree-leaf' : 'tree-node';
+    row.style.paddingLeft = (28 + depth * 14) + 'px';
+    row.dataset.name = node.name;
+    row.dataset.cat = cat.name;
+
+    if(!isLeaf){
+      var subChildren = document.createElement('div');
+      subChildren.className = 'tree-cat-children';
+      buildTreeChildren(node.children, subChildren, col, cat, depth+1);
+
+      row.innerHTML =
+        '<span class="tree-toggle-icon">▶</span>' +
+        '<span style="font-size:10px;color:rgba(255,255,255,0.3);margin-right:2px">●</span>' +
+        '<span style="color:rgba(255,255,255,0.6);font-size:11px;font-weight:600">'+node.name+'</span>' +
+        '<span style="font-size:10px;color:rgba(255,255,255,0.2);margin-left:auto">'+countLeaves(node)+'</span>';
+
+      row.addEventListener('click', function(e){
+        e.stopPropagation();
+        var icon = row.querySelector('.tree-toggle-icon');
+        var isOpen = subChildren.classList.toggle('open');
+        icon.classList.toggle('open', isOpen);
+        /* Clear highlights, mark this row */
+        clearMapHighlight();
+        document.querySelectorAll('.tree-node.highlighted,.tree-leaf.highlighted').forEach(function(el){ el.classList.remove('highlighted'); });
+        row.classList.add('highlighted');
+        /* Drill map and highlight the bubble, THEN open panel */
+        doReset();
+        setTimeout(function(){
+          drillInto(cat);
+          setTimeout(function(){
+            var found = false;
+            gCircles.selectAll('circle[data-name]').each(function(){
+              var el = d3.select(this);
+              if(!found && el.attr('data-name') === node.name){
+                found = true;
+                pulseCircle(el, col);
+              }
+            });
+            /* Open panel AFTER navigation so doReset doesn't close it */
+            openCatPanel(node, col);
+          }, 200);
+        }, 50);
+      });
+
+      row.parentNode && row.parentNode.insertBefore(subChildren, row.nextSibling);
+      container.appendChild(row);
+      container.appendChild(subChildren);
+    } else {
+      /* Leaf */
+      var dot = '<span style="width:5px;height:5px;border-radius:50%;background:'+col+';display:inline-block;margin-right:6px;flex-shrink:0"></span>';
+      row.innerHTML = dot + '<span>'+node.name+'</span>';
+      row.addEventListener('click', function(e){
+        e.stopPropagation();
+        highlightLeafOnMap(node, cat, col, true); /* true = open detail panel */
+      });
+      container.appendChild(row);
+    }
+  });
+}
+
+function highlightLeafOnMap(dataNode, cat, col, openPanel){
+  /* Clear previous highlight */
+  clearMapHighlight();
+  /* Clear tree highlights */
+  document.querySelectorAll('.tree-node.highlighted,.tree-leaf.highlighted').forEach(function(el){
+    el.classList.remove('highlighted');
+  });
+  /* Highlight row in tree */
+  var treeRow = document.querySelector('[data-name="'+CSS.escape(dataNode.name)+'"][data-cat="'+CSS.escape(cat.name)+'"]');
+  if(treeRow){
+    treeRow.classList.add('highlighted');
+    treeRow.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  /* Find full chain from ROOT to leaf */
+  function findChain(node, target, chain){
+    if(node === target) return chain.concat(node);
+    if(!node.children) return null;
+    for(var i=0;i<node.children.length;i++){
+      var r = findChain(node.children[i], target, chain.concat(node));
+      if(r) return r;
+    }
+    return null;
+  }
+  var chain = findChain(ROOT, dataNode, []);
+  if(!chain) return;
+
+  /* drillPath = all ancestors except ROOT and the leaf itself */
+  var drillPath = chain.slice(1, -1);
+
+  /* Reset map then drill step by step */
+  doReset();
+
+  /* Total time needed: 80ms per drill level */
+  var delay = 80;
+  drillPath.forEach(function(node, idx){
+    setTimeout(function(){ drillInto(node); }, delay * (idx + 1));
+  });
+
+  /* After all drills complete, find and pulse the circle */
+  var totalDelay = delay * (drillPath.length + 1) + 300;
+  setTimeout(function(){
+    var found = false;
+
+    /* Primary: look up by data-name attribute (most reliable) */
+    var el = gCircles.selectAll('circle[data-name]').filter(function(){
+      return d3.select(this).attr('data-name') === dataNode.name;
+    });
+    if(!el.empty()){
+      found = true;
+      pulseCircle(el, col);
+    }
+
+    /* Fallback: datum reference match */
+    if(!found){
+      gCircles.selectAll('circle').each(function(d){
+        if(!found && d && d.data === dataNode){
+          found = true;
+          pulseCircle(d3.select(this), col);
+        }
+      });
+    }
+
+    /* Last resort: any SVG circle with matching datum */
+    if(!found){
+      svg.selectAll('circle').each(function(d){
+        if(!found && d && d.data && d.data.name === dataNode.name){
+          found = true;
+          pulseCircle(d3.select(this), col);
+        }
+      });
+    }
+
+    if(!found) console.warn('Could not find circle for:', dataNode.name);
+
+    /* If called from Smart Nav, also open the detail panel */
+    if(openPanel){
+      /* Build a fake D3 node so openDetailPanel can use it */
+      /* Find the actual packed circle to get d */
+      var panelOpened = false;
+      gCircles.selectAll('circle[data-name]').each(function(d){
+        if(!panelOpened && d && d.data === dataNode){
+          panelOpened = true;
+          openDetailPanel(d, col, currentRoot);
+        }
+      });
+      /* Fallback: try by name */
+      if(!panelOpened){
+        gCircles.selectAll('circle[data-name]').each(function(d){
+          if(!panelOpened && d && d.data && d.data.name === dataNode.name){
+            panelOpened = true;
+            openDetailPanel(d, col, currentRoot);
+          }
+        });
+      }
+    }
+  }, totalDelay);
+}
+
+function pulseCircle(circ, col){
+  /* Simple: white stroke + glow */
+  circ
+    .attr('stroke', '#ffffff')
+    .attr('stroke-width', 4)
+    .attr('stroke-opacity', 1)
+    .attr('filter', 'drop-shadow(0 0 8px rgba(255,255,255,0.9))');
+
+  highlightedCircle = {
+    _circ: circ,
+    clear: function(){
+      circ
+        .attr('stroke', 'none')
+        .attr('stroke-width', 0)
+        .attr('stroke-opacity', 0)
+        .attr('filter', null);
+    }
+  };
+}
+
+function clearMapHighlight(){
+  if(highlightedCircle && highlightedCircle.clear) highlightedCircle.clear();
+  highlightedCircle = null;
+}
+
+function highlightCatOnMap(cat, col){
+  clearMapHighlight();
+  /* On home screen, find the circle whose data-name matches cat.name */
+  var found = false;
+  gCircles.selectAll('circle[data-name]').each(function(){
+    var el = d3.select(this);
+    if(!found && el.attr('data-name') === cat.name){
+      found = true;
+      pulseCircle(el, col);
+    }
+  });
+  if(!found) console.warn('Cat circle not found:', cat.name);
+}
+
+window.treeSearch = function(query){
+  var q = query.toLowerCase().trim();
+  var rows = document.querySelectorAll('.tree-node, .tree-leaf');
+  if(!q){
+    /* Reset visibility */
+    document.querySelectorAll('.tree-cat-children').forEach(function(el){ el.classList.remove('open'); });
+    document.querySelectorAll('.tree-toggle-icon').forEach(function(el){ el.classList.remove('open'); });
+    rows.forEach(function(r){ r.style.display=''; });
+    return;
+  }
+  rows.forEach(function(row){
+    var name = (row.dataset.name || row.textContent || '').toLowerCase();
+    var match = name.includes(q);
+    row.style.display = match ? '' : 'none';
+    if(match){
+      /* Expand parent categories */
+      var p = row.parentElement;
+      while(p && p.id !== 'tree-body'){
+        if(p.classList.contains('tree-cat-children')){
+          p.classList.add('open');
+          var prev = p.previousElementSibling;
+          if(prev){
+            var icon = prev.querySelector('.tree-toggle-icon');
+            if(icon) icon.classList.add('open');
+          }
+        }
+        p = p.parentElement;
+      }
+    }
+  });
+};
+
+/* Build tree after ROOT is ready */
+setTimeout(buildTree, 100);
 
 window.doReset=function(){
   hideTip();
