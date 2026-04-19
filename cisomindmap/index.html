@@ -2870,17 +2870,17 @@ function _setTopbarOffset(){
   document.getElementById('app').style.top=h+'px';
   W=window.innerWidth; H=window.innerHeight-h;
 }
-renderLevel(ROOT, true);
-buildCatBar();
-/* After catbar renders, measure topbar and set app offset */
-setTimeout(_setTopbarOffset, 50);
 window.addEventListener('resize', function(){
   _setTopbarOffset();
-  W=window.innerWidth;
-  var tb=document.getElementById('topbar');
-  H=window.innerHeight-(tb?tb.offsetHeight:0);
   buildPack(); renderLevel(currentRoot, currentRoot===ROOT);
 });
+/* Build catbar first so topbar reaches full height, then measure and render */
+buildCatBar();
+setTimeout(function(){
+  _setTopbarOffset();
+  buildPack();
+  renderLevel(ROOT, true);
+}, 0);
 
 /* verify totals */
 var total=countLeaves(ROOT);
