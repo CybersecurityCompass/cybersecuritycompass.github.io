@@ -1697,6 +1697,8 @@ function renderLevel(dataRoot, isTop){
               clearMapHighlight();
               pulseCircle(d3.select(this), col);
               openDetailPanel(d, col, dataRoot);
+              /* Sync Smart Nav tree to highlight this leaf */
+              syncTreeToLeaf(d.data, col);
             } else if(d.depth > 1 && d.parent && d.parent.data.children){
               /* Non-leaf parent at depth>1 — drill into it */
               drillInto(d.parent.data);
@@ -2075,6 +2077,63 @@ document.addEventListener('DOMContentLoaded', function(){
   var p = document.getElementById('detail-panel');
   if(p) p.addEventListener('click', function(e){ e.stopPropagation(); });
 });
+
+
+
+/* ── Sync Smart Nav tree when bubble clicked directly ────────── */
+function syncTreeToLeaf(dataNode, col){
+  /* Find the category this node belongs to */
+  var cat = null;
+  for(var i = 0; i < ROOT.children.length; i++){
+    if(containsData(ROOT.children[i].name, dataNode.name)){
+      cat = ROOT.children[i];
+      break;
+    }
+  }
+  if(!cat) return;
+
+  /* Clear all highlights */
+  document.querySelectorAll('.tree-node.highlighted,.tree-leaf.highlighted').forEach(function(el){
+    el.classList.remove('highlighted');
+  });
+
+  /* Expand category: find .tree-cat[data-cat=...] and open its .tree-cat-children */
+  var catDivs = document.querySelectorAll('.tree-cat');
+  catDivs.forEach(function(catDiv){
+    if(catDiv.dataset.cat === cat.name){
+      var childrenDiv = catDiv.querySelector('.tree-cat-children');
+      var icon = catDiv.querySelector('.tree-toggle-icon');
+      if(childrenDiv && !childrenDiv.classList.contains('open')){
+        childrenDiv.classList.add('open');
+        if(icon) icon.classList.add('open');
+      }
+    }
+  });
+
+  /* Find the matching row by data-name + data-cat */
+  var treeRow = document.querySelector(
+    '[data-name="' + CSS.escape(dataNode.name) + '"][data-cat="' + CSS.escape(cat.name) + '"]'
+  );
+
+  if(treeRow){
+    /* Walk up and open any collapsed sub-children containers */
+    var el = treeRow.parentElement;
+    while(el && !el.classList.contains('tree-cat')){
+      if(el.classList.contains('tree-cat-children') || el.tagName === 'DIV'){
+        if(!el.classList.contains('open')) el.classList.add('open');
+        /* Open sibling toggle icon if present */
+        var sibIcon = el.previousElementSibling && el.previousElementSibling.querySelector('.tree-toggle-icon');
+        if(sibIcon && !sibIcon.classList.contains('open')) sibIcon.classList.add('open');
+      }
+      el = el.parentElement;
+    }
+
+    /* Highlight and scroll */
+    treeRow.classList.add('highlighted');
+    treeRow.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+}
+
 
 function openDetailPanel(d, col, dataRoot){
   console.log('PANEL drillStack:', drillStack.map(function(n){return n===ROOT?'ROOT':n.name;}), 'currentRoot:', currentRoot.name, 'dataRoot:', dataRoot.name, 'leaf:', d.data.name);
