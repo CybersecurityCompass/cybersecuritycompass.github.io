@@ -7,7 +7,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0e1a;overflow:hidden;width:100vw;height:100vh;font-family:'Segoe UI',system-ui,sans-serif}
-#app{width:100%;height:100%}
+#app{position:fixed;left:0;right:0;bottom:0;top:0}
 svg{width:100%;height:100%}
 /* ── top bar ── */
 #topbar{position:fixed;top:0;left:0;right:0;z-index:20;background:rgba(10,14,26,.92);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.07);padding:0}
@@ -2863,8 +2863,24 @@ window.addEventListener('resize',function(){
 });
 
 /* boot */
+function _setTopbarOffset(){
+  var tb=document.getElementById('topbar');
+  if(!tb) return;
+  var h=tb.offsetHeight;
+  document.getElementById('app').style.top=h+'px';
+  W=window.innerWidth; H=window.innerHeight-h;
+}
 renderLevel(ROOT, true);
 buildCatBar();
+/* After catbar renders, measure topbar and set app offset */
+setTimeout(_setTopbarOffset, 50);
+window.addEventListener('resize', function(){
+  _setTopbarOffset();
+  W=window.innerWidth;
+  var tb=document.getElementById('topbar');
+  H=window.innerHeight-(tb?tb.offsetHeight:0);
+  buildPack(); renderLevel(currentRoot, currentRoot===ROOT);
+});
 
 /* verify totals */
 var total=countLeaves(ROOT);
