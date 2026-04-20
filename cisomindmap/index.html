@@ -541,7 +541,7 @@ svg{width:100%;height:100%}
   
 </div>
 
-<button id="resetbtn"  onclick="doReset()">&#8962; Overview</button>
+<button id="resetbtn"  onclick="if(drillStack&&drillStack.length){zoomOutToHome(function(){doReset();});}else{doReset();}">&#8962; Overview</button>
 <div id="hint">Click any bubble to explore · Hover for details · Click background to go back</div>
 <div id="tip">
   <div id="tip-name"></div>
@@ -1616,6 +1616,56 @@ var svg=d3.select('#sv');
 var gMain=svg.append('g');
 /* No D3 zoom — use plain SVG transform to avoid SVGLength crashes */
 var _tx=0,_ty=0,_sc=1;
+
+/* ── ZOOM ANIMATION ─────────────────────────────────────────────── */
+function zoomAnimate(fromSc, fromTx, fromTy, toSc, toTx, toTy, duration, done){
+  var start = null;
+  function ease(t){ return t<0.5 ? 2*t*t : -1+(4-2*t)*t; }
+  function frame(ts){
+    if(!start) start = ts;
+    var t = Math.min((ts-start)/duration, 1);
+    var e = ease(t);
+    _sc = fromSc + (toSc-fromSc)*e;
+    _tx = fromTx + (toTx-fromTx)*e;
+    _ty = fromTy + (toTy-fromTy)*e;
+    applyTransform();
+    if(t < 1){ requestAnimationFrame(frame); }
+    else { _sc=toSc; _tx=toTx; _ty=toTy; applyTransform(); if(done) done(); }
+  }
+  requestAnimationFrame(frame);
+}
+
+function zoomInToBubble(packedNode, done){
+  /* Zoom so the bubble fills ~40% of screen — neighbors still visible */
+  var cx = ox + packedNode.x, cy = oy + packedNode.y;
+  var targetSc = Math.min(Math.min(W,H) * 0.40 / packedNode.r, 2.4);
+  var targetTx = W/2 - targetSc * cx;
+  var targetTy = H/2 - targetSc * cy;
+  zoomAnimate(_sc, _tx, _ty, targetSc, targetTx, targetTy, 420, done);
+}
+
+function zoomInToLeaf(packedNode, done){
+  /* Zoom to center on leaf bubble — scale so leaf is clearly visible */
+  /* Use a fixed comfortable scale: leaf fills ~18% of screen min dimension */
+  var cx = ox + packedNode.x, cy = oy + packedNode.y;
+  var targetR = Math.min(W, H) * 0.18;
+  var targetSc = Math.min(targetR / Math.max(packedNode.r, 1), 5.0);
+  var targetTx = W/2 - targetSc * cx;
+  var targetTy = H/2 - targetSc * cy;
+  zoomAnimate(_sc, _tx, _ty, targetSc, targetTx, targetTy, 500, done);
+}
+
+function zoomOutToHome(done){
+  /* Push out slightly first so zoom-out is always visible */
+  var pushSc = Math.max(_sc, 1.0) * 1.12;
+  var pushTx = _tx - W*0.06;
+  var pushTy = _ty - H*0.06;
+  zoomAnimate(_sc, _tx, _ty, pushSc, pushTx, pushTy, 100, function(){
+    zoomAnimate(pushSc, pushTx, pushTy, 1, 0, 0, 340, done);
+  });
+}
+/* ────────────────────────────────────────────────────────────────── */
+
 function applyTransform(){gMain.attr('transform','translate('+_tx+','+_ty+')scale('+_sc+')');}
 var zb={transform:{x:0,y:0,k:1}};
 /* mouse wheel zoom */
@@ -1738,7 +1788,11 @@ function renderLevel(dataRoot, isTop){
       /* sub-category: click drills into it */
       circ.on('click', function(ev){
         ev.stopPropagation(); hideTip();
-        drillInto(d.data);
+        var node = d;
+        zoomInToBubble(node, function(){
+          _sc=1; _tx=0; _ty=0; applyTransform();
+          drillInto(node.data);
+        });
       });
     } else {
       /* leaf: if it has a parent that is a sub-category (depth>1), clicking drills into that parent */
@@ -1759,8 +1813,12 @@ function renderLevel(dataRoot, isTop){
               /* Sync Smart Nav tree to highlight this leaf */
               syncTreeToLeaf(d.data, col);
             } else if(d.depth > 1 && d.parent && d.parent.data.children){
-              /* Non-leaf parent at depth>1 — drill into it */
-              drillInto(d.parent.data);
+              /* Non-leaf parent at depth>1 — zoom in then drill */
+              var pNode = d.parent;
+              zoomInToBubble(pNode, function(){
+                _sc=1; _tx=0; _ty=0; applyTransform();
+                drillInto(pNode.data);
+              });
             }
           });
     }
@@ -1772,22 +1830,21 @@ function renderLevel(dataRoot, isTop){
     var outerCx = ox + packedRoot.x;
     var outerCy = oy + packedRoot.y;
     var catFs   = Math.min(Math.max(outerR * 0.055, 13), 26);
-    var textR   = outerR + catFs * 1.5;  /* just outside the ring */
+    var textRTop = outerR + catFs * 0.6;   /* top arc: close to ring */
+    var textRBot = outerR + catFs * 1.5;   /* bottom arc: enough clearance for letter tops */
     var label   = tn(dataRoot.name).toUpperCase();
     var uid     = 'cp-' + Date.now();
 
     var gArc = gCatLabels.append('g').attr('pointer-events','none');
 
-    /* ── TOP ARC: left → top → right (anticlockwise sweep=0 going upward means
-       we start at left and arc UP over the top to right, sweep-flag=1) ── */
+    /* ── TOP ARC: semicircle above the bubble ── */
     var topId = uid + '-t';
-    /* Start at left side, arc clockwise over the top to right side */
     gArc.append('path')
       .attr('id', topId)
       .attr('fill','none').attr('stroke','none')
       .attr('d',
-        'M '+(outerCx - textR)+','+ outerCy +
-        ' A '+textR+','+textR+' 0 0 1 '+(outerCx + textR)+','+outerCy
+        'M '+(outerCx - textRTop)+','+ outerCy +
+        ' A '+textRTop+','+textRTop+' 0 0 1 '+(outerCx + textRTop)+','+outerCy
       );
     gArc.append('text')
       .attr('font-size', catFs+'px').attr('font-weight','800')
@@ -1804,12 +1861,14 @@ function renderLevel(dataRoot, isTop){
     var botId = uid + '-b';
     /* Start at left side, arc counter-clockwise under the bottom to right side,
        so text reads naturally left-to-right along the bottom curve */
+    /* Bottom arc: start/end points shifted down so arc is fully below bubble */
+
     gArc.append('path')
       .attr('id', botId)
       .attr('fill','none').attr('stroke','none')
       .attr('d',
-        'M '+(outerCx - textR)+','+ outerCy +
-        ' A '+textR+','+textR+' 0 0 0 '+(outerCx + textR)+','+outerCy
+        'M '+(outerCx - textRBot)+','+ outerCy +
+        ' A '+textRBot+','+textRBot+' 0 0 0 '+(outerCx + textRBot)+','+outerCy
       );
     gArc.append('text')
       .attr('font-size', catFs+'px').attr('font-weight','800')
@@ -1937,7 +1996,15 @@ function renderLevel(dataRoot, isTop){
     });
   }
 
-  svg.on('click', function(ev){ if(document.getElementById('detail-panel').classList.contains('open')) return; hideTip(); if(drillStack.length) drillBack(); else doReset(); });
+  svg.on('click', function(ev){
+  if(document.getElementById('detail-panel').classList.contains('open')) return;
+  hideTip();
+  if(drillStack.length){
+    zoomOutToHome(function(){ drillBack(); });
+  } else {
+    doReset();
+  }
+});
 }
 
 /* Pack builder that accepts any data root */
@@ -1946,7 +2013,7 @@ function buildPackFor(dataRoot){
   var nChildren = dataRoot === ROOT ? dataRoot.children.length :
                   dataRoot.children ? dataRoot.children.length : 1;
   /* Home (9 cats) fills ~93% screen. Drilled levels scale down so bubbles fit text */
-  var maxFill = dataRoot === ROOT ? 0.93 : Math.min(0.93, Math.max(0.35, nChildren * 0.065));
+  var maxFill = dataRoot === ROOT ? 0.93 : 0.88;
   sz=Math.min(W,H)*maxFill; ox=(W-sz)/2; oy=(H-sz)/2;
   var pack=d3.pack().size([sz,sz]).padding(function(d){return d.depth===0?10:4;});
   var hier=d3.hierarchy(dataRoot)
@@ -2497,16 +2564,38 @@ function buildTree(){
       var icon = header.querySelector('.tree-toggle-icon');
       var isOpen = childrenDiv.classList.toggle('open');
       icon.classList.toggle('open', isOpen);
-      /* Highlight category bubble on home screen */
-      doReset();
       /* Clear tree highlights, mark this one */
       document.querySelectorAll('.tree-cat-header.active').forEach(function(el){ el.classList.remove('active'); });
       header.classList.add('active');
-      setTimeout(function(){
-        highlightCatOnMap(cat, col);
-        /* Open panel after reset so it doesn't get closed */
-        openCatPanel(cat, col);
-      }, 80);
+      /* If drilled in, zoom out first; then zoom into the category bubble */
+      function _afterReset(){
+        /* Find packed node for this category */
+        var catPacked = null;
+        if(packedRoot) packedRoot.each(function(n){ if(n.data===cat && n.depth===1) catPacked=n; });
+        if(catPacked){
+          zoomInToBubble(catPacked, function(){
+            /* Reset zoom so map is normal, then highlight + panel */
+            zoomAnimate(_sc, _tx, _ty, 1, 0, 0, 250, function(){
+              highlightCatOnMap(cat, col);
+              openCatPanel(cat, col);
+            });
+          });
+        } else {
+          highlightCatOnMap(cat, col);
+          openCatPanel(cat, col);
+        }
+      }
+      if(drillStack && drillStack.length > 0){
+        /* Zoom out from drilled view then go home */
+        zoomOutToHome(function(){
+          _instantReset();
+          setTimeout(_afterReset, 50);
+        });
+      } else {
+        /* Already on home — just zoom into the category bubble */
+        _instantReset();
+        setTimeout(_afterReset, 50);
+      }
     });
 
     catDiv.appendChild(header);
@@ -2514,6 +2603,44 @@ function buildTree(){
     body.appendChild(catDiv);
   });
 }
+
+
+
+/* ── INSTANT RESET for programmatic Smart Nav navigation ─────────── */
+function _instantReset(){
+  hideTip();
+  drillStack=[];
+  currentRoot=ROOT;
+  focusNode=null;
+  _tx=0;_ty=0;_sc=1; applyTransform();
+  renderLevel(ROOT, true);
+  document.getElementById('resetbtn').style.display='none';
+  document.getElementById('minimap').style.display='none';
+  closeDetailPanel();
+  document.getElementById('hint').textContent=t('hint');
+  document.getElementById('catbar').style.display='flex';
+  updateCatPillActive(null);
+}
+/* ──────────────────────────────────────────────────────────────────── */
+
+/* ── SMART NAV ZOOM HELPER ───────────────────────────────────────── */
+function _smartNavZoomThenDo(catData, callback){
+  /* If on home screen, zoom into the category bubble then proceed */
+  if(currentRoot === ROOT && packedRoot){
+    var catPacked = null;
+    packedRoot.each(function(n){ if(n.data === catData && n.depth === 1) catPacked = n; });
+    if(catPacked){
+      zoomInToBubble(catPacked, function(){
+        _sc=1; _tx=0; _ty=0; applyTransform();
+        callback();
+      });
+      return;
+    }
+  }
+  /* Already drilled or no packed node found — proceed immediately */
+  callback();
+}
+/* ────────────────────────────────────────────────────────────────── */
 
 function buildTreeChildren(nodes, container, col, cat, depth){
   if(!nodes || !nodes.length) return;
@@ -2560,26 +2687,25 @@ function buildTreeChildren(nodes, container, col, cat, depth){
         /* drillPath = all ancestors between ROOT and node (exclusive) */
         var drillPath = chain ? chain.slice(1, -1) : [cat];
 
-        /* Drill map through all ancestors, then highlight the node circle */
-        doReset();
-        var stepDelay = 80;
-        drillPath.forEach(function(ancestor, idx){
-          setTimeout(function(){ drillInto(ancestor); }, stepDelay * (idx+1));
-        });
-
-        setTimeout(function(){
-          /* Now find node's circle at depth=1 of current view */
-          var found = false;
-          gCircles.selectAll('circle[data-name]').each(function(){
-            var el = d3.select(this);
-            if(!found && el.attr('data-name') === node.name){
-              found = true;
-              pulseCircle(el, col);
-            }
+        /* Zoom into category bubble then drill */
+        _smartNavZoomThenDo(cat, function(){
+          _instantReset();
+          var stepDelay = 80;
+          drillPath.forEach(function(ancestor, idx){
+            setTimeout(function(){ drillInto(ancestor); }, stepDelay * (idx+1));
           });
-          /* Open panel AFTER navigation */
-          openCatPanel(node, col);
-        }, stepDelay * (drillPath.length + 1) + 150);
+          setTimeout(function(){
+            var found = false;
+            gCircles.selectAll('circle[data-name]').each(function(){
+              var el = d3.select(this);
+              if(!found && el.attr('data-name') === node.name){
+                found = true;
+                pulseCircle(el, col);
+              }
+            });
+            openCatPanel(node, col);
+          }, stepDelay * (drillPath.length + 1) + 150);
+        });
       });
 
       row.parentNode && row.parentNode.insertBefore(subChildren, row.nextSibling);
@@ -2628,74 +2754,80 @@ function highlightLeafOnMap(dataNode, cat, col, openPanel){
   /* drillPath = all ancestors except ROOT and the leaf itself */
   var drillPath = chain.slice(1, -1);
 
-  /* Reset map then drill step by step */
-  doReset();
-
-  /* Total time needed: 80ms per drill level */
-  var delay = 80;
-  drillPath.forEach(function(node, idx){
-    setTimeout(function(){ drillInto(node); }, delay * (idx + 1));
-  });
-
-  /* After all drills complete, find and pulse the circle */
-  var totalDelay = delay * (drillPath.length + 1) + 300;
-  setTimeout(function(){
-    var found = false;
-
-    /* Primary: look up by data-name attribute (most reliable) */
-    var el = gCircles.selectAll('circle[data-name]').filter(function(){
-      return d3.select(this).attr('data-name') === dataNode.name;
-    });
-    if(!el.empty()){
-      found = true;
-      pulseCircle(el, col);
-    }
-
-    /* Fallback: datum reference match */
-    if(!found){
-      gCircles.selectAll('circle').each(function(d){
-        if(!found && d && d.data === dataNode){
-          found = true;
-          pulseCircle(d3.select(this), col);
-        }
-      });
-    }
-
-    /* Last resort: any SVG circle with matching datum */
-    if(!found){
-      svg.selectAll('circle').each(function(d){
-        if(!found && d && d.data && d.data.name === dataNode.name){
-          found = true;
-          pulseCircle(d3.select(this), col);
-        }
-      });
-    }
-
-    if(!found) console.warn('Could not find circle for:', dataNode.name);
-
-    /* If called from Smart Nav, also open the detail panel */
-    if(openPanel){
-      /* Build a fake D3 node so openDetailPanel can use it */
-      /* Find the actual packed circle to get d */
-      var panelOpened = false;
+  /* Helper: zoom to leaf, pulse it, open panel */
+  function _finalize(delayMs){
+    setTimeout(function(){
+      /* Find the packed node for the leaf */
+      var leafPacked = null;
       gCircles.selectAll('circle[data-name]').each(function(d){
-        if(!panelOpened && d && d.data === dataNode){
-          panelOpened = true;
-          openDetailPanel(d, col, currentRoot);
-        }
+        if(!leafPacked && d && d.data && d.data.name === dataNode.name) leafPacked = d;
       });
-      /* Fallback: try by name */
-      if(!panelOpened){
-        gCircles.selectAll('circle[data-name]').each(function(d){
-          if(!panelOpened && d && d.data && d.data.name === dataNode.name){
-            panelOpened = true;
-            openDetailPanel(d, col, currentRoot);
-          }
+
+      function _showLeaf(){
+        var found = false;
+        var el = gCircles.selectAll('circle[data-name]').filter(function(){
+          return d3.select(this).attr('data-name') === dataNode.name;
         });
+        if(!el.empty()){ found=true; pulseCircle(el, col); }
+        if(!found){
+          gCircles.selectAll('circle').each(function(d){
+            if(!found && d && d.data === dataNode){ found=true; pulseCircle(d3.select(this), col); }
+          });
+        }
+        if(!found) console.warn('Could not find circle for:', dataNode.name);
+        if(openPanel){
+          var panelOpened = false;
+          gCircles.selectAll('circle[data-name]').each(function(d){
+            if(!panelOpened && d && d.data === dataNode){ panelOpened=true; openDetailPanel(d, col, currentRoot); }
+          });
+          if(!panelOpened){
+            gCircles.selectAll('circle[data-name]').each(function(d){
+              if(!panelOpened && d && d.data && d.data.name === dataNode.name){ panelOpened=true; openDetailPanel(d, col, currentRoot); }
+            });
+          }
+        }
       }
-    }
-  }, totalDelay);
+
+      if(leafPacked){
+        /* Zoom into the leaf bubble then show it */
+        zoomInToLeaf(leafPacked, function(){
+          _showLeaf();
+        });
+      } else {
+        _showLeaf();
+      }
+    }, delayMs);
+  }
+
+  /* Check: is leaf already visible in the current drilled view? */
+  function _isVisible(ancestor, node){
+    if(ancestor === node) return true;
+    if(!ancestor.children) return false;
+    return ancestor.children.some(function(c){ return _isVisible(c, node); });
+  }
+
+  if(_isVisible(currentRoot, dataNode)){
+    /* Already in view — just highlight, no navigation needed */
+    _finalize(50);
+    return;
+  }
+
+  /* Need to navigate — find category for zoom */
+  var _hlCat = null;
+  for(var _i=0;_i<ROOT.children.length;_i++){
+    if(containsData(ROOT.children[_i].name, dataNode.name)){ _hlCat=ROOT.children[_i]; break; }
+  }
+
+  _smartNavZoomThenDo(_hlCat || ROOT.children[0], function(){
+    _instantReset();
+    var delay = 80;
+    drillPath.forEach(function(node, idx){
+      setTimeout(function(){ drillInto(node); }, delay * (idx+1));
+    });
+    _finalize(delay * (drillPath.length+1) + 300);
+  });
 }
+
 
 function pulseCircle(circ, col){
   /* Simple: white stroke + glow */
