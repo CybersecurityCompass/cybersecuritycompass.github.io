@@ -2494,7 +2494,7 @@ function updateMinimap(){
     var pad=''; for(var p=0;p<=i;p++) pad+='&nbsp;&nbsp;';
     var dotCol = isActive ? activeCatColor : 'rgba(255,255,255,0.3)';
     var pipe='<span class="mm-pipe">└─</span>';
-    row.innerHTML=pad+pipe+'<span class="mm-dot" style="background:'+dotCol+'"></span>'+node.name;
+    row.innerHTML=pad+pipe+'<span class="mm-dot" style="background:'+dotCol+'"></span>'+tn(node.name);
     body.appendChild(row);
   });
 
@@ -2516,7 +2516,7 @@ function updateMinimap(){
     row.style.cssText='display:flex;align-items:center;padding:3px 0;opacity:'+(isCurrent?'1':'0.4');
     row.innerHTML='<span class="mm-dot" style="background:'+catCol+';flex-shrink:0;'+(isCurrent?'width:9px;height:9px;':'')+'"></span>'
       +'<span style="font-size:'+(isCurrent?'12':'10')+'px;color:'+(isCurrent?'#fff':'rgba(255,255,255,0.7)')+';font-weight:'+(isCurrent?'700':'400')+'">'
-      +cat.name+'</span>';
+      +tn(cat.name)+'</span>';
     body.appendChild(row);
   });
 }
