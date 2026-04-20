@@ -2142,7 +2142,16 @@ function syncTreeToLeaf(dataNode, col){
 
 
 function openDetailPanel(d, col, dataRoot){
-  console.log('PANEL drillStack:', drillStack.map(function(n){return n===ROOT?'ROOT':n.name;}), 'currentRoot:', currentRoot.name, 'dataRoot:', dataRoot.name, 'leaf:', d.data.name);
+  /* Always recompute color from the node's actual top-level category */
+  var _leafName = d && d.data ? d.data.name : (d && d.name ? d.name : null);
+  if(_leafName){
+    for(var _ci=0; _ci<ROOT.children.length; _ci++){
+      if(containsData(ROOT.children[_ci].name, _leafName)){
+        col = PAL[palIdxOf(ROOT.children[_ci]) % PAL.length];
+        break;
+      }
+    }
+  }
   var panel = document.getElementById('detail-panel');
   /* Close cat panel if open */
   document.getElementById('cat-panel').classList.remove('open');
