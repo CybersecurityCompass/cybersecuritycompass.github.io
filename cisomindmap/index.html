@@ -152,8 +152,14 @@ svg{width:100%;height:100%}
   border:1px solid rgba(255,255,255,0.12);
   color:rgba(255,255,255,0.5);
   background:rgba(255,255,255,0.04);
-  cursor:default;
+  cursor:pointer;
   line-height:1.4;
+  transition:all .15s;
+}
+.sib-chip:not(.sib-active):hover{
+  background:rgba(255,255,255,0.10);
+  color:rgba(255,255,255,0.85);
+  border-color:rgba(255,255,255,0.3);
 }
 .sib-chip.sib-active{
   border-color:currentColor;
@@ -2237,6 +2243,21 @@ function openDetailPanel(d, col, dataRoot){
       var chip = document.createElement('span');
       chip.className = 'sib-chip';
       chip.textContent = tn(s.data ? s.data.name : s.name);
+      /* Make clickable — navigate to this sibling */
+      (function(sibNode){
+        chip.addEventListener('click', function(e){
+          e.stopPropagation();
+          /* Get the actual data node (s may be a D3 node or raw data) */
+          var dataNode = sibNode.data ? sibNode.data : sibNode;
+          /* Find the category for color */
+          var sibCat = categoryOf ? categoryOf(sibNode) : null;
+          var sibCol = sibCat ? branchColor(sibNode) : col;
+          /* Use highlightLeafOnMap to navigate + open panel */
+          highlightLeafOnMap(dataNode, 
+            (function(){ for(var i=0;i<ROOT.children.length;i++){ if(containsData(ROOT.children[i].name, dataNode.name)) return ROOT.children[i]; } return ROOT.children[0]; })(),
+            sibCol, true);
+        });
+      })(s);
       siblingsEl.appendChild(chip);
     });
   } else {
