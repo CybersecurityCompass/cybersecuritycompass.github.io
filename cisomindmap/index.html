@@ -541,7 +541,7 @@ svg{width:100%;height:100%}
   
 </div>
 
-<button id="resetbtn"  onclick="if(drillStack&&drillStack.length){zoomOutToHome(function(){doReset();});}else{doReset();}">&#8962; Overview</button>
+<button id="resetbtn"  onclick="doReset()">&#8962; Overview</button>
 <div id="hint">Click any bubble to explore · Hover for details · Click background to go back</div>
 <div id="tip">
   <div id="tip-name"></div>
@@ -2000,7 +2000,7 @@ function renderLevel(dataRoot, isTop){
   if(document.getElementById('detail-panel').classList.contains('open')) return;
   hideTip();
   if(drillStack.length){
-    zoomOutToHome(function(){ drillBack(); });
+    drillBack();
   } else {
     doReset();
   }
@@ -2121,15 +2121,17 @@ function drillInto(dataNode){
 /* ── BACK one level ─────────────────────────────────────────────── */
 window.drillBack=function(){
   if(!drillStack.length){ doReset(); return; }
-  currentRoot=drillStack.pop();
+  var nextRoot=drillStack.pop();
+  if(nextRoot===ROOT){ currentRoot=ROOT; doReset(); return; }
   focusNode=null;
-  renderLevel(currentRoot, currentRoot===ROOT);
-  _tx=0;_ty=0;_sc=1;applyTransform();
-  if(currentRoot===ROOT){
-    doReset(); return;
-  }
-  updateMinimap();
-  document.getElementById('resetbtn').style.display='block';
+  /* Zoom-out animation then render parent level */
+  _sc=1.15; _tx=-(W*0.07); _ty=-(H*0.07); applyTransform();
+  zoomAnimate(1.15, -(W*0.07), -(H*0.07), 1, 0, 0, 350, function(){
+    currentRoot=nextRoot;
+    renderLevel(nextRoot, false);
+    updateMinimap();
+    document.getElementById('resetbtn').style.display='block';
+  });
 };
 /* alias for internal use */
 function drillBack(){ window.drillBack(); }
@@ -3058,16 +3060,23 @@ window.setLang = function(lang){
 
 window.doReset=function(){
   hideTip();
+  var wasDrilled = drillStack && drillStack.length > 0;
   drillStack=[];
   currentRoot=ROOT;
   focusNode=null;
-  renderLevel(ROOT, true);
-  _tx=0;_ty=0;_sc=1;applyTransform();
+  /* Zoom out animation: scale up briefly then back to 1 */
+  if(wasDrilled){
+    _sc=1.15; _tx=-(W*0.07); _ty=-(H*0.07); applyTransform();
+  }
   document.getElementById('resetbtn').style.display='none';
   document.getElementById('minimap').style.display='none';
   closeDetailPanel();
   document.getElementById('hint').textContent=t('hint');
+  document.getElementById('catbar').style.display='flex';
   updateCatPillActive(null);
+  zoomAnimate(_sc, _tx, _ty, 1, 0, 0, 380, function(){
+    renderLevel(ROOT, true);
+  });
 };
 
 /* ── breadcrumb path builder ─────────────────────────────────── */
