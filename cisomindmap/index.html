@@ -475,7 +475,45 @@ svg{width:100%;height:100%}
   opacity:0.55;
   font-weight:400;
 }
+
+/* ── VISIT COUNTER ── */
+#visit-counter{
+  position:fixed;
+  bottom:12px;
+  left:16px;
+  z-index:25;
+  font-size:12px;
+  color:rgba(255,255,255,0.7);
+  letter-spacing:0.06em;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-weight:500;
+}
 </style>
+
+
+<!-- Visit Counter -->
+<div id="visit-counter">
+  <span style="opacity:0.5">👁</span>
+  <span id="vc-num" style="font-weight:700;color:#fff"></span>
+  <span id="vc-label">visits</span>
+</div>
+
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a5a04e606154411fae72be6c970c15bc"}'></script><!-- End Cloudflare Web Analytics -->
+<script>
+/* Page view counter via countapi.dev — free, no signup */
+(function(){
+  fetch('https://api.countapi.xyz/hit/cybersecuritycompass.github.io/cisomindmap')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var el = document.getElementById('vc-num');
+      if(el && d && d.value) el.textContent = d.value.toLocaleString();
+    })
+    .catch(function(){});
+})();
+</script>
 </head>
 <body>
 
@@ -2950,6 +2988,7 @@ var LANGS = {
     detailPath:    'Path',
     noDesc:        'Key responsibility area for CISOs covering ',
     relatedTopics: 'RELATED TOPICS',
+    visits:        'visits',
     clickExplore:  '→ Click to explore sub-categories',
     clickZoom:     '→ Click to zoom into ',
   },
@@ -2976,6 +3015,7 @@ var LANGS = {
     detailPath:    'Ruta',
     noDesc:        'Área clave de responsabilidad para CISOs que cubre ',
     relatedTopics: 'TEMAS RELACIONADOS',
+    visits:        'visitas',
     clickExplore:  '→ Clic para explorar subcategorías',
     clickZoom:     '→ Clic para ampliar ',
   },
@@ -3002,6 +3042,7 @@ var LANGS = {
     detailPath:    'Caminho',
     noDesc:        'Área chave de responsabilidade para CISOs cobrindo ',
     relatedTopics: 'TÓPICOS RELACIONADOS',
+    visits:        'visitas',
     clickExplore:  '→ Clique para explorar subcategorias',
     clickZoom:     '→ Clique para ampliar ',
   }
@@ -3039,6 +3080,7 @@ window.setLang = function(lang){
   /* Leaf detail panel */
   setText('detail-siblings-title', t('alsoInGroup'));
   setText('detail-related-title', t('relatedTopics'));
+  setText('vc-label', t('visits'));
 
   /* Category panel */
   setText('cat-panel-label', t('category'));
@@ -3060,21 +3102,18 @@ window.setLang = function(lang){
 
 window.doReset=function(){
   hideTip();
-  var wasDrilled = drillStack && drillStack.length > 0;
   drillStack=[];
   currentRoot=ROOT;
   focusNode=null;
-  /* Zoom out animation: scale up briefly then back to 1 */
-  if(wasDrilled){
-    _sc=1.15; _tx=-(W*0.07); _ty=-(H*0.07); applyTransform();
-  }
   document.getElementById('resetbtn').style.display='none';
   document.getElementById('minimap').style.display='none';
   closeDetailPanel();
   document.getElementById('hint').textContent=t('hint');
   document.getElementById('catbar').style.display='flex';
   updateCatPillActive(null);
-  zoomAnimate(_sc, _tx, _ty, 1, 0, 0, 380, function(){
+  /* Always animate zoom-out: snap to pushed-in state then animate back */
+  _sc=1.18; _tx=-(W*0.08); _ty=-(H*0.08); applyTransform();
+  zoomAnimate(1.18, -(W*0.08), -(H*0.08), 1, 0, 0, 380, function(){
     renderLevel(ROOT, true);
   });
 };
