@@ -3014,3 +3014,149 @@ function t(key){ return (LANGS[currentLang] || LANGS.en)[key] || LANGS.en[key] |
 
 window.setLang = function(lang){
   currentLang = lang;
+  /* Update flag button states */
+  document.querySelectorAll('.lang-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+  /* Helper to safely set text/html */
+  function el(id){ return document.getElementById(id); }
+  function setText(id, val){ var e=el(id); if(e) e.textContent=val; }
+  function setHTML(id, val){ var e=el(id); if(e) e.innerHTML=val; }
+
+  /* Topbar */
+  setHTML('topbar-subtitle', '— '+t('subtitle'));
+  setHTML('topbar-credit-label', t('credit'));
+  setText('topbar-interactive-label', t('interactive'));
+
+  /* Hint */
+  el('hint').textContent = (drillStack && drillStack.length>0) ? t('hintDrilled') : t('hint');
+
+  /* Nav buttons */
+  setHTML('resetbtn', t('overview'));
+
+  /* Smart Nav panel */
+  var ts = el('tree-search'); if(ts) ts.placeholder = t('searchPlaceholder');
+  var th = el('tree-header'); if(th){ var h3=th.querySelector('h3'); if(h3) h3.textContent=t('navigator'); }
+  setText('tree-toggle', t('smartNav'));
+
+  /* Leaf detail panel */
+  setText('detail-siblings-title', t('alsoInGroup'));
+  setText('detail-related-title', t('relatedTopics'));
+
+  /* Category panel */
+  setText('cat-panel-label', t('category'));
+  var stats = document.querySelectorAll('.cat-stat-label');
+  if(stats[0]) stats[0].textContent = t('topics');
+  if(stats[1]) stats[1].textContent = t('subAreas');
+  setText('cat-panel-subs-title', t('subCategories'));
+
+  /* Re-render dynamic areas */
+  if(typeof buildCatBar === 'function') buildCatBar();
+  if(typeof renderLevel === 'function') renderLevel(currentRoot, currentRoot===ROOT);
+  if(typeof buildTree === 'function') buildTree();
+  if(typeof updateMinimap === 'function') updateMinimap();
+  if(typeof updateBreadcrumb === 'function' && currentRoot && currentRoot !== ROOT)
+
+  /* Persist */
+  try{ localStorage.setItem('cisomm_lang', lang); }catch(e){}
+};
+
+window.doReset=function(){
+  hideTip();
+  drillStack=[];
+  currentRoot=ROOT;
+  focusNode=null;
+  document.getElementById('resetbtn').style.display='none';
+  document.getElementById('minimap').style.display='none';
+  closeDetailPanel();
+  document.getElementById('hint').textContent=t('hint');
+  document.getElementById('catbar').style.display='flex';
+  updateCatPillActive(null);
+  /* Always animate zoom-out: snap to pushed-in state then animate back */
+  _sc=1.18; _tx=-(W*0.08); _ty=-(H*0.08); applyTransform();
+  zoomAnimate(1.18, -(W*0.08), -(H*0.08), 1, 0, 0, 380, function(){
+    renderLevel(ROOT, true);
+  });
+};
+
+/* ── breadcrumb path builder ─────────────────────────────────── */
+
+
+/* ── category pill active state ─────────────────────────────── */
+function updateCatPillActive(catName){
+  document.querySelectorAll('.catpill').forEach(function(p){
+    if(p.dataset.cat===catName){
+      p.classList.add('active');
+      p.style.borderColor=p.dataset.color;
+      p.style.color=p.dataset.color;
+      p.style.background='rgba(255,255,255,.1)';
+    } else {
+      p.classList.remove('active');
+      p.style.borderColor='';
+      p.style.color='';
+      p.style.background='';
+    }
+  });
+}
+
+/* ── build category pill bar ─────────────────────────────────── */
+function buildCatBar(){
+  var bar=document.getElementById('catbar');
+  bar.innerHTML='';
+  ROOT.children.forEach(function(cat,i){
+    var _pillColors={'Security Operations':'#1B6B3A','Identity and Access Management':'#2B5B8B','Governance':'#9B6B4B','Using and Securing AI':'#6B5B8B','Automation and Analytics':'#5B8B5B','Risk Management':'#1B7B9B','Legal':'#7a3a8c','Compliance and Audits':'#8B2020','Security Architecture':'#8B7B3B','SDLC and Project Delivery':'#2B6B6B','Business Enablement':'#CC4444','Team Management':'#4A6B5B'};
+    var col=_pillColors[cat.name]||PAL[i%PAL.length];
+    var pill=document.createElement('button');
+    pill.className='catpill';
+    pill.textContent=tn(cat.name);
+    pill.dataset.cat=cat.name;
+    pill.dataset.color=col;
+    pill.title=countBoxes(cat)+' '+t('topics');
+    /* colored dot */
+    pill.innerHTML='<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+col+';margin-right:5px;vertical-align:middle"></span>'+tn(cat.name);
+    pill.addEventListener('click',function(e){
+      e.stopPropagation();
+      hideTip();
+      /* reset stack to [ROOT] then drill — drillInto will push currentRoot */
+      drillStack=[];
+      currentRoot=ROOT;
+      drillInto(cat);
+    });
+    bar.appendChild(pill);
+  });
+  bar.style.display='flex';
+}
+
+window.addEventListener('resize',function(){
+  W=window.innerWidth; H=window.innerHeight;
+  renderLevel(currentRoot, currentRoot===ROOT);
+});
+
+/* boot */
+function _setTopbarOffset(){
+  var tb=document.getElementById('topbar');
+  if(!tb) return;
+  var h=tb.offsetHeight;
+  document.getElementById('app').style.top=h+'px';
+  W=window.innerWidth; H=window.innerHeight-h;
+}
+window.addEventListener('resize', function(){
+  _setTopbarOffset();
+  buildPack(); renderLevel(currentRoot, currentRoot===ROOT);
+});
+/* Build catbar first so topbar reaches full height, then measure and render */
+buildCatBar();
+setTimeout(function(){
+  _setTopbarOffset();
+  buildPack();
+  renderLevel(ROOT, true);
+}, 0);
+
+/* verify totals */
+var total=countLeaves(ROOT);
+console.log('CISO_READY total_leaves:'+total+' per_cat:'+
+  ROOT.children.map(function(c){return c.name.split(' ')[0]+'='+countLeaves(c);}).join(', '));
+})();
+</script>
+</body>
+</html>
