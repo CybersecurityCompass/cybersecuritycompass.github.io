@@ -437,10 +437,11 @@ rampPairs.forEach((pr,ri)=>{
 });
 
 // column headers
-[["root","Exposed?"],["kev","KEV?"],["auto","Automatable?"],["impact","Impact"],["patch","Patch in time?"],["leaf","Outcome"]]
+[["root","Exposed?"],["kev","KEV?"],["auto","Automatable?"],["impact","Impact?"],["patch","Patch in time?"],["leaf","Outcome"]]
 .forEach(([k,t])=>{
   const h=document.createElement("div"); h.className="colhead"; h.textContent=t;
-  const cx = (k==="leaf") ? (X.leaf+130) : (X[k]+50);
+  const widths={root:180, kev:160, auto:160, impact:180, patch:140, leaf:260};
+  const cx = X[k] + (widths[k]||80)/2;
   h.style.left=cx+"px"; canvas.appendChild(h);
 });
 
