@@ -17,7 +17,7 @@
     font-family:Arial, Helvetica, "Segoe UI", sans-serif; -webkit-font-smoothing:antialiased; padding:0 0 50px}
   .top{max-width:2200px; margin:0 auto; padding:38px 24px 0 64px}
   .eyebrow{color:var(--red); font-size:13px; letter-spacing:2px; text-transform:uppercase; margin:0 0 12px}
-  h1{font-size:clamp(24px,3.6vw,38px); margin:0 0 10px; font-weight:700; letter-spacing:-.5px; color:#16314d}
+  h1{font-size:clamp(24px,3.6vw,38px); margin:0 0 10px; font-weight:700; letter-spacing:-.5px; color:#16314d; max-width:820px}
   .sub{color:var(--mut); font-style:italic; font-size:clamp(14px,1.8vw,17px); margin:0; max-width:820px; line-height:1.5}
   .hint{color:var(--faint); font-size:12.5px; font-style:italic; margin:14px 0 0}
   .rule{height:2px; background:#c0202c; border:0; margin:18px auto 0; max-width:2200px; opacity:.85; box-sizing:border-box}
@@ -82,7 +82,7 @@
 
   .land{max-width:2200px; margin:30px auto 0; padding:0 24px 0 64px}
   .land .l1{font-size:clamp(17px,2.2vw,22px); font-weight:700; margin:0 0 6px; color:#16314d}
-  .land .l2{color:var(--mut); font-style:italic; font-size:15px; margin:0}
+  .land .l2{color:var(--mut); font-style:italic; font-size:clamp(14px,1.8vw,17px); margin:0; max-width:820px; line-height:1.5}
   .land .def{color:#5a5550; font-size:13.5px; line-height:1.5; margin:16px 0 0; max-width:820px}
   .land .def b{color:#a8202c}
   .byline{max-width:2200px; margin:20px auto 0; padding:0 24px 0 64px; font-size:12px; color:var(--faint)}
@@ -169,10 +169,10 @@
   <button class="lang-btn" onclick="switchLang('pt')">PT</button>
 </div>
 <div class="top">
-  <p class="eyebrow">Completed with the patch question</p>
+  <p class="eyebrow">Expanding BOD 26-04: Beyond the Patch</p>
   <h1>Rethinking the CISA BOD 26-04 Directive in the Age of Frontier AI Models</h1>
   <p class="sub" data-sub="1">Frontier models have crossed a line that changes the math of vulnerability research. Mythos class systems now discover zero days at machine speed, surfacing flaws in code that survived years of expert review. In a single evaluation run, a frontier model found hundreds of vulnerabilities in a widely used codebase, built scores of working exploits, and uncovered a remote code execution flaw, more than a decade old, granting root to unauthenticated attackers. <b>Over 99 percent of those discoveries remain unpatched.</b> This is the vulnpocalypse made manifest, and it is no longer a forecast.</p>
-  <p class="sub" data-sub="2" style="margin-top:14px"><b>Finding flaws at scale is only good news if the world can fix them at the same speed, and it cannot.</b> Vendor cycles run on weeks. Enterprise deployment runs slower, blocked by operational constraints, legacy systems that cannot be touched, and change freeze periods that lock environments for weeks. When discovery accelerates and remediation does not, the gap becomes pure attack surface. CISA BOD 26-04 started the clock on risk, which is right. But every path it draws still ends in a patch. So we add the question the directive assumes away. On every Total and Partial branch, does a patch exist in time? Yes keeps CISA's timeline. No routes to the off-ramp, where the risk is closed by decision, not repair.</p>
+  <p class="sub" data-sub="2" style="margin-top:14px"><b>Finding flaws at scale is only good news if the world can fix them at the same speed, and it cannot.</b> Vendor cycles run on weeks. Enterprise deployment runs slower, blocked by operational constraints, legacy systems that cannot be touched, and change freeze periods that lock environments for weeks. When discovery accelerates and remediation does not, the gap becomes pure attack surface. CISA BOD 26-04 started the clock on risk, which is right. But every path it draws still ends in a patch. So we add the question the directive assumes away. On every Total and Partial branch, does a patch exist in time? Yes keeps CISA's timeline. No routes to the off-ramp, where the risk is mitigated by decision, not repair.</p>
   <p class="hint">Scroll sideways to follow any path through to its outcome, or <a class="srclink" href="#walker">try the interactive version</a>. Read the directive at <a class="srclink" href="https://www.cisa.gov/news-events/directives/bod-26-04-prioritizing-security-updates-based-risk" target="_blank" rel="noopener">CISA BOD 26-04</a>.</p>
 </div>
 <hr class="rule">
@@ -504,22 +504,23 @@ Q.forEach(f=>{
 function wupdate(){
   highlightPath();
   const out=document.getElementById('wout');
-  if(Q.some(f=>!wsel[f.id])){ out.className='wout'; out.innerHTML='<p class="wwait">Answer all five to see the outcome.</p>'; return; }
+  const t=T[curLang];
+  if(Q.some(f=>!wsel[f.id])){ out.className='wout'; out.innerHTML=`<p class="wwait">${t.wo_wait}</p>`; return; }
   const slaKey=[wsel.exposed,wsel.kev,wsel.auto,wsel.impact].join('_');
   const [sla,slaCls]=SLA[slaKey];
-  const pathStr=`${wsel.exposed==='yes'?'exposed':'internal'} · ${wsel.kev==='yes'?'on KEV':'not on KEV'} · ${wsel.auto==='yes'?'automatable':'manual'} · ${wsel.impact} impact`;
+  const pathStr=`${wsel.exposed==='yes'?t.wo_exposed:t.wo_internal} \u00b7 ${wsel.kev==='yes'?t.wo_onkev:t.wo_notkev} \u00b7 ${wsel.auto==='yes'?t.wo_automatable:t.wo_manual} \u00b7 ${wsel.impact} ${t.wo_impact_s}`;
   if(wsel.patch==='yes'){
     out.className='wout set '+slaCls;
-    out.innerHTML=`<p class="wk">Patch exists in time → CISA remediation timeline</p>
+    out.innerHTML=`<p class="wk">${t.wo_yes_k}</p>
       <p class="wv">${sla}</p>
-      <p class="wpath">Path: ${pathStr} · patch in time</p>`;
+      <p class="wpath">${t.wo_path} ${pathStr} \u00b7 ${t.wo_patch_yes}</p>`;
   } else {
     out.className='wout set r-brick';
-    out.innerHTML=`<p class="wk">No patch in time → off-ramp (the directive's missing exit)</p>
-      <p class="wv">Close the risk by decision, not repair</p>
-      <p class="wsub"><b style="color:#b5601a">If a patch is coming, just late:</b> isolate until patch available, or apply a compensating control until patch available.<br>
-      <b style="color:#9e3a32">If no patch will ever come (legacy / EOL):</b> decommission and remove from service, or apply a compensating control for out-of-support systems.</p>
-      <p class="wpath">Path: ${pathStr} · no patch in time. CISA would have assigned ${sla}, but that timeline is unmeetable.</p>`;
+    out.innerHTML=`<p class="wk">${t.wo_no_k}</p>
+      <p class="wv">${t.wo_no_v}</p>
+      <p class="wsub"><b style="color:#b5601a">${t.wo_no_amber}</b> ${t.wo_no_amber_d}<br>
+      <b style="color:#9e3a32">${t.wo_no_grey}</b> ${t.wo_no_grey_d}</p>
+      <p class="wpath">${t.wo_path} ${pathStr} \u00b7 ${t.wo_patch_no}. ${t.wo_unmeet} ${sla}, ${t.wo_unmeet2}</p>`;
   }
 }
 
@@ -866,10 +867,10 @@ function highlightPath(){
 // ============ INTERNATIONALIZATION ============
 const T = {
   en: {
-    eyebrow: "Completed with the patch question",
+    eyebrow: "Expanding BOD 26-04: Beyond the Patch",
     title: "Rethinking the CISA BOD 26-04 Directive in the Age of Frontier AI Models",
     sub1: 'Frontier models have crossed a line that changes the math of vulnerability research. Mythos class systems now discover zero days at machine speed, surfacing flaws in code that survived years of expert review. In a single evaluation run, a frontier model found hundreds of vulnerabilities in a widely used codebase, built scores of working exploits, and uncovered a remote code execution flaw, more than a decade old, granting root to unauthenticated attackers. <b>Over 99 percent of those discoveries remain unpatched.</b> This is the vulnpocalypse made manifest, and it is no longer a forecast.',
-    sub2: '<b>Finding flaws at scale is only good news if the world can fix them at the same speed, and it cannot.</b> Vendor cycles run on weeks. Enterprise deployment runs slower, blocked by operational constraints, legacy systems that cannot be touched, and change freeze periods that lock environments for weeks. When discovery accelerates and remediation does not, the gap becomes pure attack surface. CISA BOD 26-04 started the clock on risk, which is right. But every path it draws still ends in a patch. So we add the question the directive assumes away. On every Total and Partial branch, does a patch exist in time? Yes keeps CISA\u2019s timeline. No routes to the off-ramp, where the risk is closed by decision, not repair.',
+    sub2: '<b>Finding flaws at scale is only good news if the world can fix them at the same speed, and it cannot.</b> Vendor cycles run on weeks. Enterprise deployment runs slower, blocked by operational constraints, legacy systems that cannot be touched, and change freeze periods that lock environments for weeks. When discovery accelerates and remediation does not, the gap becomes pure attack surface. CISA BOD 26-04 started the clock on risk, which is right. But every path it draws still ends in a patch. So we add the question the directive assumes away. On every Total and Partial branch, does a patch exist in time? Yes keeps CISA\u2019s timeline. No routes to the off-ramp, where the risk is mitigated by decision, not repair.',
     hint: 'Scroll sideways to follow any path through to its outcome, or <a class="srclink" href="#walker">try the interactive version</a>. Read the directive at <a class="srclink" href="https://www.cisa.gov/news-events/directives/bod-26-04-prioritizing-security-updates-based-risk" target="_blank" rel="noopener">CISA BOD 26-04</a>.',
     l1: "When the Patch Never Comes",
     l2: "A remediation deadline assumes a remedy exists. Frontier models now discover vulnerabilities at machine speed, surfacing flaws faster than vendors can fix them. When the patch is not coming, every branch needs the exit the directive never drew.",
@@ -905,13 +906,32 @@ const T = {
     leaf2: "3 Calendar Days to Apply Patch",
     leaf3: "14 Calendar Days to Apply Patch",
     leaf4: "60 Calendar Days to Apply Patch",
-    leaf5: "Fix on System Upgrade"
+    leaf5: "Fix on System Upgrade",
+    wo_wait: "Answer all five to see the outcome.",
+    wo_yes_k: "Patch exists in time \u2192 CISA remediation timeline",
+    wo_no_k: "No patch in time \u2192 off-ramp (the directive\u2019s missing exit)",
+    wo_no_v: "Mitigate the risk by decision, not repair",
+    wo_no_amber: "If a patch is coming, just late:",
+    wo_no_amber_d: "isolate until patch available, or apply a compensating control until patch available.",
+    wo_no_grey: "If no patch will ever come (legacy / EOL):",
+    wo_no_grey_d: "decommission and remove from service, or apply a compensating control for out-of-support systems.",
+    wo_path: "Path:",
+    wo_patch_yes: "patch in time",
+    wo_patch_no: "no patch in time",
+    wo_unmeet: "CISA would have assigned",
+    wo_unmeet2: "but that timeline is unmeetable.",
+    wo_exposed: "exposed", wo_internal: "internal",
+    wo_onkev: "on KEV", wo_notkev: "not on KEV",
+    wo_automatable: "automatable", wo_manual: "manual",
+    wo_impact_s: "impact",
+    wtitle: "Answer five questions. See where it lands.",
+    wback: "\u2191 Back to the full picture",
   },
   es: {
-    eyebrow: "Completado con la pregunta del parche",
+    eyebrow: "Ampliando la BOD 26-04: M\u00e1s All\u00e1 del Parche",
     title: "Repensando la Directiva CISA BOD 26-04 en la Era de los Modelos de IA de Frontera",
     sub1: 'Los modelos de frontera han cruzado una l\u00ednea que cambia la matem\u00e1tica de la investigaci\u00f3n de vulnerabilidades. Sistemas de clase Mythos ahora descubren zero days a velocidad de m\u00e1quina, revelando fallos en c\u00f3digo que sobrevivi\u00f3 a\u00f1os de revisi\u00f3n experta. En una sola ejecuci\u00f3n de evaluaci\u00f3n, un modelo de frontera encontr\u00f3 cientos de vulnerabilidades en una base de c\u00f3digo ampliamente utilizada, construy\u00f3 decenas de exploits funcionales y descubri\u00f3 una falla de ejecuci\u00f3n remota de c\u00f3digo, con m\u00e1s de una d\u00e9cada de antig\u00fcedad, otorgando acceso root a atacantes no autenticados. <b>M\u00e1s del 99 por ciento de esos descubrimientos permanecen sin parche.</b> Esto es el vulnpocalypse hecho realidad, y ya no es un pron\u00f3stico.',
-    sub2: '<b>Encontrar fallos a escala solo es buena noticia si el mundo puede corregirlos a la misma velocidad, y no puede.</b> Los ciclos de los proveedores se miden en semanas. El despliegue empresarial es a\u00fan m\u00e1s lento, bloqueado por restricciones operativas, sistemas legados que no se pueden tocar y per\u00edodos de congelaci\u00f3n de cambios que bloquean entornos durante semanas. Cuando el descubrimiento se acelera y la remediaci\u00f3n no, la brecha se convierte en superficie de ataque pura. CISA BOD 26-04 inici\u00f3 el reloj del riesgo, lo cual es correcto. Pero cada ruta que dibuja termina en un parche. As\u00ed que agregamos la pregunta que la directiva asume como resuelta. En cada rama Total y Parcial, \u00bfexiste un parche a tiempo? S\u00ed mantiene el cronograma de CISA. No dirige a la salida, donde el riesgo se cierra por decisi\u00f3n, no por reparaci\u00f3n.',
+    sub2: '<b>Encontrar fallos a escala solo es buena noticia si el mundo puede corregirlos a la misma velocidad, y no puede.</b> Los ciclos de los proveedores se miden en semanas. El despliegue empresarial es a\u00fan m\u00e1s lento, bloqueado por restricciones operativas, sistemas legados que no se pueden tocar y per\u00edodos de congelaci\u00f3n de cambios que bloquean entornos durante semanas. Cuando el descubrimiento se acelera y la remediaci\u00f3n no, la brecha se convierte en superficie de ataque pura. CISA BOD 26-04 inici\u00f3 el reloj del riesgo, lo cual es correcto. Pero cada ruta que dibuja termina en un parche. As\u00ed que agregamos la pregunta que la directiva asume como resuelta. En cada rama Total y Parcial, \u00bfexiste un parche a tiempo? S\u00ed mantiene el cronograma de CISA. No dirige a la salida, donde el riesgo se mitiga por decisi\u00f3n, no por reparaci\u00f3n.',
     hint: 'Despl\u00e1cese lateralmente para seguir cualquier ruta hasta su resultado, o <a class="srclink" href="#walker">pruebe la versi\u00f3n interactiva</a>. Lea la directiva en <a class="srclink" href="https://www.cisa.gov/news-events/directives/bod-26-04-prioritizing-security-updates-based-risk" target="_blank" rel="noopener">CISA BOD 26-04</a>.',
     l1: "Cuando el Parche Nunca Llega",
     l2: "Un plazo de remediaci\u00f3n asume que existe un remedio. Los modelos de frontera ahora descubren vulnerabilidades a velocidad de m\u00e1quina, revelando fallos m\u00e1s r\u00e1pido de lo que los proveedores pueden corregirlos. Cuando el parche no va a llegar, cada rama necesita la salida que la directiva nunca dibuj\u00f3.",
@@ -947,13 +967,32 @@ const T = {
     leaf2: "3 D\u00edas Calendario para Aplicar Parche",
     leaf3: "14 D\u00edas Calendario para Aplicar Parche",
     leaf4: "60 D\u00edas Calendario para Aplicar Parche",
-    leaf5: "Corregir en Actualizaci\u00f3n del Sistema"
+    leaf5: "Corregir en Actualizaci\u00f3n del Sistema",
+    wo_wait: "Responda las cinco preguntas para ver el resultado.",
+    wo_yes_k: "El parche existe a tiempo \u2192 cronograma de remediaci\u00f3n CISA",
+    wo_no_k: "Sin parche a tiempo \u2192 salida (la salida que falta en la directiva)",
+    wo_no_v: "Mitigar el riesgo por decisi\u00f3n, no por reparaci\u00f3n",
+    wo_no_amber: "Si el parche viene, solo tarde:",
+    wo_no_amber_d: "aislar hasta que el parche est\u00e9 disponible, o aplicar un control compensatorio hasta que el parche est\u00e9 disponible.",
+    wo_no_grey: "Si nunca habr\u00e1 parche (legado / fin de vida):",
+    wo_no_grey_d: "dar de baja y retirar del servicio, o aplicar un control compensatorio para sistemas sin soporte.",
+    wo_path: "Ruta:",
+    wo_patch_yes: "parche a tiempo",
+    wo_patch_no: "sin parche a tiempo",
+    wo_unmeet: "CISA habr\u00eda asignado",
+    wo_unmeet2: "pero ese plazo es inalcanzable.",
+    wo_exposed: "expuesto", wo_internal: "interno",
+    wo_onkev: "en KEV", wo_notkev: "no en KEV",
+    wo_automatable: "automatizable", wo_manual: "manual",
+    wo_impact_s: "impacto",
+    wtitle: "Responda cinco preguntas. Vea d\u00f3nde cae.",
+    wback: "\u2191 Volver al diagrama completo",
   },
   pt: {
-    eyebrow: "Completado com a pergunta do patch",
+    eyebrow: "Ampliando a BOD 26-04: Al\u00e9m do Patch",
     title: "Repensando a Diretiva CISA BOD 26-04 na Era dos Modelos de IA de Fronteira",
     sub1: 'Os modelos de fronteira cruzaram uma linha que muda a matem\u00e1tica da pesquisa de vulnerabilidades. Sistemas de classe Mythos agora descobrem zero days na velocidade da m\u00e1quina, revelando falhas em c\u00f3digo que sobreviveu a anos de revis\u00e3o especializada. Em uma \u00fanica execu\u00e7\u00e3o de avalia\u00e7\u00e3o, um modelo de fronteira encontrou centenas de vulnerabilidades em uma base de c\u00f3digo amplamente utilizada, construiu dezenas de exploits funcionais e descobriu uma falha de execu\u00e7\u00e3o remota de c\u00f3digo, com mais de uma d\u00e9cada de exist\u00eancia, concedendo acesso root a atacantes n\u00e3o autenticados. <b>Mais de 99 por cento dessas descobertas permanecem sem patch.</b> Este \u00e9 o vulnpocalypse tornado realidade, e n\u00e3o \u00e9 mais uma previs\u00e3o.',
-    sub2: '<b>Encontrar falhas em escala s\u00f3 \u00e9 boa not\u00edcia se o mundo puder corrigi-las na mesma velocidade, e n\u00e3o pode.</b> Os ciclos dos fornecedores s\u00e3o medidos em semanas. A implanta\u00e7\u00e3o empresarial \u00e9 ainda mais lenta, bloqueada por restri\u00e7\u00f5es operacionais, sistemas legados que n\u00e3o podem ser tocados e per\u00edodos de congelamento de mudan\u00e7as que travam ambientes por semanas. Quando a descoberta acelera e a remedia\u00e7\u00e3o n\u00e3o, a lacuna se torna superf\u00edcie de ataque pura. CISA BOD 26-04 iniciou o rel\u00f3gio do risco, o que \u00e9 correto. Mas cada caminho que desenha ainda termina em um patch. Ent\u00e3o adicionamos a pergunta que a diretiva assume como resolvida. Em cada ramo Total e Parcial, existe um patch a tempo? Sim mant\u00e9m o cronograma da CISA. N\u00e3o direciona para a sa\u00edda, onde o risco \u00e9 fechado por decis\u00e3o, n\u00e3o por reparo.',
+    sub2: '<b>Encontrar falhas em escala s\u00f3 \u00e9 boa not\u00edcia se o mundo puder corrigi-las na mesma velocidade, e n\u00e3o pode.</b> Os ciclos dos fornecedores s\u00e3o medidos em semanas. A implanta\u00e7\u00e3o empresarial \u00e9 ainda mais lenta, bloqueada por restri\u00e7\u00f5es operacionais, sistemas legados que n\u00e3o podem ser tocados e per\u00edodos de congelamento de mudan\u00e7as que travam ambientes por semanas. Quando a descoberta acelera e a remedia\u00e7\u00e3o n\u00e3o, a lacuna se torna superf\u00edcie de ataque pura. CISA BOD 26-04 iniciou o rel\u00f3gio do risco, o que \u00e9 correto. Mas cada caminho que desenha ainda termina em um patch. Ent\u00e3o adicionamos a pergunta que a diretiva assume como resolvida. Em cada ramo Total e Parcial, existe um patch a tempo? Sim mant\u00e9m o cronograma da CISA. N\u00e3o direciona para a sa\u00edda, onde o risco \u00e9 mitigado por decis\u00e3o, n\u00e3o por reparo.',
     hint: 'Role lateralmente para seguir qualquer caminho at\u00e9 seu resultado, ou <a class="srclink" href="#walker">experimente a vers\u00e3o interativa</a>. Leia a diretiva em <a class="srclink" href="https://www.cisa.gov/news-events/directives/bod-26-04-prioritizing-security-updates-based-risk" target="_blank" rel="noopener">CISA BOD 26-04</a>.',
     l1: "Quando o Patch Nunca Chega",
     l2: "Um prazo de remedia\u00e7\u00e3o assume que existe um rem\u00e9dio. Os modelos de fronteira agora descobrem vulnerabilidades na velocidade da m\u00e1quina, revelando falhas mais r\u00e1pido do que os fornecedores conseguem corrigi-las. Quando o patch n\u00e3o vai chegar, cada ramo precisa da sa\u00edda que a diretiva nunca desenhou.",
@@ -989,7 +1028,26 @@ const T = {
     leaf2: "3 Dias Corridos para Aplicar Patch",
     leaf3: "14 Dias Corridos para Aplicar Patch",
     leaf4: "60 Dias Corridos para Aplicar Patch",
-    leaf5: "Corrigir na Atualiza\u00e7\u00e3o do Sistema"
+    leaf5: "Corrigir na Atualiza\u00e7\u00e3o do Sistema",
+    wo_wait: "Responda as cinco perguntas para ver o resultado.",
+    wo_yes_k: "O patch existe a tempo \u2192 cronograma de remedia\u00e7\u00e3o CISA",
+    wo_no_k: "Sem patch a tempo \u2192 sa\u00edda (a sa\u00edda que falta na diretiva)",
+    wo_no_v: "Mitigar o risco por decis\u00e3o, n\u00e3o por reparo",
+    wo_no_amber: "Se o patch est\u00e1 vindo, apenas atrasado:",
+    wo_no_amber_d: "isolar at\u00e9 que o patch esteja dispon\u00edvel, ou aplicar um controle compensat\u00f3rio at\u00e9 que o patch esteja dispon\u00edvel.",
+    wo_no_grey: "Se nunca haver\u00e1 patch (legado / fim de vida):",
+    wo_no_grey_d: "descomissionar e retirar de servi\u00e7o, ou aplicar um controle compensat\u00f3rio para sistemas sem suporte.",
+    wo_path: "Caminho:",
+    wo_patch_yes: "patch a tempo",
+    wo_patch_no: "sem patch a tempo",
+    wo_unmeet: "CISA teria atribu\u00eddo",
+    wo_unmeet2: "mas esse prazo \u00e9 inalcan\u00e7\u00e1vel.",
+    wo_exposed: "exposto", wo_internal: "interno",
+    wo_onkev: "no KEV", wo_notkev: "fora do KEV",
+    wo_automatable: "automatiz\u00e1vel", wo_manual: "manual",
+    wo_impact_s: "impacto",
+    wtitle: "Responda cinco perguntas. Veja onde chega.",
+    wback: "\u2191 Voltar ao diagrama completo",
   }
 };
 
@@ -1006,10 +1064,12 @@ function switchLang(lang){
   const s1=q('[data-sub="1"]'); if(s1) s1.innerHTML=t.sub1;
   const s2=q('[data-sub="2"]'); if(s2) s2.innerHTML=t.sub2;
   const hi=q('.hint'); if(hi) hi.innerHTML=t.hint;
-  const l1=q('.l1'); if(l1) l1.innerHTML=t.l1;
-  const l2=q('.l2'); if(l2) l2.innerHTML=t.l2;
-  const df=q('.def'); if(df) df.innerHTML=t.def;
+  const l1=q('.land .l1'); if(l1) l1.innerHTML=t.l1;
+  const l2=q('.land .l2'); if(l2) l2.innerHTML=t.l2;
+  const df=q('.land .def'); if(df) df.innerHTML=t.def;
   const we=q('.weyebrow'); if(we) we.textContent=t.weyebrow;
+  const wt=q('.wtitle'); if(wt) wt.textContent=t.wtitle;
+  const wb=q('.byline a[href="#fullpicture"]'); if(wb) wb.textContent=t.wback;
   // diagram nodes by class
   document.querySelectorAll('.n-root').forEach(el=>el.innerHTML=t.node_root);
   document.querySelectorAll('.n-dec').forEach(el=>{
@@ -1022,6 +1082,7 @@ function switchLang(lang){
   // YES/NO pills in the diagram
   document.querySelectorAll('.yn.y').forEach(el=>el.textContent=t.btn_yes);
   document.querySelectorAll('.yn.n').forEach(el=>el.textContent=t.btn_no);
+  document.querySelectorAll('.no-pill').forEach(el=>el.textContent=t.btn_no);
   // column headers
   const colKeys=['col_root','col_kev','col_auto','col_impact','col_patch','col_leaf'];
   document.querySelectorAll('.colhead').forEach((el,i)=>{ if(t[colKeys[i]]) el.textContent=t[colKeys[i]]; });
@@ -1082,6 +1143,8 @@ function switchLang(lang){
     if(v==='total') btn.innerHTML=t.total+'<small></small>';
     if(v==='partial') btn.innerHTML=t.partial+'<small></small>';
   });
+  // refresh walker output with new language
+  if(typeof wupdate==='function') wupdate();
 }
 
 // Auto-detect browser language and switch on load
