@@ -191,7 +191,7 @@
 
 <div class="walk" id="walker">
   <hr class="wrule">
-  <p class="weyebrow">Walk one vulnerability through the completed directive</p>
+  <p class="weyebrow">Walk one vulnerability through the expanded directive</p>
   <h2 class="wtitle">Answer five questions. See where it lands.</h2>
   <div class="wtools"><button id="wfocus" class="wfocusbtn" type="button">Dim everything else</button><button id="wisolate" class="wfocusbtn" type="button">Show only the path</button><button id="wreset" class="wresetbtn" type="button">Reset</button></div>
   <div class="wgrid" id="wgrid"></div>
@@ -875,7 +875,7 @@ const T = {
     l1: "When the Patch Never Comes",
     l2: "A remediation deadline assumes a remedy exists. Frontier models now discover vulnerabilities at machine speed, surfacing flaws faster than vendors can fix them. When the patch is not coming, every branch needs the exit the directive never drew.",
     def: "<b>Vulnpocalypse. A rapid, structural increase in the volume of exploitable software vulnerabilities, driven by frontier AI discovery and compounded by remediation friction, producing risk at a scale defenders cannot absorb.</b>",
-    weyebrow: "Walk one vulnerability through the completed directive",
+    weyebrow: "Walk one vulnerability through the expanded directive",
     node_root: "Is the vulnerable<br>asset publicly<br>exposed?",
     node_kev: "Vulnerability<br>listed on KEV?",
     node_auto: "Can an adversary<br>automate all steps<br>to exploit?",
@@ -936,7 +936,7 @@ const T = {
     l1: "Cuando el Parche Nunca Llega",
     l2: "Un plazo de remediaci\u00f3n asume que existe un remedio. Los modelos de frontera ahora descubren vulnerabilidades a velocidad de m\u00e1quina, revelando fallos m\u00e1s r\u00e1pido de lo que los proveedores pueden corregirlos. Cuando el parche no va a llegar, cada rama necesita la salida que la directiva nunca dibuj\u00f3.",
     def: "<b>Vulnpocalypse. Un aumento r\u00e1pido y estructural en el volumen de vulnerabilidades de software explotables, impulsado por el descubrimiento mediante IA de frontera y agravado por la fricci\u00f3n en la remediaci\u00f3n, produciendo riesgo a una escala que los defensores no pueden absorber.</b>",
-    weyebrow: "Recorra una vulnerabilidad a trav\u00e9s de la directiva completada",
+    weyebrow: "Recorra una vulnerabilidad a trav\u00e9s de la directiva ampliada",
     node_root: "\u00bfEl activo vulnerable<br>est\u00e1 expuesto<br>p\u00fablicamente?",
     node_kev: "\u00bfVulnerabilidad<br>listada en KEV?",
     node_auto: "\u00bfPuede un adversario<br>automatizar todos<br>los pasos para explotar?",
@@ -997,7 +997,7 @@ const T = {
     l1: "Quando o Patch Nunca Chega",
     l2: "Um prazo de remedia\u00e7\u00e3o assume que existe um rem\u00e9dio. Os modelos de fronteira agora descobrem vulnerabilidades na velocidade da m\u00e1quina, revelando falhas mais r\u00e1pido do que os fornecedores conseguem corrigi-las. Quando o patch n\u00e3o vai chegar, cada ramo precisa da sa\u00edda que a diretiva nunca desenhou.",
     def: "<b>Vulnpocalypse. Um aumento r\u00e1pido e estrutural no volume de vulnerabilidades de software explor\u00e1veis, impulsionado pela descoberta via IA de fronteira e agravado pela fric\u00e7\u00e3o na remedia\u00e7\u00e3o, produzindo risco em uma escala que os defensores n\u00e3o conseguem absorver.</b>",
-    weyebrow: "Percorra uma vulnerabilidade atrav\u00e9s da diretiva completada",
+    weyebrow: "Percorra uma vulnerabilidade atrav\u00e9s da diretiva ampliada",
     node_root: "O ativo vulner\u00e1vel<br>est\u00e1 publicamente<br>exposto?",
     node_kev: "Vulnerabilidade<br>listada no KEV?",
     node_auto: "Um advers\u00e1rio pode<br>automatizar todos os<br>passos para explorar?",
@@ -1069,7 +1069,7 @@ function switchLang(lang){
   const df=q('.land .def'); if(df) df.innerHTML=t.def;
   const we=q('.weyebrow'); if(we) we.textContent=t.weyebrow;
   const wt=q('.wtitle'); if(wt) wt.textContent=t.wtitle;
-  const wb=q('.byline a[href="#fullpicture"]'); if(wb) wb.textContent=t.wback;
+  const wb=q('.wback a'); if(wb) wb.textContent=t.wback;
   // diagram nodes by class
   document.querySelectorAll('.n-root').forEach(el=>el.innerHTML=t.node_root);
   document.querySelectorAll('.n-dec').forEach(el=>{
