@@ -21,7 +21,7 @@ html,body{background:#000;height:100%;}
   <div id="compass-stage" id="compass-stage" style="position:relative;width:min(96vw,96vh);aspect-ratio:1/1;overflow:hidden;background:#0a0c0e;border-radius:6px;box-shadow:0 30px 80px rgba(0,0,0,.6);">
     <div id="pub-link" style="position:absolute;bottom:10px;right:12px;z-index:100;font-family:Inter,Arial,sans-serif;font-size:8px;color:rgba(255,255,255,0.35);letter-spacing:.03em;line-height:1.6;text-align:right;pointer-events:auto;max-width:52%;"></div>
     <div id="compass-title" style="position:absolute;top:12px;left:14px;z-index:100;font-family:Inter,Arial,sans-serif;font-size:clamp(16px,3.2vmin,35px);font-weight:600;color:#ffffff;letter-spacing:.2px;pointer-events:none;">The Cybersecurity Compass</div>
-    <div style="position:absolute;bottom:10px;left:12px;z-index:100;font-family:Inter,system-ui,sans-serif;font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:.04em;line-height:1.4;pointer-events:auto;">Created and Designed by:<br><a href="https://www.linkedin.com/in/jpcastro/" target="_blank" style="color:rgba(255,255,255,0.5);text-decoration:none;display:inline-block;">Juan Pablo Castro Vilaró</a></div>
+    <div id="credit" style="position:absolute;bottom:10px;left:12px;z-index:100;font-family:Inter,system-ui,sans-serif;font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:.04em;line-height:1.4;pointer-events:auto;"></div>
     <div id="lang-bar">
       <button id="btn-en" onclick="setLang('en')">EN</button>
       <button id="btn-es" onclick="setLang('es')">ES</button>
@@ -45,15 +45,15 @@ const T={
   en:{crm:"Cyber Risk Management",pap:"Proactive and Predictive",bab:"Before a Breach",dar:"Detection and Response",rad:"Reactive and Defensive",dub:"During a Breach",cr:"Cyber Resilience",rai:"Recover and Improve",aab:"After a Breach",ppl:"People",prc:"Process",tch:"Technology",lbl:"Language",title:"The Cybersecurity Compass",
     pubTitle:"The Cybersecurity Compass: Strategically Navigating the Stormy Digital Ocean",
     pubUrl:"https://www.researchgate.net/publication/389628862",
-    pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"},
+    pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366",credit:"Created and Designed by:"},
   es:{crm:"Gestión del Ciber Riesgo",pap:"Proactivo y Predictivo",bab:"Antes de una Brecha",dar:"Detección y Respuesta",rad:"Reactivo y Defensivo",dub:"Durante una Brecha",cr:"Ciber Resiliencia",rai:"Recuperar y Mejorar",aab:"Después de una Brecha",ppl:"Personas",prc:"Procesos",tch:"Tecnología",lbl:"Idioma",title:"La Brújula de Ciberseguridad",
     pubTitle:"La Brújula de la Ciberseguridad: Navegando Estratégicamente el Tormentoso Océano Digital",
     pubUrl:"https://www.researchgate.net/publication/389631500",
-    pubDoi:"10.13140/RG.2.2.20733.68322",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.20733.68322"},
+    pubDoi:"10.13140/RG.2.2.20733.68322",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.20733.68322",credit:"Creado y Diseñado por:"},
   pt:{crm:"Gestão de Ciber Riscos",pap:"Proativo e Preditivo",bab:"Antes de uma Brecha",dar:"Detecção e Resposta",rad:"Reativo e Defensivo",dub:"Durante uma Brecha",cr:"Ciber Resiliência",rai:"Recuperar e Melhorar",aab:"Após uma Brecha",ppl:"Pessoas",prc:"Processos",tch:"Tecnologia",lbl:"Idioma",title:"A Bússola de Cibersegurança",
     pubTitle:"A Bússola da Cibersegurança: Navegando Estrategicamente pelo Tempestuoso Oceano Digital",
     pubUrl:"https://www.researchgate.net/publication/389631493",
-    pubDoi:"10.13140/RG.2.2.14022.79687",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.14022.79687"}
+    pubDoi:"10.13140/RG.2.2.14022.79687",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.14022.79687",credit:"Criado e Projetado por:"}
 };
 
 const txtIds={crm:'txt-crm',pap:'txt-pap',bab:'txt-bab',dar:'txt-dar',rad:'txt-rad',dub:'txt-dub',cr:'txt-cr',rai:'txt-rai',aab:'txt-aab',ppl:'txt-ppl',prc:'txt-prc',tch:'txt-tch'};
@@ -74,6 +74,8 @@ function applyLang(l){
   const titleEl=document.getElementById('compass-title');if(titleEl)titleEl.textContent=t.title;
   const pub=document.getElementById('pub-link');
   if(pub)pub.innerHTML='<a href="'+t.pubUrl+'" target="_blank" style="color:rgba(255,255,255,0.45);text-decoration:none;display:block;margin-bottom:2px;">'+t.pubTitle+'</a><a href="'+t.pubDoiUrl+'" target="_blank" style="color:rgba(255,255,255,0.28);text-decoration:none;">DOI: '+t.pubDoi+'</a>';
+  const credit=document.getElementById('credit');
+  if(credit)credit.innerHTML=t.credit+'<br><a href="https://www.linkedin.com/in/jpcastro/" target="_blank" style="color:rgba(255,255,255,0.5);text-decoration:none;display:inline-block;">Juan Pablo Castro Vilaró</a>';
 
   ['en','es','pt'].forEach(c=>{
     const b=document.getElementById('btn-'+c);
