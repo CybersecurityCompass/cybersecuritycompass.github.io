@@ -221,12 +221,13 @@ function getZone(svgX, svgY){
 
   // Outer sector ring
   if(dist>=SECTOR_INNER && dist<=SECTOR_OUTER){
-    // Sector 0 (CRM):        300°-60°  (top-right)
-    // Sector 1 (D&R):        60°-180°  (bottom)
-    // Sector 2 (Resilience): 180°-300° (top-left)
-    if(angle>=300 || angle<60)  return 0;
-    if(angle>=60  && angle<180) return 1;
-    if(angle>=180 && angle<300) return 2;
+    // Boundaries at 15°, 135°, 255° (from SVG path endpoints)
+    // Sector 0 (CRM):         15°-135°  (top-right)
+    // Sector 1 (D&R):        135°-255°  (bottom)
+    // Sector 2 (Resilience): 255°-360° and 0°-15° (top-left, wraps)
+    if(angle>=15  && angle<135) return 0;
+    if(angle>=135 && angle<255) return 1;
+    return 2;
   }
   return -1;
 }
