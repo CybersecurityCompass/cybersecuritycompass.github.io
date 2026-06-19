@@ -47,6 +47,7 @@ html,body{background:#000;height:100%;}
     <path id="hit0" d="M 651.81 122.72 A 432 432 0 0 1 845.47 845.47 L 688.49 688.49 A 210 210 0 0 0 594.35 337.16 Z"/>
     <path id="hit1" d="M 845.47 845.47 A 432 432 0 0 1 122.72 651.81 L 337.16 594.35 A 210 210 0 0 0 688.49 688.49 Z"/>
     <path id="hit2" d="M 122.72 651.81 A 432 432 0 0 1 651.81 122.72 L 594.35 337.16 A 210 210 0 0 0 337.16 594.35 Z"/>
+
   </svg>
 
   <div id="lang-bar">
@@ -123,6 +124,33 @@ const TT={
   ]
 };
 
+const TTP={
+  en:[
+    {h:"People",s:"The Human Layer",
+     b:"Technology does not defend organizations. People do. The People dimension of the compass represents the human layer that makes every other investment meaningful: the security analysts who interpret signals, the executives who make risk decisions, the employees who are either the first line of defense or the first point of failure. And on the other side of every attack, there is also a person. Cybercriminals are not automated forces of nature. They are individuals with intentions, motivations, and strategies of their own. They study their targets, exploit indecision, and move with purpose. Defending against them requires the same human qualities they possess: awareness, judgment, and the will to act before they do. A compass without skilled, aware, and empowered people is an instrument no one knows how to read. Culture, training, accountability, and leadership are not soft factors. They are the hands on the wheel."},
+    {h:"Process",s:"The Operational Backbone",
+     b:"Process is the operational backbone that connects people to technology and strategy to execution. Without it, even the best tools produce noise, and even the best talent operates in silos. At the core of a mature process layer sit the CyberRiskOps discipline and its operational nerve center, the Cyber Risk Operations Center (CROC), where risk intelligence is continuously measured, prioritized, and acted upon. Security Operations (SecOps) bridges that risk intelligence with real-time action, while the Security Operations Center (SOC) executes detection, investigation, and response at speed. Together, they transform cybersecurity from a set of isolated reactions into a continuous, measurable, and improving operation. Process is what ensures the compass keeps moving."},
+    {h:"Technology",s:"The Force Multiplier",
+     b:"Technology is the force multiplier of your cybersecurity strategy, but only when it serves a clear purpose. Cyber Risk Quantification (CRQ) translates technical risk into financial language that executives can act on. Cyber Risk Exposure Management (CREM) continuously maps and prioritizes your attack surface before adversaries can exploit it. Extended Detection and Response (XDR) unifies visibility across endpoints, networks, cloud, and identity into a single, correlated picture. Threat Intelligence feeds your compass with adversary context, turning reactive alerts into proactive decisions. Automation eliminates the manual friction that slows response and allows your teams to operate at machine speed without burning out. A unified platform ties all of this together, replacing fragmented point solutions with integrated intelligence. Artificial Intelligence extends what human teams can do across every layer. Technology does not define your strategy. It executes it."}
+  ],
+  es:[
+    {h:"Personas",s:"La Capa Humana",
+     b:"La tecnología no defiende organizaciones. Las personas sí. La dimensión de Personas representa la capa humana que da sentido a cada otra inversión: los analistas que interpretan señales, los ejecutivos que toman decisiones de riesgo, los empleados que son la primera línea de defensa o el primer punto de falla. Y al otro lado de cada ataque también hay una persona. Los ciberdelincuentes no son fuerzas automatizadas de la naturaleza. Son individuos con intenciones, motivaciones y estrategias propias. Estudian sus objetivos, explotan la indecisión y actúan con propósito. Defenderse de ellos requiere las mismas cualidades humanas que ellos poseen: conciencia, juicio y voluntad de actuar antes que ellos. Una brújula sin personas capacitadas y empoderadas es un instrumento que nadie sabe leer. La cultura, la formación, la responsabilidad y el liderazgo no son factores blandos. Son las manos en el timón."},
+    {h:"Procesos",s:"La Columna Vertebral Operacional",
+     b:"El proceso es la columna vertebral operacional que conecta a las personas con la tecnología y la estrategia con la ejecución. Sin él, incluso las mejores herramientas generan ruido y el mejor talento opera en silos. En el núcleo de una capa de proceso madura se encuentran la disciplina CyberRiskOps y su centro neurálgico operacional, el Centro de Operaciones de Ciber Riesgo (CROC), donde la inteligencia de riesgo se mide, prioriza y actúa continuamente. Security Operations (SecOps) conecta esa inteligencia de riesgo con la acción en tiempo real, mientras que el Centro de Operaciones de Seguridad (SOC) ejecuta la detección, investigación y respuesta con velocidad. Juntos, transforman la ciberseguridad de un conjunto de reacciones aisladas en una operación continua, medible y en mejora constante. El proceso es lo que garantiza que la brújula siga en movimiento."},
+    {h:"Tecnología",s:"El Multiplicador de Fuerza",
+     b:"La tecnología es el multiplicador de fuerza de tu estrategia de ciberseguridad, pero solo cuando sirve a un propósito claro. La Cuantificación del Ciber Riesgo (CRQ) traduce el riesgo técnico a un lenguaje financiero que los ejecutivos pueden utilizar. La Gestión de Exposición al Ciber Riesgo (CREM) mapea y prioriza continuamente tu superficie de ataque antes de que los adversarios puedan explotarla. La Detección y Respuesta Extendida (XDR) unifica la visibilidad en endpoints, redes, nube e identidad en una imagen única y correlacionada. La Inteligencia de Amenazas alimenta tu brújula con contexto del adversario, convirtiendo alertas reactivas en decisiones proactivas. La automatización elimina la fricción manual que ralentiza la respuesta y permite a tus equipos operar a la velocidad de las máquinas. Una plataforma unificada integra todo esto, reemplazando soluciones puntuales fragmentadas con inteligencia integrada. La Inteligencia Artificial amplía lo que los equipos humanos pueden hacer en cada capa. La tecnología no define tu estrategia. La ejecuta."}
+  ],
+  pt:[
+    {h:"Pessoas",s:"A Camada Humana",
+     b:"A tecnologia não defende organizações. As pessoas sim. A dimensão de Pessoas representa a camada humana que dá sentido a cada outro investimento: os analistas que interpretam sinais, os executivos que tomam decisões de risco, os funcionários que são a primeira linha de defesa ou o primeiro ponto de falha. E do outro lado de cada ataque também há uma pessoa. Os cibercriminosos não são forças automatizadas da natureza. São indivíduos com intenções, motivações e estratégias próprias. Estudam seus alvos, exploram a indecisão e agem com propósito. Defendê-los exige as mesmas qualidades humanas que eles possuem: consciência, julgamento e vontade de agir antes deles. Uma bússola sem pessoas capacitadas e empoderadas é um instrumento que ninguém sabe ler. Cultura, treinamento, responsabilidade e liderança não são fatores suaves. São as mãos no leme."},
+    {h:"Processos",s:"A Espinha Dorsal Operacional",
+     b:"O processo é a espinha dorsal operacional que conecta pessoas à tecnologia e estratégia à execução. Sem ele, até as melhores ferramentas geram ruído e o melhor talento opera em silos. No núcleo de uma camada de processo madura estão a disciplina CyberRiskOps e seu centro operacional, o Centro de Operações de Ciber Risco (CROC), onde a inteligência de risco é continuamente medida, priorizada e executada. Security Operations (SecOps) conecta essa inteligência de risco com ação em tempo real, enquanto o Centro de Operações de Segurança (SOC) executa detecção, investigação e resposta com velocidade. Juntos, transformam a cibersegurança de um conjunto de reações isoladas em uma operação contínua, mensurável e em melhoria constante. O processo é o que garante que a bússola continue em movimento."},
+    {h:"Tecnologia",s:"O Multiplicador de Força",
+     b:"A tecnologia é o multiplicador de força da sua estratégia de cibersegurança, mas apenas quando serve a um propósito claro. A Quantificação do Ciber Risco (CRQ) traduz o risco técnico em linguagem financeira que os executivos podem utilizar. A Gestão de Exposição ao Ciber Risco (CREM) mapeia e prioriza continuamente sua superfície de ataque antes que os adversários possam explorá-la. A Detecção e Resposta Estendida (XDR) unifica a visibilidade em endpoints, redes, nuvem e identidade em uma imagem única e correlacionada. A Inteligência de Ameaças alimenta sua bússola com contexto do adversário, transformando alertas reativos em decisões proativas. A automação elimina o atrito manual que atrasa a resposta e permite que suas equipes operem na velocidade das máquinas. Uma plataforma unificada integra tudo isso, substituindo soluções pontuais fragmentadas por inteligência integrada. A Inteligência Artificial amplia o que as equipes humanas podem fazer em cada camada. A tecnologia não define sua estratégia. Ela a executa."}
+  ]
+};
+
 const IDS={crm:'t-crm',pap:'t-pap',bab:'t-bab',dar:'t-dar',rad:'t-rad',dub:'t-dub',cr:'t-cr',rai:'t-rai',aab:'t-aab',ppl:'t-ppl',prc:'t-prc',tch:'t-tch'};
 
 let lang=(()=>{const n=(navigator.language||'en').slice(0,2).toLowerCase();return T[n]?n:'en';})();
@@ -166,20 +194,74 @@ function posTT(cx,cy){
   tt.style.top=y+'px';
 }
 
+// Unified mouse handler - single source of truth
+// All tooltip logic driven from one mousemove on the stage overlay
+let puzzleAngle=0;
+let lastCX=0, lastCY=0;
+let hoverState=-1; // -1=none, 0/1/2=sector, 3/4/5=puzzle piece
+
+const CX=540, CY=540;
+const PUZZLE_OUTER=200, PUZZLE_INNER=122;
+const SECTOR_OUTER=432, SECTOR_INNER=210;
+
+function getZone(svgX, svgY){
+  const dx=svgX-CX, dy=svgY-CY;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  // Angle 0=top, clockwise
+  const angle=(Math.atan2(dx,-dy)*180/Math.PI+360)%360;
+
+  // Puzzle ring
+  if(dist>=PUZZLE_INNER && dist<=PUZZLE_OUTER){
+    // At rotation=0: People=300°-60°, Process=60°-180°, Technology=180°-300°
+    // Subtract puzzleAngle to get piece-local angle, then offset by 300° so People starts at 0
+    const local=((angle-puzzleAngle)%360+360)%360;
+    const adjusted=(local-300+360)%360;
+    return 3+Math.floor(adjusted/120); // 3=People,4=Process,5=Technology
+  }
+
+  // Outer sector ring
+  if(dist>=SECTOR_INNER && dist<=SECTOR_OUTER){
+    // Sector 0 (CRM):        300°-60°  (top-right)
+    // Sector 1 (D&R):        60°-180°  (bottom)
+    // Sector 2 (Resilience): 180°-300° (top-left)
+    if(angle>=300 || angle<60)  return 0;
+    if(angle>=60  && angle<180) return 1;
+    if(angle>=180 && angle<300) return 2;
+  }
+  return -1;
+}
+
+function showTT(zone, cx, cy){
+  const d = zone<3 ? TT[lang][zone] : TTP[lang][zone-3];
+  tth.textContent=d.h; tts.textContent=d.s; ttb.textContent=d.b;
+  tt.classList.add('on');
+  posTT(cx, cy);
+}
+
+// Single mousemove listener on the hits SVG (sits above everything)
+const hitsSvg=document.getElementById('hits');
+hitsSvg.style.pointerEvents='all';
+// Remove individual hit path pointer events - we handle everything here
 [0,1,2].forEach(i=>{
   const el=document.getElementById('hit'+i);
-  el.addEventListener('mouseenter',function(e){
-    const r=stage.getBoundingClientRect();
-    const d=TT[lang][i];
-    tth.textContent=d.h; tts.textContent=d.s; ttb.textContent=d.b;
-    tt.classList.add('on');
-    posTT(e.clientX-r.left, e.clientY-r.top);
-  });
-  el.addEventListener('mousemove',function(e){
-    const r=stage.getBoundingClientRect();
-    posTT(e.clientX-r.left, e.clientY-r.top);
-  });
-  el.addEventListener('mouseleave',function(){tt.classList.remove('on');});
+  if(el) el.style.pointerEvents='none';
+});
+
+hitsSvg.addEventListener('mousemove', function(e){
+  const r=stage.getBoundingClientRect();
+  const cx=e.clientX-r.left, cy=e.clientY-r.top;
+  lastCX=cx; lastCY=cy;
+  const scale=1080/r.width;
+  const zone=getZone(cx*scale, cy*scale);
+  // If in puzzle ring, mark as -2 so tick loop keeps refreshing even when not moving
+  hoverState=(zone>=3)?-2:zone;
+  if(zone===-1){ tt.classList.remove('on'); }
+  else { showTT(zone, cx, cy); hoverState=zone; }
+});
+
+hitsSvg.addEventListener('mouseleave', function(){
+  tt.classList.remove('on');
+  hoverState=-1;
 });
 
 // Animation
@@ -222,7 +304,19 @@ function tick(now){
   A.needle+=diff*0.10;
   const sway=(sum<0.15?4:1.2)*Math.sin(A.t*2.0);
   if(needleEl)needleEl.setAttribute('transform','rotate('+((A.needle+sway).toFixed(2))+' 540 540)');
-  if(puzzle)puzzle.setAttribute('transform','rotate('+((A.spin*13)%360).toFixed(2)+' 540 540)');
+  const pAngle=(A.spin*13)%360;
+  puzzleAngle=pAngle;
+  if(puzzle)puzzle.setAttribute('transform','rotate('+pAngle.toFixed(2)+' 540 540)');
+  // Refresh tooltip live every frame when cursor is over puzzle ring
+  if(hoverState>=3 || hoverState===-2){
+    const scale=1080/stage.offsetWidth;
+    const zone=getZone(lastCX*scale, lastCY*scale);
+    if(zone!==hoverState){
+      hoverState=zone;
+      if(zone===-1) tt.classList.remove('on');
+      else showTT(zone, lastCX, lastCY);
+    }
+  }
 
   requestAnimationFrame(tick);
 }
