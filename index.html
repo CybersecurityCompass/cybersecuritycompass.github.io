@@ -71,7 +71,7 @@ const T={
     cr:"Cyber Resilience",rai:"Recover and Improve",aab:"After a Breach",
     ppl:"People",prc:"Process",tch:"Technology",
     title:"The Cybersecurity Compass",credit:"Created and Designed by:",
-    pubTitle:"The Cybersecurity Compass: Strategically Navigating the Stormy Digital Ocean",
+    pubLine1:"The Cybersecurity Compass:",pubLine2:"Strategically Navigating the Stormy Digital Ocean",
     pubUrl:"https://www.researchgate.net/publication/389628862",
     pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
   },
@@ -81,7 +81,7 @@ const T={
     cr:"Ciber Resiliencia",rai:"Recuperar y Mejorar",aab:"Después de una Brecha",
     ppl:"Personas",prc:"Procesos",tch:"Tecnología",
     title:"La Brújula de Ciberseguridad",credit:"Creado y Diseñado por:",
-    pubTitle:"La Brújula de la Ciberseguridad: Navegando Estratégicamente el Tormentoso Océano Digital",
+    pubLine1:"La Brújula de la Ciberseguridad:",pubLine2:"Navegando Estratégicamente el Tormentoso Océano Digital",
     pubUrl:"https://www.researchgate.net/publication/389631500",
     pubDoi:"10.13140/RG.2.2.20733.68322",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.20733.68322"
   },
@@ -90,8 +90,8 @@ const T={
     dar:"Detecção e Resposta",rad:"Reativo e Defensivo",dub:"Durante uma Brecha",
     cr:"Ciber Resiliência",rai:"Recuperar e Melhorar",aab:"Após uma Brecha",
     ppl:"Pessoas",prc:"Processos",tch:"Tecnologia",
-    title:"A Bússola de Cibersegurança",credit:"Criado e Projetado por:",
-    pubTitle:"A Bússola da Cibersegurança: Navegando Estrategicamente pelo Tempestuoso Oceano Digital",
+    title:"A Bússola da Cibersegurança",credit:"Criado e Projetado por:",
+    pubLine1:"A Bússola da Cibersegurança:",pubLine2:"Navegando Estrategicamente pelo Tempestuoso Oceano Digital",
     pubUrl:"https://www.researchgate.net/publication/389631493",
     pubDoi:"10.13140/RG.2.2.14022.79687",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.14022.79687"
   }
@@ -165,7 +165,14 @@ function applyLang(l){
   });
   document.getElementById('compass-title').textContent=t.title;
   document.getElementById('credit').innerHTML=t.credit+'<br><a href="https://www.linkedin.com/in/jpcastro/" target="_blank" style="color:rgba(255,255,255,.5);text-decoration:none;">Juan Pablo Castro Vilaró</a>';
-  document.getElementById('pub-link').innerHTML='<a href="'+t.pubUrl+'" target="_blank" style="color:rgba(255,255,255,.45);text-decoration:none;display:block;margin-bottom:2px;">'+t.pubTitle+'</a><a href="'+t.pubDoiUrl+'" target="_blank" style="color:rgba(255,255,255,.28);text-decoration:none;">DOI: '+t.pubDoi+'</a>';
+  // Line1 stays on its own line; line2 follows on same line if space allows,
+  // otherwise breaks cleanly below line1 (never mid-word)
+  document.getElementById('pub-link').innerHTML=
+    '<a href="'+t.pubUrl+'" target="_blank" style="color:rgba(255,255,255,.45);text-decoration:none;display:block;margin-bottom:3px;">'+
+      '<span style="display:inline;white-space:nowrap;">'+t.pubLine1+'</span> '+
+      '<span style="display:inline;white-space:nowrap;">'+t.pubLine2+'</span>'+
+    '</a>'+
+    '<a href="'+t.pubDoiUrl+'" target="_blank" style="color:rgba(255,255,255,.28);text-decoration:none;">DOI: '+t.pubDoi+'</a>';
   ['en','es','pt'].forEach(c=>{
     const b=document.getElementById('btn-'+c);
     b.style.background=c===l?'#E01C24':'rgba(255,255,255,0.1)';
