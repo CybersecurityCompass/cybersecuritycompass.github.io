@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Cyber Risk Management Lifecycle (CRML)</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .stage {
+    width: 100%;
+    max-width: 1600px;
+    padding: 24px;
+  }
+  .stage svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .credit {
+    position: fixed;
+    bottom: 18px;
+    left: 22px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #666;
+    user-select: none;
+  }
+  .credit .label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 2px;
+  }
+  .credit a {
+    color: #888;
+    text-decoration: none;
+    font-size: 11px;
+    transition: color 0.15s;
+  }
+  .credit a:hover {
+    color: #C4322B;
+  }
+  .info-label { cursor: pointer; }
+  .tooltip {
+    position: fixed;
+    max-width: 480px;
+    min-width: 320px;
+    padding: 26px 30px;
+    background: rgba(12, 12, 12, 0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    color: #e6e6e6;
+    font-size: 14px;
+    line-height: 1.6;
+    pointer-events: auto;
+    z-index: 1000;
+    opacity: 0;
+    transform: scale(0.82) translateY(10px);
+    transform-origin: top left;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.92), 0 0 0 1px rgba(255, 255, 255, 0.02);
+  }
+  .tooltip strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--tip-accent, #F19A38);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .tooltip .meta {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #888;
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+  .tooltip .body {
+    display: block;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #e6e6e6;
+  }
+  .tooltip .quote {
+    display: block;
+    margin-top: 18px;
+    padding: 4px 0 4px 16px;
+    border-left: 2px solid var(--tip-accent, #F19A38);
+    font-style: italic;
+    color: #c2c2c2;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .tooltip.visible {
+    animation: tipIn 0.36s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes tipIn {
+    0%   { opacity: 0; transform: scale(0.82) translateY(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .page-title {
+    position: fixed;
+    top: 30px;
+    left: 36px;
+    z-index: 10;
+    user-select: none;
+    max-width: 480px;
+  }
+  .page-title .eyebrow {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    color: #888;
+    margin-bottom: 18px;
+  }
+  .page-title .main {
+    font-size: clamp(24px, 2.8vw, 36px);
+    font-weight: 400;
+    color: #FFFFFF;
+    line-height: 1.12;
+    letter-spacing: -0.005em;
+    margin-bottom: 16px;
+  }
+  .page-title .main em {
+    font-style: normal;
+    color: #C4322B;
+    font-weight: 500;
+  }
+  .page-title .acronym {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.34em;
+    color: #C4322B;
+    padding: 5px 12px 4px 14px;
+    border: 1px solid rgba(196, 50, 43, 0.4);
+    border-radius: 3px;
+  }
+  button.replay {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: transparent;
+    color: #888;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 8px 18px;
+    font: inherit;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    user-select: none;
+    z-index: 10;
+  }
+  button.replay:hover {
+    color: #C4322B;
+    border-color: rgba(196, 50, 43, 0.5);
+  }
+  .tooltip a {
+    color: var(--tip-accent, #F19A38);
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.22);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s ease, color 0.15s ease;
+  }
+  .tooltip a:hover {
+    text-decoration-color: var(--tip-accent, #F19A38);
+  }
+  .tooltip .quote a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.18);
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s ease, text-decoration-style 0.15s ease;
+  }
+  .tooltip .quote a:hover {
+    text-decoration-color: var(--tip-accent, #F19A38);
+    text-decoration-style: solid;
+  }
+</style>
+</head>
+<body>
+  <div class="page-title">
+    <div class="eyebrow">Cybersecurity Compass · Before a Breach</div>
+    <div class="main">The Cyber Risk Management <em>Lifecycle</em></div>
+    <div class="acronym">CRML</div>
+  </div>
+  <div class="stage">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="100%" preserveAspectRatio="xMidYMid meet" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+  <!-- Black background -->
+  <rect width="1600" height="900" fill="#000000"/>
+
+  <defs>
+    <!-- Arrow marker (white, filled chevron) -->
+    <marker id="arrowhead" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="11" markerHeight="11" orient="auto">
+      <path d="M0,1.5 L10,6 L0,10.5 L2.5,6 Z" fill="#FFFFFF"/>
+    </marker>
+
+    <!-- Radial gradient for the central puzzle ring -->
+    <radialGradient id="puzzleGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6A6964"/>
+      <stop offset="60%" stop-color="#A6A39A"/>
+      <stop offset="100%" stop-color="#CDC9BF"/>
+    </radialGradient>
+
+    <!-- Curved text paths along outer dashed circle - labels at r=275, spans 70 deg -->
+    <path id="p-monitoring"  d="M 649.18 402.26 A 275 275 0 0 1 872.26 179.18" fill="none"/>
+    <path id="p-asset"       d="M 967.74 179.18 A 275 275 0 0 1 1190.82 402.26" fill="none"/>
+    <path id="p-consolidate" d="M 1190.82 497.74 A 275 275 0 0 1 967.74 720.82" fill="none"/>
+    <path id="p-apply"       d="M 872.26 720.82 A 275 275 0 0 1 649.18 497.74" fill="none"/>
+
+    <!-- Inner wheel labels (People, Process, Technology) - centered on piece centers at radius 120 (moved 20 inward) -->
+    <path id="p-people"     d="M 842.87 358.07 A 120 120 0 0 1 997.13 358.07" fill="none"/>
+    <path id="p-process"    d="M 1038.18 429.17 A 120 120 0 0 1 961.04 562.76" fill="none"/>
+    <path id="p-technology" d="M 878.96 562.76 A 120 120 0 0 1 801.82 429.17" fill="none"/>
+  </defs>
+
+  <!-- Outer dashed circle - r=255 -->
+  <circle cx="920" cy="450" r="255" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="11 8" opacity="0"><animate attributeName="opacity" from="0" to="0.75" begin="2s" dur="0.5s" fill="freeze"/></circle>
+
+  <!-- Animated travelers along the dashed line.
+       Circle 1 (amber): Inventory -> Identify, loops every 3s starting at t=0.
+       Circle 2 (oxblood): Identify -> Prioritization, loops every 3s starting at t=3s.
+       Result: when Circle 1 finishes its first trip, Circle 2 begins AND Circle 1 restarts.
+       Placed AFTER the dashed circle so they cover the dash line, but BEFORE the satellites. -->
+  <circle r="13" fill="#F19A38" opacity="0">
+    <animateMotion dur="2s" begin="12s" repeatCount="indefinite"
+                   path="M 920 195 A 255 255 0 0 1 1175 450"/>
+    <animate attributeName="opacity"
+             values="0;1;1;1;0"
+             keyTimes="0;0.08;0.5;0.92;1"
+             dur="2s" begin="12s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="13" fill="#A8201D" opacity="0">
+    <animateMotion dur="2s" begin="14s" repeatCount="indefinite"
+                   path="M 1175 450 A 255 255 0 0 1 920 705"/>
+    <animate attributeName="opacity"
+             values="0;1;1;1;0"
+             keyTimes="0;0.08;0.5;0.92;1"
+             dur="2s" begin="14s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="13" fill="#FF6A2C" opacity="0">
+    <animateMotion dur="2s" begin="16s" repeatCount="indefinite"
+                   path="M 920 705 A 255 255 0 0 1 665 450"/>
+    <animate attributeName="opacity"
+             values="0;1;1;1;0"
+             keyTimes="0;0.08;0.5;0.92;1"
+             dur="2s" begin="16s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Circle 6: Mitigation -> Inventory traveler along the dashed line.
+       Quarter-arc through the upper-left of the dashed circle, closing the lifecycle loop. -->
+  <circle r="13" fill="#E62E22" opacity="0">
+    <animateMotion dur="2s" begin="22s" repeatCount="indefinite"
+                   path="M 665 450 A 255 255 0 0 1 920 195"/>
+    <animate attributeName="opacity"
+             values="0;1;1;1;0"
+             keyTimes="0;0.08;0.5;0.92;1"
+             dur="2s" begin="22s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Curved labels along outer dashed circle -->
+  <text font-size="20" font-weight="400" fill="#B9B6AC" letter-spacing="0.5" opacity="0" data-tip="&lt;strong&gt;Cyber Risk Monitoring&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;CONTINUOUS · SOC + CROC · REAL TIME&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;Continuous oversight that runs around all five stages and never stops. Cyber risk monitoring is not a project, it is a posture: new assets appear, new vulnerabilities surface, the threat landscape shifts, and a recalculation that was right last week is wrong today. Monitoring is what tells the loop when to turn again. Executed by a dedicated &lt;a href=&quot;https://www.researchgate.net/publication/388194441&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Cyber Risk Operations Center (CROC)&lt;/a&gt; alongside the SOC.&lt;/span&gt;" data-color="#F19A38" class="info-label">
+    <textPath href="#p-monitoring" startOffset="50%" text-anchor="middle">Cyber Risk Monitoring</textPath>
+    <animate attributeName="opacity" from="0" to="1" begin="10s" dur="0.5s" fill="freeze"/>
+  </text>
+  <path d="M 649.18 402.26 A 275 275 0 0 1 872.26 179.18" fill="none" stroke="transparent" stroke-width="40" pointer-events="stroke" class="info-label" data-tip="&lt;strong&gt;Cyber Risk Monitoring&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;CONTINUOUS · SOC + CROC · REAL TIME&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;Continuous oversight that runs around all five stages and never stops. Cyber risk monitoring is not a project, it is a posture: new assets appear, new vulnerabilities surface, the threat landscape shifts, and a recalculation that was right last week is wrong today. Monitoring is what tells the loop when to turn again. Executed by a dedicated &lt;a href=&quot;https://www.researchgate.net/publication/388194441&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Cyber Risk Operations Center (CROC)&lt;/a&gt; alongside the SOC.&lt;/span&gt;" data-color="#F19A38" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="10s" dur="0.5s" fill="freeze"/></path>
+  <text font-size="20" font-weight="400" fill="#B9B6AC" letter-spacing="0.5" opacity="0" data-tip="&lt;strong&gt;For Each Digital Asset&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;PER ASSET · DYNAMIC · SHARED · CONTINUOUS&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;The CRML is applied to every digital asset individually. Every device, identity, application, and connection implies a cyber risk that must be calculated, and in the age of AI, &lt;a href=&quot;https://www.researchgate.net/publication/406634241&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;agents now create their own connections&lt;/a&gt; through APIs and Model Context Protocol that are each a new exposure of their own. Cyber risk is dynamic, shared, and continuous: it evolves in real time, requires collaboration across all stakeholders, and demands ongoing reassessment rather than point-in-time snapshots.&lt;/span&gt;" data-color="#F19A38" class="info-label">
+    <textPath href="#p-asset" startOffset="50%" text-anchor="middle">For Each Digital Asset</textPath>
+    <animate attributeName="opacity" from="0" to="1" begin="4s" dur="0.5s" fill="freeze"/>
+  </text>
+  <path d="M 967.74 179.18 A 275 275 0 0 1 1190.82 402.26" fill="none" stroke="transparent" stroke-width="40" pointer-events="stroke" class="info-label" data-tip="&lt;strong&gt;For Each Digital Asset&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;PER ASSET · DYNAMIC · SHARED · CONTINUOUS&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;The CRML is applied to every digital asset individually. Every device, identity, application, and connection implies a cyber risk that must be calculated, and in the age of AI, &lt;a href=&quot;https://www.researchgate.net/publication/406634241&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;agents now create their own connections&lt;/a&gt; through APIs and Model Context Protocol that are each a new exposure of their own. Cyber risk is dynamic, shared, and continuous: it evolves in real time, requires collaboration across all stakeholders, and demands ongoing reassessment rather than point-in-time snapshots.&lt;/span&gt;" data-color="#F19A38" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="4s" dur="0.5s" fill="freeze"/></path>
+  <text font-size="20" font-weight="400" fill="#B9B6AC" letter-spacing="0.5" opacity="0" data-tip="&lt;strong&gt;Consolidate Cyber Risk&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;AGGREGATE · ORGANIZATIONAL VIEW · STRATEGIC&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;All per-asset cyber risk scores from the previous stage are normalized and aggregated. Consolidation can run at the organization level for a unified view, or at sub-levels by tagged asset groups (business units, geographies, application portfolios, or any operational dimension) for targeted visibility. This moves the conversation from isolated technical findings to a holistic, business-aligned picture that executives and board members can act on.&lt;/span&gt;" data-color="#F19A38" class="info-label">
+    <textPath href="#p-consolidate" startOffset="50%" text-anchor="middle">Consolidate Cyber Risk</textPath>
+    <animate attributeName="opacity" from="0" to="1" begin="6s" dur="0.5s" fill="freeze"/>
+  </text>
+  <path d="M 1190.82 497.74 A 275 275 0 0 1 967.74 720.82" fill="none" stroke="transparent" stroke-width="40" pointer-events="stroke" class="info-label" data-tip="&lt;strong&gt;Consolidate Cyber Risk&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;AGGREGATE · ORGANIZATIONAL VIEW · STRATEGIC&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;All per-asset cyber risk scores from the previous stage are normalized and aggregated. Consolidation can run at the organization level for a unified view, or at sub-levels by tagged asset groups (business units, geographies, application portfolios, or any operational dimension) for targeted visibility. This moves the conversation from isolated technical findings to a holistic, business-aligned picture that executives and board members can act on.&lt;/span&gt;" data-color="#F19A38" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="6s" dur="0.5s" fill="freeze"/></path>
+  <text font-size="20" font-weight="400" fill="#B9B6AC" letter-spacing="0.5" opacity="0" data-tip="&lt;strong&gt;Apply Defenses &amp; Controls&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;DEPLOY · TECHNICAL + ADMINISTRATIVE · PRIORITIZED&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;Based on the prioritized cyber risk profile from the previous stage, deploy the appropriate defenses, technical solutions such as firewalls and encryption, plus administrative controls such as access policies and training. Controls are chosen to address the highest-priority cyber risks, not as a one-size-fits-all checklist.&lt;/span&gt;" data-color="#F19A38" class="info-label">
+    <textPath href="#p-apply" startOffset="50%" text-anchor="middle">Apply Defenses and Controls</textPath>
+    <animate attributeName="opacity" from="0" to="1" begin="8s" dur="0.5s" fill="freeze"/>
+  </text>
+  <path d="M 872.26 720.82 A 275 275 0 0 1 649.18 497.74" fill="none" stroke="transparent" stroke-width="40" pointer-events="stroke" class="info-label" data-tip="&lt;strong&gt;Apply Defenses &amp; Controls&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;DEPLOY · TECHNICAL + ADMINISTRATIVE · PRIORITIZED&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;Based on the prioritized cyber risk profile from the previous stage, deploy the appropriate defenses, technical solutions such as firewalls and encryption, plus administrative controls such as access policies and training. Controls are chosen to address the highest-priority cyber risks, not as a one-size-fits-all checklist.&lt;/span&gt;" data-color="#F19A38" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="8s" dur="0.5s" fill="freeze"/></path>
+
+  <!-- Curved white CW flow arrows between satellites, at r=205. Each arrow spans 22-67 deg in its gap. -->
+  <!-- Top -> Right (upper-right gap, 22-67 deg) -->
+  <path d="M 996.79 259.93 A 205 205 0 0 1 1108.71 369.90" fill="none" stroke="#FFFFFF" stroke-width="2.6" marker-end="url(#arrowhead)" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="2s" dur="0.5s" fill="freeze"/></path>
+  <!-- Right -> Bottom (lower-right gap, 112-157 deg) -->
+  <path d="M 1110.07 526.79 A 205 205 0 0 1 1000.10 638.71" fill="none" stroke="#FFFFFF" stroke-width="2.6" marker-end="url(#arrowhead)" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="2s" dur="0.5s" fill="freeze"/></path>
+  <!-- Bottom -> Left (lower-left gap, 202-247 deg) -->
+  <path d="M 843.21 640.07 A 205 205 0 0 1 731.29 530.10" fill="none" stroke="#FFFFFF" stroke-width="2.6" marker-end="url(#arrowhead)" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="2s" dur="0.5s" fill="freeze"/></path>
+  <!-- Left -> Top (upper-left gap, 292-337 deg) -->
+  <path d="M 729.93 373.21 A 205 205 0 0 1 839.90 261.29" fill="none" stroke="#FFFFFF" stroke-width="2.6" marker-end="url(#arrowhead)" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="2s" dur="0.5s" fill="freeze"/></path>
+
+  <!-- Central puzzle ring: THREE interlocking pieces of 120deg each. ROTATING.
+       Pieces centered at 0 (People), 120 (Process), 240 (Technology).
+       Seams at 60, 180, 300 deg. Each piece has TAB on its CCW edge, NOTCH on its CW edge.
+       Bulb: R=16, perpendicular offset h=12, attachment chord=20, peak perpendicular extent 28 (~62% pinch). -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate"
+                      from="0 920 450" to="360 920 450"
+                      dur="30s" repeatCount="indefinite"/>
+    <!-- People (top, centered 0 deg): tab on 300 seam (into Technology), notch on 60 seam (Process's tab into People) -->
+    <path fill="#6D6E71" class="info-label" data-tip="&lt;strong&gt;People&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;FOUNDATIONAL PILLAR · CULTURE · CYBER RISK HUNTERS&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;One of the three foundational pillars of cybersecurity. Encompasses the human element, security awareness, training, and organizational culture, alongside dedicated &lt;a href=&quot;https://www.researchgate.net/publication/395721548&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Cyber Risk Hunters&lt;/a&gt; who ask where the organization could be compromised, complementing the threat hunters who ask whether it already is.&lt;/span&gt;" data-color="#F19A38" d="M 768.45 362.50 A 175 175 0 0 1 1071.55 362.50 L 1041.24 380.00 A 16 16 0 1 1 1023.92 390.00 L 993.61 407.50 A 85 85 0 0 0 846.39 407.50 L 816.08 390.00 A 16 16 0 1 0 798.76 380.00 L 768.45 362.50 Z"/>
+    <!-- Process (lower-right, centered 120 deg): tab on 60 seam (into People), notch on 180 seam (Technology's tab into Process) -->
+    <path fill="#808285" class="info-label" data-tip="&lt;strong&gt;Process&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;FOUNDATIONAL PILLAR · CYBERRISKOPS · CROC + CROM&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;One of the three foundational pillars. The policies, procedures, and methodologies, including the CRML itself, that structure how cybersecurity is practiced. Modern programs operationalize this through &lt;a href=&quot;https://www.researchgate.net/publication/402149983&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;CyberRiskOps&lt;/a&gt;: continuous, adaptive processes that fuse cyber risk assessment and &lt;a href=&quot;https://www.researchgate.net/publication/388564202&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;cyber risk reduction&lt;/a&gt; into a single loop, eliminating the traditional gap between identifying cyber risks and actually reducing them. CyberRiskOps is executed by a dedicated &lt;a href=&quot;https://www.researchgate.net/publication/388194441&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Cyber Risk Operations Center (CROC)&lt;/a&gt; that works before a breach, continuously hunting exposure and driving reduction, while the SOC handles what is already happening. The &lt;a href=&quot;https://www.researchgate.net/publication/390490235&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Cyber Risk Operational Model (CROM)&lt;/a&gt; provides the maturity path that moves the program from static risk mapping toward proactive operations.&lt;/span&gt;" data-color="#F19A38" d="M 1071.55 362.50 A 175 175 0 0 1 920 625 L 920 590 A 16 16 0 1 1 920 570 L 920 535 A 85 85 0 0 0 993.61 407.50 L 1023.92 390.00 A 16 16 0 1 0 1041.24 380.00 L 1071.55 362.50 Z"/>
+    <!-- Technology (lower-left, centered 240 deg): tab on 180 seam (into Process), notch on 300 seam (People's tab into Technology) -->
+    <path fill="#939598" class="info-label" data-tip="&lt;strong&gt;Technology&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;FOUNDATIONAL PILLAR · CREM + CRQ + AEV&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;One of the three foundational pillars. The platforms that operationalize cyber risk management at scale. Cyber Risk Exposure Management (CREM) unifies asset inventory, AI-powered asset contextualization, the &lt;a href=&quot;https://www.researchgate.net/publication/388321083&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Cyber Risk Asset Graph&lt;/a&gt; that maps relationships across the attack surface, &lt;a href=&quot;https://www.researchgate.net/publication/388421250&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Risk-Based Vulnerability Management (RBVM)&lt;/a&gt;, and exposure assessment. &lt;a href=&quot;https://www.researchgate.net/publication/396206049&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Cyber Risk Quantification (CRQ)&lt;/a&gt; expresses cyber risk in financial terms executives can act on, turning likelihood and impact into a probable loss and a range, not a color. Adversarial Exposure Validation (AEV) tests defenses against real attack techniques to verify whether controls actually work. Together these capabilities make cyber risk measurable, prioritized, and continuously reducible.&lt;/span&gt;" data-color="#F19A38" d="M 920 625 A 175 175 0 0 1 768.45 362.50 L 798.76 380.00 A 16 16 0 1 1 816.08 390.00 L 846.39 407.50 A 85 85 0 0 0 920 535 L 920 570 A 16 16 0 1 0 920 590 L 920 625 Z"/>
+  </g>
+
+  <!-- Inner black hub - STATIC, drawn on top of rotating pieces' inner notches -->
+  <circle cx="920" cy="450" r="85" fill="#000000" class="info-label" data-tip="&lt;strong&gt;Cyber Risk Management Lifecycle (CRML)&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;BEFORE A BREACH · STRATEGIC FRAMEWORK · CONTINUOUS LOOP&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;A continuous, before-a-breach loop that runs for every digital asset, the operating engine of the &lt;a href=&quot;https://www.researchgate.net/publication/389628862&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Cybersecurity Compass&lt;/a&gt; and complementary to outcome frameworks like NIST CSF 2.0. Where the framework names the destinations, CRML supplies the route and the cadence: identify, assess, mitigate, and verify reduction. In the age of AI, where &lt;a href=&quot;https://www.researchgate.net/publication/398971490&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;attackers move at machine speed&lt;/a&gt;, the loop must run at machine speed too, while staying under human governance.&lt;/span&gt;&lt;span class=&quot;quote&quot;&gt;“&lt;a href=&quot;https://www.researchgate.net/publication/388653064&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;What is not defined cannot be measured. What is not measured, cannot be improved. What is not improved, is always degraded.&lt;/a&gt;”&lt;/span&gt;" data-color="#F19A38"/>
+
+  <!-- People / Process / Technology curved labels - ROTATING with the puzzle pieces -->
+  <g pointer-events="none">
+    <animateTransform attributeName="transform" type="rotate"
+                      from="0 920 450" to="360 920 450"
+                      dur="30s" repeatCount="indefinite"/>
+    <text font-size="24" font-weight="500" fill="#FFFFFF" pointer-events="none">
+      <textPath href="#p-people" startOffset="50%" text-anchor="middle" pointer-events="none">People</textPath>
+    </text>
+    <text font-size="24" font-weight="500" fill="#FFFFFF" pointer-events="none">
+      <textPath href="#p-process" startOffset="50%" text-anchor="middle" pointer-events="none">Process</textPath>
+    </text>
+    <text font-size="24" font-weight="500" fill="#FFFFFF" pointer-events="none">
+      <textPath href="#p-technology" startOffset="50%" text-anchor="middle" pointer-events="none">Technology</textPath>
+    </text>
+  </g>
+
+  <!-- Central title text -->
+  <text x="923" y="431" text-anchor="middle" font-size="17" font-weight="700" fill="#FFFFFF" pointer-events="none">Cyber Risk</text>
+  <text x="923" y="455" text-anchor="middle" font-size="17" font-weight="700" fill="#FFFFFF" pointer-events="none">Management</text>
+  <text x="923" y="479" text-anchor="middle" font-size="17" font-weight="700" fill="#FFFFFF" pointer-events="none">Lifecycle</text>
+
+  <!-- Bidirectional arrows between Cyber Risk Mitigation and Recalculation -
+       Moved BEFORE the Mit/Recalc satellites so Circle 4 can be drawn on top of the arrows
+       but below the satellites. R=205 arcs, pulled back ~10px arc length per side (~2.8 deg). -->
+  <!-- Top arrow: Recalculation -> Mitigation (curves up, CW visually) -->
+  <path d="M 431.45 405.47 A 205 205 0 0 1 644.16 406.39" fill="none" stroke="#FFFFFF" stroke-width="2.6" marker-end="url(#arrowhead)" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="11s" dur="0.5s" fill="freeze"/></path>
+  <!-- Bottom arrow: Mitigation -> Recalculation (curves down, CW visually) -->
+  <path d="M 644.16 493.61 A 205 205 0 0 1 431.45 494.53" fill="none" stroke="#FFFFFF" stroke-width="2.6" marker-end="url(#arrowhead)" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="11s" dur="0.5s" fill="freeze"/></path>
+
+  <!-- Circle 4: Mitigation -> Recalculation traveler along the bottom arrow.
+       Path starts at Mit center and ends at Recalc center, so satellites cover start/end.
+       Drawn AFTER the arrows so the circle travels on top of the arrow line. -->
+  <circle r="13" fill="#E62E22" opacity="0">
+    <animateMotion dur="2s" begin="18s" repeatCount="indefinite"
+                   path="M 705 450 L 644.16 493.61 A 205 205 0 0 1 431.45 494.53 L 365 450"/>
+    <animate attributeName="opacity"
+             values="0;1;1;1;0"
+             keyTimes="0;0.15;0.5;0.85;1"
+             dur="2s" begin="18s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Circle 5: Recalculation -> Mitigation traveler along the top arrow.
+       Path starts at Recalc center and ends at Mit center, satellites cover start/end. -->
+  <circle r="13" fill="#FF7A5C" opacity="0">
+    <animateMotion dur="2s" begin="20s" repeatCount="indefinite"
+                   path="M 365 450 L 431.45 405.47 A 205 205 0 0 1 644.16 406.39 L 705 450"/>
+    <animate attributeName="opacity"
+             values="0;1;1;1;0"
+             keyTimes="0;0.15;0.5;0.85;1"
+             dur="2s" begin="20s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Four satellite circles (r=65) -->
+  <!-- Top: Inventory (brand orange) -->
+  <circle cx="920" cy="235" r="65" fill="#F19A38" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="2s" dur="0.5s" fill="freeze"/></circle>
+  <!-- Right: Identify (deep oxblood) -->
+  <circle cx="1135" cy="450" r="65" fill="#A8201D" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="2s" dur="0.5s" fill="freeze"/></circle>
+  <!-- Bottom: Cyber Risk Assessment (orange-red) -->
+  <circle cx="920" cy="665" r="65" fill="#FF6A2C" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="2s" dur="0.5s" fill="freeze"/></circle>
+  <!-- Left: Cyber Risk Mitigation (TrendAI brand red) -->
+  <circle cx="705" cy="450" r="65" fill="#E62E22" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="2s" dur="0.5s" fill="freeze"/></circle>
+
+  <!-- Satellite labels -->
+  <!-- Top: Inventory, Contextualize and Value Digital Assets -->
+  <text x="920" y="110" text-anchor="middle" font-size="22" font-weight="500" fill="#F19A38" opacity="0" data-tip="&lt;strong&gt;Inventory, Contextualize &amp; Value Digital Assets&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;STAGE 1 · ASSETS + CONTEXT · CRITICALITY&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;The lifecycle begins here. Identify all digital assets, devices, applications, data, and especially identities (frequently targeted by cybercriminals), and contextualize each within its &lt;a href=&quot;https://www.researchgate.net/publication/388321083&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;business role and dependencies&lt;/a&gt;. Context is what makes valuation meaningful: the same server may be peripheral in one organization and mission-critical in another. The result is the asset criticality that drives every later prioritization decision; without it, prioritization becomes guesswork.&lt;/span&gt;" data-color="#F19A38" class="info-label">
+    <tspan x="920" dy="0">Inventory, Contextualize and</tspan>
+    <tspan x="920" dy="28">Value Digital Assets</tspan>
+    <animate attributeName="opacity" from="0" to="1" begin="3s" dur="0.5s" fill="freeze"/>
+  </text>
+  <rect x="755" y="85" width="330" height="70" fill="transparent" pointer-events="all" class="info-label" data-tip="&lt;strong&gt;Inventory, Contextualize &amp; Value Digital Assets&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;STAGE 1 · ASSETS + CONTEXT · CRITICALITY&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;The lifecycle begins here. Identify all digital assets, devices, applications, data, and especially identities (frequently targeted by cybercriminals), and contextualize each within its &lt;a href=&quot;https://www.researchgate.net/publication/388321083&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;business role and dependencies&lt;/a&gt;. Context is what makes valuation meaningful: the same server may be peripheral in one organization and mission-critical in another. The result is the asset criticality that drives every later prioritization decision; without it, prioritization becomes guesswork.&lt;/span&gt;" data-color="#F19A38" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="3s" dur="0.5s" fill="freeze"/></rect>
+
+  <!-- Right: Identify Vulnerabilities, Threats and Consequences -->
+  <text x="1215" y="420" text-anchor="start" font-size="22" font-weight="500" fill="#D62A22" opacity="0" data-tip="&lt;strong&gt;Identify Vulnerabilities, Threats &amp; Consequences&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;STAGE 2 · TRIAD ANALYSIS · DIAGNOSIS&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;For each asset, analyze &lt;a href=&quot;https://www.researchgate.net/publication/388386953&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;three intersecting elements&lt;/a&gt; to calculate its cyber risk score. Vulnerabilities: weaknesses such as unpatched software, misconfigurations, or social engineering exposure. Threats: actors or events that could exploit them, from external attackers to insider threats. Consequences: operational, reputational, legal, and financial impacts, weighted by the asset criticality established in the previous stage. Where the three converge, that is the cyber risk, computed per asset.&lt;/span&gt;" data-color="#D62A22" class="info-label">
+    <tspan x="1215" dy="0">Identify Vulnerabilities,</tspan>
+    <tspan x="1215" dy="28">Threats and</tspan>
+    <tspan x="1215" dy="28">Consequences</tspan>
+    <animate attributeName="opacity" from="0" to="1" begin="5s" dur="0.5s" fill="freeze"/>
+  </text>
+  <rect x="1210" y="395" width="290" height="95" fill="transparent" pointer-events="all" class="info-label" data-tip="&lt;strong&gt;Identify Vulnerabilities, Threats &amp; Consequences&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;STAGE 2 · TRIAD ANALYSIS · DIAGNOSIS&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;For each asset, analyze &lt;a href=&quot;https://www.researchgate.net/publication/388386953&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;three intersecting elements&lt;/a&gt; to calculate its cyber risk score. Vulnerabilities: weaknesses such as unpatched software, misconfigurations, or social engineering exposure. Threats: actors or events that could exploit them, from external attackers to insider threats. Consequences: operational, reputational, legal, and financial impacts, weighted by the asset criticality established in the previous stage. Where the three converge, that is the cyber risk, computed per asset.&lt;/span&gt;" data-color="#D62A22" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="5s" dur="0.5s" fill="freeze"/></rect>
+
+  <!-- Bottom: Cyber Risk Assessment, Calculation and Prioritization -->
+  <text x="920" y="770" text-anchor="middle" font-size="22" font-weight="500" fill="#FF6A2C" opacity="0" data-tip="&lt;strong&gt;Cyber Risk Assessment, Calculation &amp; Prioritization&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;STAGE 3 · CRI · NIST + MITRE ATT&amp;CK&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;Cyber risk is quantified as a &lt;a href=&quot;https://www.researchgate.net/publication/389001302&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Cyber Risk Index (CRI)&lt;/a&gt;, a numerical value calculated using industry standards such as NIST and MITRE ATT&amp;CK, informed by expert judgment where the data runs out. The point of the number is not the number itself; it is the ranking. A clear cyber risk profile sends scarce resources to the most significant exposures first, instead of spreading them evenly across cyber risks that were never equal.&lt;/span&gt;" data-color="#FF6A2C" class="info-label">
+    <tspan x="920" dy="0">Cyber Risk Assessment,</tspan>
+    <tspan x="920" dy="28">Calculation and Prioritization</tspan>
+    <animate attributeName="opacity" from="0" to="1" begin="7s" dur="0.5s" fill="freeze"/>
+  </text>
+  <rect x="750" y="745" width="340" height="70" fill="transparent" pointer-events="all" class="info-label" data-tip="&lt;strong&gt;Cyber Risk Assessment, Calculation &amp; Prioritization&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;STAGE 3 · CRI · NIST + MITRE ATT&amp;CK&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;Cyber risk is quantified as a &lt;a href=&quot;https://www.researchgate.net/publication/389001302&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Cyber Risk Index (CRI)&lt;/a&gt;, a numerical value calculated using industry standards such as NIST and MITRE ATT&amp;CK, informed by expert judgment where the data runs out. The point of the number is not the number itself; it is the ranking. A clear cyber risk profile sends scarce resources to the most significant exposures first, instead of spreading them evenly across cyber risks that were never equal.&lt;/span&gt;" data-color="#FF6A2C" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="7s" dur="0.5s" fill="freeze"/></rect>
+
+  <!-- Left: Cyber Risk Mitigation -->
+  <text x="570" y="442" text-anchor="middle" font-size="22" font-weight="500" fill="#E62E22" opacity="0" data-tip="&lt;strong&gt;Cyber Risk Mitigation&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;STAGE 4 · CONTROLS · ACTION&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;Deploys actions and controls, technical (firewalls, encryption, segmentation) and administrative (access policies, training, incident response), to reduce the probability or impact of threats. Critically, mitigation is not the same as &lt;a href=&quot;https://www.researchgate.net/publication/388564202&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;cyber risk reduction&lt;/a&gt;; reduction is the measurable decrease in exposure once those mitigations actually take effect.&lt;/span&gt;" data-color="#E62E22" class="info-label">
+    <tspan x="570" dy="0">Cyber Risk</tspan>
+    <tspan x="570" dy="28">Mitigation</tspan>
+    <animate attributeName="opacity" from="0" to="1" begin="9s" dur="0.5s" fill="freeze"/>
+  </text>
+  <rect x="510" y="420" width="120" height="65" fill="transparent" pointer-events="all" class="info-label" data-tip="&lt;strong&gt;Cyber Risk Mitigation&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;STAGE 4 · CONTROLS · ACTION&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;Deploys actions and controls, technical (firewalls, encryption, segmentation) and administrative (access policies, training, incident response), to reduce the probability or impact of threats. Critically, mitigation is not the same as &lt;a href=&quot;https://www.researchgate.net/publication/388564202&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;cyber risk reduction&lt;/a&gt;; reduction is the measurable decrease in exposure once those mitigations actually take effect.&lt;/span&gt;" data-color="#E62E22" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="9s" dur="0.5s" fill="freeze"/></rect>
+
+  <!-- Far-left circle: Cyber Risk Assessment and Recalculation (light tomato) -->
+  <circle cx="365" cy="450" r="70" fill="#FF7A5C" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="11s" dur="0.5s" fill="freeze"/></circle>
+
+  <!-- Far-left circle label -->
+  <text x="365" y="335" text-anchor="middle" font-size="22" font-weight="500" fill="#FF7A5C" opacity="0" data-tip="&lt;strong&gt;Cyber Risk Assessment &amp; Recalculation&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;STAGE 5 · VERIFICATION · ORG + ASSET LEVELS&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;The stage most programs skip. After controls are applied, the &lt;a href=&quot;https://www.researchgate.net/publication/389001302&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Cyber Risk Index (CRI)&lt;/a&gt; is recalculated at the organization level and at the asset level to verify whether each control actually reduced cyber risk, or only looked like it did. The ticket closing was activity; the number falling is the reduction. This is also what keeps the organization aligned with the speed of business and the &lt;a href=&quot;https://www.researchgate.net/publication/398971490&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;speed of the attacker&lt;/a&gt;, not the speed of the last audit.&lt;/span&gt;" data-color="#FF7A5C" class="info-label">
+    <tspan x="365" dy="0">Cyber Risk Assessment</tspan>
+    <tspan x="365" dy="28">and Recalculation</tspan>
+    <animate attributeName="opacity" from="0" to="1" begin="11s" dur="0.5s" fill="freeze"/>
+  </text>
+  <rect x="245" y="312" width="240" height="63" fill="transparent" pointer-events="all" class="info-label" data-tip="&lt;strong&gt;Cyber Risk Assessment &amp; Recalculation&lt;/strong&gt;&lt;span class=&quot;meta&quot;&gt;STAGE 5 · VERIFICATION · ORG + ASSET LEVELS&lt;/span&gt;&lt;span class=&quot;body&quot;&gt;The stage most programs skip. After controls are applied, the &lt;a href=&quot;https://www.researchgate.net/publication/389001302&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Cyber Risk Index (CRI)&lt;/a&gt; is recalculated at the organization level and at the asset level to verify whether each control actually reduced cyber risk, or only looked like it did. The ticket closing was activity; the number falling is the reduction. This is also what keeps the organization aligned with the speed of business and the &lt;a href=&quot;https://www.researchgate.net/publication/398971490&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;speed of the attacker&lt;/a&gt;, not the speed of the last audit.&lt;/span&gt;" data-color="#FF7A5C" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="11s" dur="0.5s" fill="freeze"/></rect>
+</svg>
+  </div>
+    <div class="credit">
+    <span class="label">Created and Designed by</span>
+    <a href="https://www.linkedin.com/in/jpcastro/" target="_blank" rel="noopener">Juan Pablo Castro Vilaró</a>
+  </div>
+  <div class="tooltip" id="tip" role="tooltip" aria-hidden="true"></div>
+  <script>
+    (function() {
+      const tip = document.getElementById('tip');
+      let activeEl = null;
+      let hideTimer = null;
+      function cancelHide() {
+        if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+      }
+      function scheduleHide(delay) {
+        cancelHide();
+        hideTimer = setTimeout(hide, delay);
+      }
+      function show(el, x, y) {
+        const op = parseFloat(getComputedStyle(el).opacity);
+        if (!isNaN(op) && op < 0.5) return;
+        cancelHide();
+        tip.classList.remove('visible');
+        void tip.offsetWidth;
+        tip.innerHTML = el.dataset.tip;
+        const accent = el.dataset.color || '#F19A38';
+        tip.style.setProperty('--tip-accent', accent);
+        tip.setAttribute('aria-hidden', 'false');
+        tip.style.left = (x + 22) + 'px';
+        tip.style.top = (y + 22) + 'px';
+        requestAnimationFrame(() => {
+          const r = tip.getBoundingClientRect();
+          if (r.right > window.innerWidth - 16) {
+            tip.style.left = Math.max(16, x - r.width - 22) + 'px';
+          }
+          if (r.bottom > window.innerHeight - 16) {
+            tip.style.top = Math.max(16, y - r.height - 22) + 'px';
+          }
+        });
+        activeEl = el;
+        tip.classList.add('visible');
+      }
+      function hide() {
+        tip.classList.remove('visible');
+        tip.setAttribute('aria-hidden', 'true');
+        activeEl = null;
+        hideTimer = null;
+      }
+      document.querySelectorAll('.info-label').forEach(el => {
+        el.addEventListener('mouseenter', e => {
+          show(el, e.clientX, e.clientY);
+        });
+        el.addEventListener('mouseleave', () => scheduleHide(300));
+        el.addEventListener('click', e => {
+          if (activeEl === el) { hide(); return; }
+          show(el, e.clientX, e.clientY);
+          e.stopPropagation();
+        });
+      });
+      // Keep the tooltip open while the cursor is inside it (so links are clickable)
+      tip.addEventListener('mouseenter', cancelHide);
+      tip.addEventListener('mouseleave', () => scheduleHide(150));
+      // Clicking outside both the trigger and the tooltip closes it
+      document.addEventListener('click', e => {
+        if (activeEl && !tip.contains(e.target)) hide();
+      });
+    })();
+  </script>
+  <button class="replay" onclick="document.querySelector('.stage svg').setCurrentTime(0)">Replay</button>
+</body>
+</html>
