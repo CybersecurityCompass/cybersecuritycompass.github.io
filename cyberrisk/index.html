@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyber Risk · Cybersecurity Compass</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+      color: #fff;
+      font-family: 'Helvetica Neue', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow: hidden;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+    }
+
+    .page-title {
+      position: fixed;
+      top: 30px;
+      left: 36px;
+      z-index: 10;
+      user-select: none;
+      max-width: 480px;
+      pointer-events: none;
+    }
+    .page-title .eyebrow {
+      font-size: 10.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      color: #888;
+      margin-bottom: 18px;
+      pointer-events: auto;
+    }
+    .page-title .main {
+      font-size: clamp(24px, 2.8vw, 36px);
+      font-weight: 400;
+      color: #FFFFFF;
+      line-height: 1.12;
+      letter-spacing: -0.005em;
+      margin-bottom: 16px;
+      pointer-events: auto;
+    }
+    .page-title .main em {
+      font-style: normal;
+      color: #C4322B;
+      font-weight: 500;
+    }
+
+    .svg-wrap {
+      position: relative;
+      width: 100%;
+      max-width: min(94vw, calc((100vh - 170px) * 16 / 9));
+      aspect-ratio: 16 / 9;
+    }
+
+    .svg-wrap svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Single info panel pinned to the bottom of the diagram. Each label, when hovered, populates this box rather than spawning a tooltip near the cursor. When a bottom-half label is hovered, the panel flips to the top to keep clear of the cursor. */
+    .info-panel {
+      position: absolute;
+      bottom: 4%;
+      left: 50%;
+      width: clamp(300px, 60%, 720px);
+      background: rgba(12, 12, 12, 0.96);
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 18px 28px 16px;
+      color: #d8d8d8;
+      font-size: 17px;
+      line-height: 1.55;
+      z-index: 20;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7);
+      opacity: 0;
+      transform: translate(-50%, 12px);
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease, border-color 0.25s ease, top 0.25s ease, bottom 0.25s ease;
+    }
+    .info-panel.visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+      pointer-events: auto;
+    }
+    .info-panel.top {
+      bottom: auto;
+      top: 4%;
+      transform: translate(-50%, -12px);
+    }
+    .info-panel.top.visible {
+      transform: translate(-50%, 0);
+    }
+    .info-panel h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+    .info-panel p {
+      margin: 0;
+      color: #d0d0d0;
+    }
+    .info-panel .source {
+      margin-top: 10px;
+      font-size: 9.5px;
+      letter-spacing: 1.5px;
+      color: #5e5e5e;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .info-close {
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+      padding: 4px 8px;
+      font-family: inherit;
+      transition: color 0.15s ease;
+    }
+    .info-close:hover { color: #fff; }
+
+    /* Smooth fill transition on the circles and lens overlays */
+    #cyberRiskSvg circle,
+    #cyberRiskSvg .lens {
+      transition: fill-opacity 0.35s ease;
+    }
+
+    /* Labels themselves transition smoothly when their colour changes */
+    #cyberRiskSvg .hot-label {
+      transition: fill 0.35s ease;
+    }
+
+    /* Outer labels turn white while the cursor is on them, so they stay legible against the wash that lights up beneath */
+    #cyberRiskSvg #threatLabel:hover,
+    #cyberRiskSvg #vulnerabilityLabel:hover,
+    #cyberRiskSvg #consequenceLabel:hover {
+      fill: #FFFFFF;
+    }
+
+    /* Heartbeat pulse on the Cyber Risk centre while the cursor is on the centre label */
+    @keyframes cyberRiskPulse {
+      0%, 100% { fill-opacity: 0; }
+      50%      { fill-opacity: 0.55; }
+    }
+    #cyberRiskPulse {
+      transition: fill-opacity 0.35s ease;
+    }
+    #cyberRiskPulse.pulsing {
+      animation: cyberRiskPulse 1.5s ease-in-out infinite;
+    }
+
+    /* Hover/tap target on the labels is only live once the intro animation finishes (the script adds .active after the timeline ends, and removes it again whenever Replay is pressed) */
+    .hot-label {
+      cursor: default;
+      pointer-events: none;
+    }
+    .hot-label.active {
+      cursor: pointer;
+      pointer-events: bounding-box;
+    }
+
+    .controls {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+    }
+
+    button.replay {
+      background: transparent;
+      border: 1.5px solid #444;
+      color: #ccc;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      padding: 11px 24px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+    }
+
+    button.replay:hover { border-color: #F19A38; color: #F19A38; }
+    button.replay:active { transform: scale(0.97); }
+
+    .credit {
+      position: absolute;
+      bottom: 28px;
+      left: 32px;
+    }
+    .credit-eyebrow {
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      color: #5a5a5a;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 1px;
+      line-height: 1.2;
+    }
+    .credit-name {
+      font-size: 11px;
+      color: #888;
+      font-weight: 400;
+      text-decoration: none;
+      display: inline-block;
+      line-height: 1.2;
+      transition: color 0.2s ease;
+    }
+    .credit-name:hover,
+    .credit-name:focus-visible {
+      color: #d0d0d0;
+      outline: none;
+    }
+
+    .reference {
+      position: absolute;
+      bottom: 28px;
+      right: 32px;
+      text-align: right;
+      max-width: 340px;
+    }
+    .reference-eyebrow {
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      color: #5a5a5a;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 1px;
+      line-height: 1.2;
+    }
+    .reference a {
+      display: block;
+      color: #888;
+      text-decoration: none;
+      font-weight: 400;
+      line-height: 1.3;
+      transition: color 0.2s ease;
+    }
+    .reference a:hover,
+    .reference a:focus-visible {
+      color: #d0d0d0;
+      outline: none;
+    }
+    .reference-title { font-size: 11px; }
+    .reference-doi   { font-size: 10px; color: #6e6e6e !important; margin-top: 1px; }
+
+    @media (max-width: 640px) {
+      .page-title { top: 18px; left: 20px; max-width: calc(100vw - 40px); }
+      .page-title .eyebrow { font-size: 9px; letter-spacing: 0.2em; margin-bottom: 10px; }
+      .credit { bottom: 22px; left: 20px; }
+      .credit-eyebrow { font-size: 9px; letter-spacing: 2.5px; }
+      .credit-name { font-size: 13px; }
+      .reference { display: none; }
+      .controls { bottom: 22px; }
+      button.replay { font-size: 10px; padding: 9px 18px; letter-spacing: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="page-title">
+      <div class="eyebrow">Cybersecurity Compass · Before a Breach</div>
+      <div class="main">Cyber Risk:<br><em>A Visual Representation</em></div>
+    </div>
+
+    <div class="svg-wrap">
+      <svg id="cyberRiskSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"
+           font-family="'Helvetica Neue', 'Arial Black', Arial, sans-serif"
+           role="img" aria-label="Cyber Risk Venn diagram" aria-describedby="svg-desc">
+        <desc id="svg-desc">A Venn diagram showing Cyber Risk as the intersection of Threat, Vulnerability, and Consequence, with pairwise overlaps labelled Potential Cyber Risk, Theoretical Cyber Risk, and Cyber Risk Exposure.</desc>
+
+        <!-- Background -->
+        <rect width="1600" height="900" fill="#000000"/>
+
+        <!-- Cyber Risk filled center (fades in first) -->
+        <path d="M 800,326.2
+                 A 270,270 0 0,1 924.8,542.4
+                 A 270,270 0 0,1 675.2,542.4
+                 A 270,270 0 0,1 800,326.2 Z"
+              fill="#D6342E" opacity="0">
+          <animate attributeName="opacity" from="0" to="1" begin="0s" dur="1.4s" fill="freeze"/>
+        </path>
+
+        <!-- Three Venn rings (stroke-only intro animation). Threat keeps its fill on the same element; Vulnerability and Consequence have their fills moved later in document order so their labels sit behind the fill. -->
+        <g stroke-width="16" stroke-linecap="round">
+          <circle id="threatCircle" cx="800" cy="303" r="270"
+                  stroke="#F19A38" fill="#F19A38" fill-opacity="0"
+                  stroke-dasharray="1697" stroke-dashoffset="1697">
+            <animate attributeName="stroke-dashoffset" from="1697" to="0"
+                     begin="4.4s" dur="1s" fill="freeze"/>
+          </circle>
+          <circle cx="655" cy="554" r="270"
+                  stroke="#A8201D" fill="none"
+                  stroke-dasharray="1697" stroke-dashoffset="1697">
+            <animate attributeName="stroke-dashoffset" from="1697" to="0"
+                     begin="5.4s" dur="1s" fill="freeze"/>
+          </circle>
+          <circle cx="945" cy="554" r="270"
+                  stroke="#FF6A2C" fill="none"
+                  stroke-dasharray="1697" stroke-dashoffset="1697">
+            <animate attributeName="stroke-dashoffset" from="1697" to="0"
+                     begin="6.4s" dur="1s" fill="freeze"/>
+          </circle>
+        </g>
+
+        <!-- Black masks: punch a gap in the ring strokes where the outer labels sit -->
+        <g fill="#000000">
+          <rect x="245" y="600" width="350" height="68"/>
+          <rect x="1005" y="600" width="350" height="68"/>
+        </g>
+
+        <!-- Outer labels: fade in sequentially -->
+        <g text-anchor="middle" font-size="52" font-weight="900" letter-spacing="0.5">
+          <text id="threatLabel" class="hot-label" x="800" y="215" fill="#F19A38" opacity="0">Threat<animate attributeName="opacity" from="0" to="1" begin="1.4s" dur="1s" fill="freeze"/></text>
+          <text id="vulnerabilityLabel" class="hot-label" x="420" y="650" fill="#A8201D" opacity="0">Vulnerability<animate attributeName="opacity" from="0" to="1" begin="2.4s" dur="1s" fill="freeze"/></text>
+          <text id="consequenceLabel" class="hot-label" x="1180" y="650" fill="#FF6A2C" opacity="0">Consequence<animate attributeName="opacity" from="0" to="1" begin="3.4s" dur="1s" fill="freeze"/></text>
+        </g>
+
+        <!-- Hover fills for Vulnerability and Consequence sit ABOVE their labels so the wash overlays the text -->
+        <g stroke="none" pointer-events="none">
+          <circle id="vulnerabilityCircle" cx="655" cy="554" r="270" fill="#A8201D" fill-opacity="0"/>
+          <circle id="consequenceCircle"   cx="945" cy="554" r="270" fill="#FF6A2C" fill-opacity="0"/>
+        </g>
+
+        <!-- Hover lens overlays: each path covers the full geometric intersection of its two circles, filled with the colour-mix of the two ring colours. Sits BELOW the pairwise labels so the labels stay crisp on top of the wash. -->
+        <g stroke="none" pointer-events="none">
+          <!-- Potential = Threat ∩ Vulnerability  (#F19A38 ⊕ #A8201D = #CD5D2B) -->
+          <path id="potentialLens" class="lens"
+                d="M 530.2,314.6 A 270,270 0 0,0 924.8,542.4 A 270,270 0 0,0 530.2,314.6 Z"
+                fill="#CD5D2B" fill-opacity="0"/>
+          <!-- Theoretical = Threat ∩ Consequence  (#F19A38 ⊕ #FF6A2C = #F88232) -->
+          <path id="theoreticalLens" class="lens"
+                d="M 1069.8,314.6 A 270,270 0 0,1 675.2,542.4 A 270,270 0 0,1 1069.8,314.6 Z"
+                fill="#F88232" fill-opacity="0"/>
+          <!-- Cyber Risk Exposure = Vulnerability ∩ Consequence  (#A8201D ⊕ #FF6A2C = #D44524) -->
+          <path id="exposureLens" class="lens"
+                d="M 800,326.2 A 270,270 0 0,1 800,781.8 A 270,270 0 0,1 800,326.2 Z"
+                fill="#D44524" fill-opacity="0"/>
+        </g>
+
+        <!-- Pairwise intersection labels (fade in once all three circles are drawn). Placed above the lens fills so the white text stays sharp when a lens lights up. -->
+        <g text-anchor="middle" font-weight="700" fill="#FFFFFF" opacity="0">
+          <animate attributeName="opacity" from="0" to="1" begin="7.4s" dur="1.2s" fill="freeze"/>
+          <text id="potentialLabel" class="hot-label" x="645" y="372" font-size="30">
+            <tspan x="645">Potential</tspan>
+            <tspan x="645" dy="34">Cyber</tspan>
+            <tspan x="645" dy="34">Risk</tspan>
+          </text>
+          <text id="theoreticalLabel" class="hot-label" x="955" y="372" font-size="30">
+            <tspan x="955">Theoretical</tspan>
+            <tspan x="955" dy="34">Cyber</tspan>
+            <tspan x="955" dy="34">Risk</tspan>
+          </text>
+          <text id="exposureLabel" class="hot-label" x="800" y="620" font-size="30">
+            <tspan x="800">Cyber</tspan>
+            <tspan x="800" dy="34">Risk</tspan>
+            <tspan x="800" dy="34">Exposure</tspan>
+          </text>
+        </g>
+
+        <!-- Cyber Risk pulse overlay: same Reuleaux shape as the red centre, but a white wash that breathes 0 → 0.55 → 0 when the centre label is hovered. -->
+        <path id="cyberRiskPulse"
+              d="M 800,326.2
+                 A 270,270 0 0,1 924.8,542.4
+                 A 270,270 0 0,1 675.2,542.4
+                 A 270,270 0 0,1 800,326.2 Z"
+              fill="#FFFFFF" fill-opacity="0" pointer-events="none"/>
+
+        <!-- Center label: Cyber Risk (fades in together with the red fill) -->
+        <g text-anchor="middle" fill="#FFFFFF" font-weight="900" font-size="40" opacity="0">
+          <animate attributeName="opacity" from="0" to="1" begin="0s" dur="1.4s" fill="freeze"/>
+          <text id="cyberRiskLabel" class="hot-label" x="800" y="460">
+            <tspan x="800">Cyber</tspan>
+            <tspan x="800" dy="44">Risk</tspan>
+          </text>
+        </g>
+      </svg>
+
+      <!-- Single info panel pinned to the bottom of the diagram. Content is swapped in by the hover handler. -->
+      <div class="info-panel" id="infoPanel" role="region" aria-live="polite" aria-hidden="true">
+        <h3 id="infoTitle"></h3>
+        <p  id="infoBody"></p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="replay" onclick="replayAnimation()" aria-label="Replay animation">↻ Replay</button>
+    </div>
+
+    <div class="credit">
+      <div class="credit-eyebrow">Created and designed by</div>
+      <a class="credit-name" href="https://www.linkedin.com/in/jpcastro/" target="_blank" rel="noopener noreferrer">Juan Pablo Castro Vilaró</a>
+    </div>
+
+    <div class="reference">
+      <a class="reference-title" href="https://www.researchgate.net/publication/388386953" target="_blank" rel="noopener noreferrer">Decoding Cyber Risk: A Visual Representation</a>
+      <a class="reference-doi" href="https://doi.org/10.13140/RG.2.2.33733.15849/1" target="_blank" rel="noopener noreferrer">DOI: 10.13140/RG.2.2.33733.15849/1</a>
+    </div>
+  </div>
+
+  <script>
+    // ---------------- Info panel ----------------
+    const LABEL_INFO = {
+      threatLabel: {
+        title: 'Threat',
+        color: '#F19A38',
+        body:  'Anything that has the potential to cause harm or allow unauthorized access to an information system. This could be malicious actors, state-sponsored groups, cyber criminals or insider threats.'
+      },
+      vulnerabilityLabel: {
+        title: 'Vulnerability',
+        color: '#E63A37',
+        body:  'A weakness that can be exploited by a threat. Examples include unpatched software, misconfigured controls and users who may fall victim to social engineering.'
+      },
+      consequenceLabel: {
+        title: 'Consequence',
+        color: '#FF6A2C',
+        body:  'The impact or damage that would occur if a threat successfully exploits a vulnerability. Financial loss, reputational harm, loss of proprietary data, and business disruption are common consequences.'
+      },
+      potentialLabel: {
+        title: 'Potential Cyber Risk',
+        color: '#E08050',
+        body:  'The intersection of Threat and Vulnerability, highlighting that there is a risk present if both a threat exists and the system is vulnerable to it, even if a consequence has not yet occurred.'
+      },
+      theoreticalLabel: {
+        title: 'Theoretical Cyber Risk',
+        color: '#F88232',
+        body:  'The intersection of Threat and Consequence; there is a theoretical risk when a threat could have serious consequences, even if a current vulnerability isn\u0027t identified.'
+      },
+      exposureLabel: {
+        title: 'Cyber Risk Exposure',
+        color: '#E55838',
+        body:  'Where Vulnerability and Consequence intersect, indicating that there is exposure to risk when a system is vulnerable and the consequences of an exploit are potentially significant, regardless of the current level of threat.'
+      },
+      cyberRiskLabel: {
+        title: 'Cyber Risk',
+        color: '#FF5552',
+        body:  'Represents the potential for losses or damages that may occur due to a threat exploiting a vulnerability and resulting in a consequence. The overarching concept that encompasses all aspects of the potential negative outcomes of cyber events.'
+      }
+    };
+
+    // Labels whose own position is in the bottom half of the diagram. Hovering any of these flips the info panel up to the top edge so the panel stays clear of the cursor.
+    const BOTTOM_LABELS = new Set(['vulnerabilityLabel', 'consequenceLabel', 'exposureLabel']);
+
+    let activeLabelId = null;
+    let infoHideTimer = null;
+
+    function cancelInfoHide() {
+      if (infoHideTimer) { clearTimeout(infoHideTimer); infoHideTimer = null; }
+    }
+    function queueInfoHide() {
+      cancelInfoHide();
+      infoHideTimer = setTimeout(() => { hideInfo(); infoHideTimer = null; }, 120);
+    }
+
+    function hideInfo() {
+      const panel = document.getElementById('infoPanel');
+      if (panel) {
+        panel.classList.remove('visible');
+        panel.setAttribute('aria-hidden', 'true');
+      }
+      activeLabelId = null;
+    }
+
+    function showInfo(labelId) {
+      const info = LABEL_INFO[labelId];
+      const panel = document.getElementById('infoPanel');
+      const titleEl = document.getElementById('infoTitle');
+      const bodyEl  = document.getElementById('infoBody');
+      if (!info || !panel || !titleEl || !bodyEl) return;
+      titleEl.textContent = info.title;
+      titleEl.style.color = info.color;
+      bodyEl.textContent  = info.body;
+      panel.style.borderColor = info.color;
+      panel.classList.toggle('top', BOTTOM_LABELS.has(labelId));
+      panel.classList.add('visible');
+      panel.setAttribute('aria-hidden', 'false');
+      activeLabelId = labelId;
+    }
+
+    // Tap anywhere outside a label or the panel closes it (mobile)
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.info-panel')) return;
+      if (e.target.closest('.hot-label')) return;
+      hideInfo();
+    });
+
+    // ---------------- Hover / Pulse ----------------
+    // Length of the intro timeline, in ms. Matches the last SMIL animation end (pairwise labels fade-in: begin 7.4s + dur 1.2s = 8.6s). 100ms cushion so the activation can never beat the final frame.
+    const INTRO_MS = 8700;
+
+    // Hover: light up each circle/lens (or pulse the centre) while the cursor is on its label. Hover/click is only armed once the intro animation finishes; pressing Replay re-arms it.
+    const restartHovers = (function setupHovers() {
+      const entries = [
+        { labelId: 'threatLabel',        targetId: 'threatCircle',        kind: 'fill'  },
+        { labelId: 'vulnerabilityLabel', targetId: 'vulnerabilityCircle', kind: 'fill'  },
+        { labelId: 'consequenceLabel',   targetId: 'consequenceCircle',   kind: 'fill'  },
+        { labelId: 'potentialLabel',     targetId: 'potentialLens',       kind: 'fill'  },
+        { labelId: 'theoreticalLabel',   targetId: 'theoreticalLens',     kind: 'fill'  },
+        { labelId: 'exposureLabel',      targetId: 'exposureLens',        kind: 'fill'  },
+        { labelId: 'cyberRiskLabel',     targetId: 'cyberRiskPulse',      kind: 'pulse' }
+      ];
+
+      const wired = entries
+        .map(e => ({
+          label:   document.getElementById(e.labelId),
+          labelId: e.labelId,
+          target:  document.getElementById(e.targetId),
+          kind:    e.kind
+        }))
+        .filter(p => p.label && p.target);
+
+      const showOf = ({ target, kind }) => kind === 'pulse'
+        ? () => target.classList.add('pulsing')
+        : () => target.setAttribute('fill-opacity', '0.4');
+
+      const hideOf = ({ target, kind }) => kind === 'pulse'
+        ? () => target.classList.remove('pulsing')
+        : () => target.setAttribute('fill-opacity', '0');
+
+      wired.forEach((p) => {
+        const show = showOf(p);
+        const hide = hideOf(p);
+
+        // Hover shows the wash/pulse AND populates the info panel.
+        p.label.addEventListener('mouseenter', () => {
+          show();
+          cancelInfoHide();
+          showInfo(p.labelId);
+        });
+        p.label.addEventListener('mouseleave', () => {
+          hide();
+          queueInfoHide();
+        });
+
+        // Mobile: tap behaves like hover. The synthetic click fires too, but the document click handler ignores label targets, so nothing bad happens.
+        p.label.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          if (p.label.classList.contains('active')) {
+            show();
+            cancelInfoHide();
+            showInfo(p.labelId);
+          }
+        }, { passive: false });
+      });
+
+      // Touch devices: tapping anywhere outside a label clears hover effects (tooltip itself handles its own dismissal via close-on-outside-click).
+      document.addEventListener('touchstart', (e) => {
+        const onLabel = wired.some(({ label }) => label.contains(e.target));
+        if (!onLabel) wired.forEach(p => hideOf(p)());
+      });
+
+      const setArmed = (armed) => {
+        wired.forEach(({ label }) => label.classList.toggle('active', armed));
+        if (!armed) wired.forEach(p => hideOf(p)());
+      };
+
+      let armTimer = setTimeout(() => setArmed(true), INTRO_MS);
+
+      return function rearmAfterReplay() {
+        setArmed(false);
+        clearTimeout(armTimer);
+        armTimer = setTimeout(() => setArmed(true), INTRO_MS);
+      };
+    })();
+
+    function replayAnimation() {
+      const svg = document.getElementById('cyberRiskSvg');
+      if (svg && typeof svg.setCurrentTime === 'function') {
+        svg.setCurrentTime(0);
+        restartHovers();
+        hideInfo();
+      }
+    }
+  </script>
+</body>
+</html>
