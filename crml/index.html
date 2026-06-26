@@ -274,6 +274,17 @@
   .publication .pub-doi a:hover {
     color: #C4322B;
   }
+  .page-title, .credit, .publication, button.replay {
+    transition: opacity 220ms ease;
+  }
+  body.cr-modal-open .page-title,
+  body.cr-modal-open .credit,
+  body.cr-modal-open .publication,
+  body.cr-modal-open button.replay {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
 </style>
 </head>
 <body>
@@ -948,6 +959,16 @@
   .publication .pub-doi a:hover {
     color: #C4322B;
   }
+  .page-title, .credit, .publication, button.replay {
+    transition: opacity 220ms ease;
+  }
+  body.cr-modal-open .page-title,
+  body.cr-modal-open .credit,
+  body.cr-modal-open .publication,
+  body.cr-modal-open button.replay {
+    opacity: 0;
+    pointer-events: none;
+  }
 </style>
 </head>
 <body>
@@ -1243,10 +1264,6 @@
   <\/script>
 
 
-  <div class="publication">
-    <a class="pub-title" href="https://www.researchgate.net/publication/408096877" target="_blank" rel="noopener">Revisiting the Cyber Risk Management Lifecycle (CRML) in the Age of AI</a>
-    <div class="pub-doi">DOI: <a href="https://doi.org/10.13140/RG.2.2.36183.02724" target="_blank" rel="noopener">10.13140/RG.2.2.36183.02724</a></div>
-  </div>
 </body></html>`;
 
     const _crModal = document.getElementById('cr-modal');
@@ -1256,10 +1273,12 @@
     function openCyberRiskModal() {
       _crIframe.srcdoc = cyberRiskHtml;
       _crModal.classList.add('open');
+      document.body.classList.add('cr-modal-open');
       document.body.style.overflow = 'hidden';
     }
     function closeCyberRiskModal() {
       _crModal.classList.remove('open');
+      document.body.classList.remove('cr-modal-open');
       document.body.style.overflow = '';
       setTimeout(() => { _crIframe.srcdoc = ''; }, 240);
     }
