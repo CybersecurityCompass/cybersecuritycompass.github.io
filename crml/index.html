@@ -328,7 +328,7 @@
     pointer-events: none !important;
   }
 
-  /* CTA tooltip — pill that appears over the Identify satellite once the mini Venn is clickable */
+  /* CTA tooltip — pill that appears above the cursor on the Identify satellite, centered horizontally */
   .cta-tooltip {
     position: fixed;
     z-index: 100;
@@ -346,13 +346,23 @@
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
-    transform: scale(0.95);
+    /* Anchor point: bottom-center of the pill sits at (left, top). 14px gap above cursor. */
+    transform: translate(-50%, -100%) translateY(-14px) scale(0.95);
+    transform-origin: center bottom;
     transition: opacity 200ms ease, transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
   }
   .cta-tooltip.visible {
     opacity: 1;
-    transform: scale(1);
+    transform: translate(-50%, -100%) translateY(-14px) scale(1);
+  }
+  /* Flip-below variant: bottom-center anchor → top-center anchor when there's no room above */
+  .cta-tooltip.flipped {
+    transform: translate(-50%, 0) translateY(20px) scale(0.95);
+    transform-origin: center top;
+  }
+  .cta-tooltip.flipped.visible {
+    transform: translate(-50%, 0) translateY(20px) scale(1);
   }
   body.cr-modal-open .cta-tooltip {
     opacity: 0 !important;
@@ -575,10 +585,8 @@
       <circle cx="1150" cy="459" r="20" fill="none" stroke="#FF6A2C" stroke-width="1.6"/>
     </g>
   </g>
-  <!-- Identify satellite click surface: covers the entire satellite area; activates only after the mini Venn is visible (t=12s) -->
-  <circle id="venn-cta-trigger" cx="1135" cy="450" r="65" fill="transparent" pointer-events="none" style="cursor: pointer;" onclick="openCyberRiskModal()" role="button" aria-label="Open Cyber Risk visualization">
-    <set attributeName="pointer-events" to="all" begin="12s" fill="freeze"/>
-  </circle>
+  <!-- Identify satellite click surface: covers the entire satellite area; click is gated by JS until the mini Venn is visible (opacity > 0.5) -->
+  <circle id="venn-cta-trigger" cx="1135" cy="450" r="65" fill="transparent" pointer-events="all" style="cursor: pointer;" onclick="handleVennClick()" role="button" aria-label="Open Cyber Risk visualization"></circle>
   <!-- Bottom: Cyber Risk Assessment (orange-red) -->
   <circle cx="920" cy="665" r="65" fill="#FF6A2C" opacity="0"><animate attributeName="opacity" from="0" to="1" begin="2s" dur="0.5s" fill="freeze"/></circle>
   <!-- Left: Cyber Risk Mitigation (TrendAI brand red) -->
@@ -1591,30 +1599,50 @@
 
 
     // -- CTA tooltip wiring on the Identify satellite click surface --
+    // Mini Venn becomes visible at t=12s via the existing opacity animation.
+    // We check the parent group's computed opacity to gate clicks/hover — this also
+    // handles Replay correctly (animation resets → opacity resets → guard re-activates).
+    function isVennVisible() {
+      const venn = document.getElementById('venn-pulse-group');
+      if (!venn || !venn.parentElement) return false;
+      return parseFloat(getComputedStyle(venn.parentElement).opacity) > 0.5;
+    }
+    function handleVennClick() {
+      if (!isVennVisible()) return;
+      openCyberRiskModal();
+    }
     (function() {
       const trigger = document.getElementById('venn-cta-trigger');
       const cta = document.getElementById('cta-tip');
       if (!trigger || !cta) return;
       function positionAt(x, y) {
-        // Place cta near cursor; flip to the LEFT if it would overflow the right edge
-        cta.style.left = (x + 18) + 'px';
-        cta.style.top  = (y + 18) + 'px';
+        // Place anchor exactly at cursor; CSS transform centers the pill horizontally and lifts it above the cursor
+        cta.style.left = x + 'px';
+        cta.style.top  = y + 'px';
+        cta.classList.remove('flipped');
         requestAnimationFrame(() => {
           const r = cta.getBoundingClientRect();
-          if (r.right > window.innerWidth - 12) {
-            cta.style.left = Math.max(12, x - r.width - 18) + 'px';
+          // Flip below the cursor if no room above
+          if (r.top < 8) {
+            cta.classList.add('flipped');
           }
-          if (r.bottom > window.innerHeight - 12) {
-            cta.style.top = Math.max(12, y - r.height - 18) + 'px';
+          // Clamp horizontally if the pill would overflow either edge
+          const halfW = r.width / 2;
+          if (x - halfW < 12) {
+            cta.style.left = (12 + halfW) + 'px';
+          } else if (x + halfW > window.innerWidth - 12) {
+            cta.style.left = (window.innerWidth - 12 - halfW) + 'px';
           }
         });
       }
       trigger.addEventListener('mouseenter', e => {
+        if (!isVennVisible()) return;
         positionAt(e.clientX, e.clientY);
         cta.classList.add('visible');
         cta.setAttribute('aria-hidden', 'false');
       });
       trigger.addEventListener('mousemove', e => {
+        if (!isVennVisible()) return;
         positionAt(e.clientX, e.clientY);
       });
       trigger.addEventListener('mouseleave', () => {
