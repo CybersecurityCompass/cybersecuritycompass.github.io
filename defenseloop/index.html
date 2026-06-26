@@ -90,6 +90,45 @@
     transition: color 160ms ease;
   }
   #page-credit a:hover { color: #ffffff; }
+
+  /* ============================================================
+     CTA PILL TOOLTIP — appears over the central compass on hover
+     Pattern reference: cta_pill_tooltip_example.html
+     ============================================================ */
+  .cta-tooltip {
+    position: fixed;
+    z-index: 100;
+    padding: 7px 14px;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1.5px solid #E01C24;
+    border-radius: 999px;
+    color: #FFFFFF;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.015em;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -100%) translateY(-14px) scale(0.95);
+    transform-origin: center bottom;
+    transition: opacity 200ms ease,
+                transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  }
+  .cta-tooltip.visible {
+    opacity: 1;
+    transform: translate(-50%, -100%) translateY(-14px) scale(1);
+  }
+  .cta-tooltip.flipped {
+    transform: translate(-50%, 0) translateY(20px) scale(0.95);
+    transform-origin: center top;
+  }
+  .cta-tooltip.flipped.visible {
+    transform: translate(-50%, 0) translateY(20px) scale(1);
+  }
 </style>
 </head>
 <body>
@@ -242,11 +281,14 @@
 <g><circle cx="800" cy="470" r="34" fill="#0c0c0e" stroke="#2a2a30" stroke-width="1.2"/><circle cx="800" cy="470" r="30" fill="#f3f1ec" stroke="#d8d5cd" stroke-width="1"/><line x1="828.0" y1="470.0" x2="824.0" y2="470.0" stroke="#9a968c" stroke-width="1.2"/><line x1="827.8" y1="473.7" x2="826.3" y2="473.5" stroke="#9a968c" stroke-width="0.6"/><line x1="827.0" y1="477.2" x2="825.6" y2="476.9" stroke="#9a968c" stroke-width="0.6"/><line x1="825.9" y1="480.7" x2="824.5" y2="480.1" stroke="#9a968c" stroke-width="0.6"/><line x1="824.2" y1="484.0" x2="822.9" y2="483.2" stroke="#9a968c" stroke-width="0.6"/><line x1="822.2" y1="487.0" x2="821.0" y2="486.1" stroke="#9a968c" stroke-width="0.6"/><line x1="819.8" y1="489.8" x2="817.0" y2="487.0" stroke="#9a968c" stroke-width="1.2"/><line x1="817.0" y1="492.2" x2="816.1" y2="491.0" stroke="#9a968c" stroke-width="0.6"/><line x1="814.0" y1="494.2" x2="813.2" y2="492.9" stroke="#9a968c" stroke-width="0.6"/><line x1="810.7" y1="495.9" x2="810.1" y2="494.5" stroke="#9a968c" stroke-width="0.6"/><line x1="807.2" y1="497.0" x2="806.9" y2="495.6" stroke="#9a968c" stroke-width="0.6"/><line x1="803.7" y1="497.8" x2="803.5" y2="496.3" stroke="#9a968c" stroke-width="0.6"/><line x1="800.0" y1="498.0" x2="800.0" y2="494.0" stroke="#9a968c" stroke-width="1.2"/><line x1="796.3" y1="497.8" x2="796.5" y2="496.3" stroke="#9a968c" stroke-width="0.6"/><line x1="792.8" y1="497.0" x2="793.1" y2="495.6" stroke="#9a968c" stroke-width="0.6"/><line x1="789.3" y1="495.9" x2="789.9" y2="494.5" stroke="#9a968c" stroke-width="0.6"/><line x1="786.0" y1="494.2" x2="786.8" y2="492.9" stroke="#9a968c" stroke-width="0.6"/><line x1="783.0" y1="492.2" x2="783.9" y2="491.0" stroke="#9a968c" stroke-width="0.6"/><line x1="780.2" y1="489.8" x2="783.0" y2="487.0" stroke="#9a968c" stroke-width="1.2"/><line x1="777.8" y1="487.0" x2="779.0" y2="486.1" stroke="#9a968c" stroke-width="0.6"/><line x1="775.8" y1="484.0" x2="777.1" y2="483.2" stroke="#9a968c" stroke-width="0.6"/><line x1="774.1" y1="480.7" x2="775.5" y2="480.1" stroke="#9a968c" stroke-width="0.6"/><line x1="773.0" y1="477.2" x2="774.4" y2="476.9" stroke="#9a968c" stroke-width="0.6"/><line x1="772.2" y1="473.7" x2="773.7" y2="473.5" stroke="#9a968c" stroke-width="0.6"/><line x1="772.0" y1="470.0" x2="776.0" y2="470.0" stroke="#9a968c" stroke-width="1.2"/><line x1="772.2" y1="466.3" x2="773.7" y2="466.5" stroke="#9a968c" stroke-width="0.6"/><line x1="773.0" y1="462.8" x2="774.4" y2="463.1" stroke="#9a968c" stroke-width="0.6"/><line x1="774.1" y1="459.3" x2="775.5" y2="459.9" stroke="#9a968c" stroke-width="0.6"/><line x1="775.8" y1="456.0" x2="777.1" y2="456.8" stroke="#9a968c" stroke-width="0.6"/><line x1="777.8" y1="453.0" x2="779.0" y2="453.9" stroke="#9a968c" stroke-width="0.6"/><line x1="780.2" y1="450.2" x2="783.0" y2="453.0" stroke="#9a968c" stroke-width="1.2"/><line x1="783.0" y1="447.8" x2="783.9" y2="449.0" stroke="#9a968c" stroke-width="0.6"/><line x1="786.0" y1="445.8" x2="786.8" y2="447.1" stroke="#9a968c" stroke-width="0.6"/><line x1="789.3" y1="444.1" x2="789.9" y2="445.5" stroke="#9a968c" stroke-width="0.6"/><line x1="792.8" y1="443.0" x2="793.1" y2="444.4" stroke="#9a968c" stroke-width="0.6"/><line x1="796.3" y1="442.2" x2="796.5" y2="443.7" stroke="#9a968c" stroke-width="0.6"/><line x1="800.0" y1="442.0" x2="800.0" y2="446.0" stroke="#9a968c" stroke-width="1.2"/><line x1="803.7" y1="442.2" x2="803.5" y2="443.7" stroke="#9a968c" stroke-width="0.6"/><line x1="807.2" y1="443.0" x2="806.9" y2="444.4" stroke="#9a968c" stroke-width="0.6"/><line x1="810.7" y1="444.1" x2="810.1" y2="445.5" stroke="#9a968c" stroke-width="0.6"/><line x1="814.0" y1="445.8" x2="813.2" y2="447.1" stroke="#9a968c" stroke-width="0.6"/><line x1="817.0" y1="447.8" x2="816.1" y2="449.0" stroke="#9a968c" stroke-width="0.6"/><line x1="819.8" y1="450.2" x2="817.0" y2="453.0" stroke="#9a968c" stroke-width="1.2"/><line x1="822.2" y1="453.0" x2="821.0" y2="453.9" stroke="#9a968c" stroke-width="0.6"/><line x1="824.2" y1="456.0" x2="822.9" y2="456.8" stroke="#9a968c" stroke-width="0.6"/><line x1="825.9" y1="459.3" x2="824.5" y2="459.9" stroke="#9a968c" stroke-width="0.6"/><line x1="827.0" y1="462.8" x2="825.6" y2="463.1" stroke="#9a968c" stroke-width="0.6"/><line x1="827.8" y1="466.3" x2="826.3" y2="466.5" stroke="#9a968c" stroke-width="0.6"/><g id="needle"><path d="M 780.7 457.5 L 802.7 465.8 L 797.3 474.2 Z" fill="#E11B22"/><path d="M 819.3 482.5 L 797.3 474.2 L 802.7 465.8 Z" fill="#1a1a1e"/></g><circle cx="800" cy="470" r="5" fill="#1a1a1e"/><path d="M 800 467 L 803 470 L 800 473 L 797 470 Z" fill="#E11B22"/></g>
 
   <!-- Click target on the small compass (opens the full Cybersecurity Compass modal) -->
-  <circle id="compass-hit" cx="800" cy="470" r="65" fill="transparent" style="cursor:pointer;" onclick="openCompass()">
-    <title>Open the Cybersecurity Compass</title>
-  </circle>
+  <circle id="compass-hit" cx="800" cy="470" r="65" fill="transparent" style="cursor:pointer;" onclick="openCompass()"></circle>
 </svg>
 
+</div>
+
+<!-- CTA pill tooltip — shared single instance, shown when hovering the central compass -->
+<div id="cta-tip" class="cta-tooltip" role="status" aria-hidden="true" aria-live="polite">
+  <span id="cta-tip-text">Click to Explore the Cybersecurity Compass →</span>
 </div>
 
 <script>
@@ -276,6 +318,72 @@
     const raw = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
     const code = raw.split('-')[0];
     setLang(supported.indexOf(code) !== -1 ? code : 'en');
+  })();
+
+  /* ============================================================
+     CTA PILL TOOLTIP — wires the central compass click target
+     to a cursor-following pill that says "Click to Explore..."
+     ============================================================ */
+  (function () {
+    const cta = document.getElementById('cta-tip');
+    const ctaText = document.getElementById('cta-tip-text');
+    const trigger = document.getElementById('compass-hit');
+    if (!cta || !ctaText || !trigger) return;
+
+    const LABELS = {
+      en: 'Click to Explore the Cybersecurity Compass →',
+      es: 'Haz clic para Explorar la Brújula de Ciberseguridad →',
+      pt: 'Clique para Explorar a Bússola de Cibersegurança →'
+    };
+    const labelForCurrentLang = () => {
+      const lang = document.documentElement.getAttribute('lang') || 'en';
+      return LABELS[lang] || LABELS.en;
+    };
+
+    let active = false;
+
+    function positionAt(x, y) {
+      cta.style.left = x + 'px';
+      cta.style.top  = y + 'px';
+      cta.classList.remove('flipped');
+      requestAnimationFrame(() => {
+        const r = cta.getBoundingClientRect();
+        // Flip below cursor if no room above
+        if (r.top < 8) cta.classList.add('flipped');
+        // Clamp horizontally to ±12px from viewport edges
+        const halfW = r.width / 2;
+        if (x - halfW < 12) {
+          cta.style.left = (12 + halfW) + 'px';
+        } else if (x + halfW > window.innerWidth - 12) {
+          cta.style.left = (window.innerWidth - 12 - halfW) + 'px';
+        }
+      });
+    }
+
+    trigger.addEventListener('mouseenter', e => {
+      active = true;
+      ctaText.textContent = labelForCurrentLang();
+      positionAt(e.clientX, e.clientY);
+      cta.classList.add('visible');
+      cta.setAttribute('aria-hidden', 'false');
+    });
+    trigger.addEventListener('mousemove', e => {
+      if (!active) return;
+      positionAt(e.clientX, e.clientY);
+      // Update text in case the language was switched mid-hover
+      ctaText.textContent = labelForCurrentLang();
+    });
+    trigger.addEventListener('mouseleave', () => {
+      active = false;
+      cta.classList.remove('visible');
+      cta.setAttribute('aria-hidden', 'true');
+    });
+    // Hide the pill once the modal opens, in case the click lands before mouseleave fires
+    trigger.addEventListener('click', () => {
+      active = false;
+      cta.classList.remove('visible');
+      cta.setAttribute('aria-hidden', 'true');
+    });
   })();
 </script>
 
