@@ -1117,14 +1117,27 @@
           <circle id="consequenceCircle" cx="945" cy="554" r="270" fill="#FF6A2C" fill-opacity="0"></circle>
         </g>
 
-        <!-- Hover lens overlays: each path covers the full geometric intersection of its two circles, filled with the colour-mix of the two ring colours. Sits BELOW the pairwise labels so the labels stay crisp on top of the wash. -->
+        <!-- Hover lens overlays: each path covers the full geometric intersection of its two circles, filled with the colour-mix of the two ring colours. Sits BELOW the pairwise labels so the labels stay crisp on top of the wash. Each lens is masked to subtract the central Cyber Risk (T ∩ V ∩ C) triangle so the highlight shows ONLY the unique pairwise region. -->
+        <defs>
+          <mask id="excludeCyberRiskCenter" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="900">
+            <rect x="0" y="0" width="1600" height="900" fill="white"/>
+            <!-- Subtract the central Cyber Risk Reuleaux triangle so the pairwise highlight excludes the triple intersection -->
+            <path d="M 800,326.2 A 270,270 0 0,1 924.8,542.4 A 270,270 0 0,1 675.2,542.4 A 270,270 0 0,1 800,326.2 Z" fill="black"/>
+            <!-- Subtract the three Venn ring strokes (stroke-width 16, matching the visible rings) so highlights stay inside the borders -->
+            <g fill="none" stroke="black" stroke-width="16">
+              <circle cx="800" cy="303" r="270"/>
+              <circle cx="655" cy="554" r="270"/>
+              <circle cx="945" cy="554" r="270"/>
+            </g>
+          </mask>
+        </defs>
         <g stroke="none" pointer-events="none">
           <!-- Potential = Threat ∩ Vulnerability  (#F19A38 ⊕ #A8201D = #CD5D2B) -->
-          <path id="potentialLens" class="lens" d="M 530.2,314.6 A 270,270 0 0,0 924.8,542.4 A 270,270 0 0,0 530.2,314.6 Z" fill="#CD5D2B" fill-opacity="0"></path>
+          <path id="potentialLens" class="lens" d="M 530.2,314.6 A 270,270 0 0,0 924.8,542.4 A 270,270 0 0,0 530.2,314.6 Z" fill="#CD5D2B" fill-opacity="0" mask="url(#excludeCyberRiskCenter)"></path>
           <!-- Theoretical = Threat ∩ Consequence  (#F19A38 ⊕ #FF6A2C = #F88232) -->
-          <path id="theoreticalLens" class="lens" d="M 1069.8,314.6 A 270,270 0 0,1 675.2,542.4 A 270,270 0 0,1 1069.8,314.6 Z" fill="#F88232" fill-opacity="0"></path>
+          <path id="theoreticalLens" class="lens" d="M 1069.8,314.6 A 270,270 0 0,1 675.2,542.4 A 270,270 0 0,1 1069.8,314.6 Z" fill="#F88232" fill-opacity="0" mask="url(#excludeCyberRiskCenter)"></path>
           <!-- Cyber Risk Exposure = Vulnerability ∩ Consequence  (#A8201D ⊕ #FF6A2C = #D44524) -->
-          <path id="exposureLens" class="lens" d="M 800,326.2 A 270,270 0 0,1 800,781.8 A 270,270 0 0,1 800,326.2 Z" fill="#D44524" fill-opacity="0"></path>
+          <path id="exposureLens" class="lens" d="M 800,326.2 A 270,270 0 0,1 800,781.8 A 270,270 0 0,1 800,326.2 Z" fill="#D44524" fill-opacity="0" mask="url(#excludeCyberRiskCenter)"></path>
         </g>
 
         <!-- Pairwise intersection labels (fade in once all three circles are drawn). Placed above the lens fills so the white text stays sharp when a lens lights up. -->
