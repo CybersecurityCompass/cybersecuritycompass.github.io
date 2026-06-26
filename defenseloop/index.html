@@ -692,13 +692,14 @@ hitsSvg.addEventListener('mousemove', function(e){
   const zone=getZone(cx*scale, cy*scale);
   // If in puzzle ring, mark as -2 so tick loop keeps refreshing even when not moving
   hoverState=(zone>=3)?-2:zone;
-  if(zone===-1){ tt.classList.remove('on'); }
-  else { showTT(zone, cx, cy); hoverState=zone; }
+  if(zone===-1){ tt.classList.remove('on'); hitsSvg.style.cursor='default'; }
+  else { showTT(zone, cx, cy); hoverState=zone; hitsSvg.style.cursor='pointer'; }
 });
 
 hitsSvg.addEventListener('mouseleave', function(){
   tt.classList.remove('on');
   hoverState=-1;
+  hitsSvg.style.cursor='default';
 });
 
 // Animation
@@ -750,8 +751,8 @@ function tick(now){
     const zone=getZone(lastCX*scale, lastCY*scale);
     if(zone!==hoverState){
       hoverState=zone;
-      if(zone===-1) tt.classList.remove('on');
-      else showTT(zone, lastCX, lastCY);
+      if(zone===-1){ tt.classList.remove('on'); hitsSvg.style.cursor='default'; }
+      else { showTT(zone, lastCX, lastCY); hitsSvg.style.cursor='pointer'; }
     }
   }
 
