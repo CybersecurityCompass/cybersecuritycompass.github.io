@@ -334,6 +334,25 @@
            role="img" aria-label="Cyber Risk Venn diagram" aria-describedby="svg-desc">
         <desc id="svg-desc">A Venn diagram showing Cyber Risk as the intersection of Threat, Vulnerability, and Consequence, with pairwise overlaps labelled Potential Cyber Risk, Theoretical Cyber Risk, and Cyber Risk Exposure.</desc>
 
+        <!-- Mask applied to the three pairwise lens overlays. White = lens visible, black = lens hidden. Punches out (a) the central Cyber Risk Reuleaux so the highlight wraps around the red centre, and (b) the three 16px Venn ring strokes so the orange/red/orange-red outlines stay crisp during hover instead of being recoloured by the wash. The stroke-width="16" here matches the visible ring group exactly. -->
+        <defs>
+          <mask id="excludeCenterMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="900">
+            <rect x="0" y="0" width="1600" height="900" fill="white"/>
+            <!-- Central Cyber Risk Reuleaux (triple intersection T ∩ V ∩ C) -->
+            <path d="M 800,326.2
+                     A 270,270 0 0,1 924.8,542.4
+                     A 270,270 0 0,1 675.2,542.4
+                     A 270,270 0 0,1 800,326.2 Z"
+                  fill="black"/>
+            <!-- Three Venn ring strokes (matches the visible 16px stroke ring group below) -->
+            <g fill="none" stroke="black" stroke-width="16">
+              <circle cx="800" cy="303" r="270"/>
+              <circle cx="655" cy="554" r="270"/>
+              <circle cx="945" cy="554" r="270"/>
+            </g>
+          </mask>
+        </defs>
+
         <!-- Background -->
         <rect width="1600" height="900" fill="#000000"/>
 
@@ -387,8 +406,8 @@
           <circle id="consequenceCircle"   cx="945" cy="554" r="270" fill="#FF6A2C" fill-opacity="0"/>
         </g>
 
-        <!-- Hover lens overlays: each path covers the full geometric intersection of its two circles, filled with the colour-mix of the two ring colours. Sits BELOW the pairwise labels so the labels stay crisp on top of the wash. -->
-        <g stroke="none" pointer-events="none">
+        <!-- Hover lens overlays: each path covers the full geometric intersection of its two circles, filled with the colour-mix of the two ring colours. Sits BELOW the pairwise labels so the labels stay crisp on top of the wash. The mask subtracts the central Cyber Risk Reuleaux so the highlight wraps AROUND the red centre instead of covering it. -->
+        <g stroke="none" pointer-events="none" mask="url(#excludeCenterMask)">
           <!-- Potential = Threat ∩ Vulnerability  (#F19A38 ⊕ #A8201D = #CD5D2B) -->
           <path id="potentialLens" class="lens"
                 d="M 530.2,314.6 A 270,270 0 0,0 924.8,542.4 A 270,270 0 0,0 530.2,314.6 Z"
