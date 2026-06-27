@@ -320,7 +320,7 @@
   #cc-frame-wrap { position: relative; width: min(94vw, 94vh); aspect-ratio: 1/1; transform: scale(0.96); opacity: 0; transition: opacity 240ms ease 60ms, transform 240ms ease 60ms; }
   #cc-modal.open #cc-frame-wrap { opacity: 1; transform: scale(1); }
   #cc-iframe { width: 100%; height: 100%; border: 0; background: transparent; display: block; }
-  #cc-close { position: absolute; top: 14px; right: 14px; z-index: 1001; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.18); background: rgba(0,0,0,0.55); color: #f5f5f7; font-size: 22px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: background 160ms ease, border-color 160ms ease; }
+  #cc-close { position: absolute; top: 14px; right: 14px; z-index: 1001; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.13); background: rgba(0,0,0,0.55); color: #f5f5f7; font-size: 22px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: background 160ms ease, border-color 160ms ease; }
   #cc-close:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.30); }
 
   /* Clickable "Cybersecurity Compass" inside the eyebrow */
@@ -343,8 +343,9 @@
     pointer-events: none !important;
   }
 
-  /* Subtle hover indicator on the lower-right compass click target */
-  #lr-compass-hit:hover { fill: rgba(255,255,255,0.04); }
+  /* Hover indicator on the lower-right compass click target — soft transparent circle that fades in */
+  #lr-compass-hit { transition: fill 0.18s ease; }
+  #lr-compass-hit:hover { fill: rgba(255,255,255,0.13); }
 
   .cta-tooltip {
     position: fixed;
