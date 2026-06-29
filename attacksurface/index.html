@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The attack surface, in motion</title>
+<style>
+  :root{
+    --bg:#0B0E14; --ink:#FFFFFF; --muted:#8A8F98; --line:#2A2F3A;
+    --red:#E10600;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family:Arial,Helvetica,sans-serif;}
+  .wrap{max-width:1280px;margin:0 auto;padding:28px 36px 40px;}
+  h1{font-size:25px;font-weight:700;margin:0 0 6px;letter-spacing:-0.2px;}
+  h1 .r{color:var(--red);}
+  .sub{color:var(--muted);font-size:13.5px;margin:0 0 14px;max-width:1050px;line-height:1.45;}
+  .rule{height:1px;background:var(--line);margin:0 0 8px;}
+  canvas{display:block;width:100%;height:auto;}
+  .controls{display:flex;gap:14px;align-items:center;margin-top:14px;flex-wrap:wrap;}
+  button{background:#11161F;color:#E8E8EA;border:1px solid #3A4150;border-radius:5px;
+    padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+  button:hover{border-color:#5A6472;}
+  button:focus-visible{outline:2px solid var(--red);outline-offset:2px;}
+  .speed{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12.5px;}
+  input[type=range]{accent-color:var(--red);}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;color:#9AA0AA;font-size:12px;align-items:center;}
+  .sw{display:inline-block;width:13px;height:13px;border-radius:2px;margin-right:7px;vertical-align:-1px;}
+  .foot{margin-top:18px;}
+  .foot .lead{color:#FFFFFF;font-size:14.5px;font-weight:700;margin:0 0 4px;}
+  .foot .tag{color:#5A6072;font-size:10.5px;margin:0;}
+  @media (prefers-reduced-motion: reduce){ /* still renders a static frame; JS checks this */ }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The attack surface is a <span class="r">living</span> three dimensional figure.</h1>
+  <p class="sub">Asset Categories on one axis, Attack Tactics &amp; Techniques on another, Cyber Risk as height. The colors are not fixed. Risk rises and falls across the surface in real time, peaks erupt where exposure concentrates, and the blue fog of the unknown spreads faster than anyone is watching.</p>
+  <div class="rule"></div>
+
+  <canvas id="c" width="1280" height="760" aria-label="Animated 3D attack surface terrain"></canvas>
+
+  <div class="controls">
+    <button id="play" aria-pressed="true">Pause</button>
+    <button id="reset">Reset</button>
+    <button id="toggleLegend" aria-pressed="true">Hide legend on chart</button>
+    <div class="speed">
+      <label for="spd">Speed</label>
+      <input id="spd" type="range" min="0.25" max="2.5" step="0.25" value="1" aria-label="Animation speed"/>
+      <span id="spdv">1.0&times;</span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><span class="sw" style="background:#3E6B45"></span>low risk, the wide plain</span>
+    <span><span class="sw" style="background:#C9962E"></span>elevated, the broad mass</span>
+    <span><span class="sw" style="background:#C0241F"></span>sharp peaks, concentrated risk</span>
+    <span><span class="sw" style="background:#2563B0"></span>unknown surface, not yet discovered</span>
+  </div>
+
+  <div class="foot">
+    <p class="lead">Cyber Risk is never still. By the time a periodic snapshot is read, the surface it described has already changed shape.</p>
+    <p class="tag" style="margin-top:16px;">A living surface is read continuously, asset by asset. That continuous reading is part of the Cyber Risk Management Lifecycle (CRML).</p>
+    <p class="tag" style="margin-top:6px;">Explore the interactive CRML: <a href="https://cybersecuritycompass.github.io/crml/" style="color:#E10600;text-decoration:none;">https://cybersecuritycompass.github.io/crml/</a></p>
+  </div>
+</div>
+
+<script>
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const W = cv.width, H = cv.height;   // logical drawing units (unchanged)
+
+// High-DPI: enlarge the backing store so canvas text/lines render crisp,
+// while CSS keeps the displayed size the same. All draw code keeps using W,H.
+function setupHiDPI(){
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  cv.width = W * dpr;
+  cv.height = H * dpr;
+  cv.style.width = '100%';        // CSS controls displayed size (responsive)
+  cv.style.height = 'auto';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);  // map logical W,H onto the larger store
+  ctx.imageSmoothingEnabled = true;
+}
+setupHiDPI();
+window.addEventListener('resize', ()=>{ setupHiDPI(); });
+
+const NX = 30, NY = 30;
+const OX = W/2, OY = 410;     // plate center on canvas (raised so front tip clears bottom)
+const SX = 17.5, SY = 9.0;    // iso scale
+const ZSCALE = 1.7;           // vertical exaggeration so peaks stand taller
+
+const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---- pseudo-random but stable noise field ----
+function hash(i,j){ const s=Math.sin(i*127.1+j*311.7)*43758.5453; return s-Math.floor(s); }
+
+// moving "risk centers" that drift, so the amber mass breathes
+const centers = [
+  {x:15,y:14,a:26,vx:0.05,vy:0.03},
+  {x:9, y:18,a:18,vx:-0.04,vy:0.05},
+  {x:21,y:9, a:14,vx:0.03,vy:-0.04},
+];
+// peaks now have a lifecycle: each occupies a slot, fades in at a location,
+// lives a while, fades out, then respawns in a NEW random zone. So peaks
+// appear in different places over time instead of pulsing in fixed spots.
+const NUM_PEAKS = 13;
+function rand(seed){ const s=Math.sin(seed*999.7)*43758.5453; return s-Math.floor(s); }
+const peaks = [];
+for(let k=0;k<NUM_PEAKS;k++){
+  peaks.push({
+    x: 4+rand(k*3.1)*(NX-8),
+    y: 4+rand(k*7.7)*(NY-8),
+    height: 38 + rand(k*1.9)*40,    // peak amplitude
+    life: 6 + rand(k*5.3)*6,        // seconds it stays at full
+    born: -rand(k*2.2)*8,           // stagger initial phases
+    fade: 2.2,                      // fade in/out seconds
+  });
+}
+function respawn(p,k,t){
+  // pick a new zone, biased away from current so it visibly moves
+  let nx, ny, tries=0;
+  do{
+    nx = 4 + Math.random()*(NX-8);
+    ny = 4 + Math.random()*(NY-8);
+    tries++;
+  } while(((nx-p.x)**2+(ny-p.y)**2) < 64 && tries<8);
+  p.x=nx; p.y=ny;
+  p.height = 38 + Math.random()*42;
+  p.life = 6 + Math.random()*6;
+  p.born = t;
+}
+function peakAmp(p,t){
+  // envelope: 0 -> 1 over fade, hold for life, 1 -> 0 over fade
+  const age = t - p.born;
+  const total = p.fade + p.life + p.fade;
+  if(age < 0) return 0;
+  if(age > total){ return -1; } // signal: dead, needs respawn
+  if(age < p.fade) return age/p.fade;
+  if(age < p.fade + p.life) return 1;
+  return 1 - (age - p.fade - p.life)/p.fade;
+}
+// unknown (blue) zones now also roam: each fades in at a location, lives,
+// fades out, and respawns elsewhere, so the fog of the unknown moves across
+// the surface instead of pulsing in fixed spots.
+const NUM_FOG = 6;
+const unknownZones = [];
+for(let k=0;k<NUM_FOG;k++){
+  unknownZones.push({
+    x: 3+rand(k*4.3+0.5)*(NX-6),
+    y: 3+rand(k*8.1+0.5)*(NY-6),
+    radius: 2.4 + rand(k*2.7)*2.0,
+    life: 5 + rand(k*6.1)*7,
+    born: -rand(k*3.3)*7,
+    fade: 2.0,
+  });
+}
+function fogRespawn(u,t){
+  let nx,ny,tries=0;
+  do{ nx=3+Math.random()*(NX-6); ny=3+Math.random()*(NY-6); tries++; }
+  while(((nx-u.x)**2+(ny-u.y)**2) < 49 && tries<8);
+  u.x=nx; u.y=ny;
+  u.radius = 2.4 + Math.random()*2.2;
+  u.life = 5 + Math.random()*7;
+  u.born = t;
+}
+function fogEnv(u,t){
+  const age=t-u.born, total=u.fade+u.life+u.fade;
+  if(age<0) return 0;
+  if(age>total) return -1;
+  if(age<u.fade) return age/u.fade;
+  if(age<u.fade+u.life) return 1;
+  return 1-(age-u.fade-u.life)/u.fade;
+}
+
+function iso(i,j,h){
+  const ci=i-(NX-1)/2, cj=j-(NY-1)/2;
+  return [ OX + (ci-cj)*SX, OY + (ci+cj)*SY - h*ZSCALE ];
+}
+
+function heightAt(i,j,t){
+  let h = 4 + hash(i,j)*5;
+  for(const c of centers){
+    const cx = c.x + Math.sin(t*0.6+c.x)*1.5;
+    const cy = c.y + Math.cos(t*0.5+c.y)*1.5;
+    h += c.a * Math.exp(-(((i-cx)**2+(j-cy)**2)/120));
+  }
+  for(let k=0;k<peaks.length;k++){
+    const p=peaks[k];
+    let env=peakAmp(p,t);
+    if(env<0) env=0;                 // dead peaks contribute nothing this frame
+    if(env>0){
+      h += p.height*env * Math.exp(-(((i-p.x)**2+(j-p.y)**2)/2.6));
+    }
+  }
+  return h;
+}
+
+function unknownFactor(i,j,t){
+  let f=0;
+  for(const u of unknownZones){
+    let env=fogEnv(u,t);
+    if(env<0) env=0;
+    if(env<=0) continue;
+    const d=Math.sqrt((i-u.x)**2+(j-u.y)**2);
+    const edge=1.5;
+    let m = 1-(d-(u.radius-edge))/edge;
+    m=Math.max(0,Math.min(1,m));
+    m*=env;                       // fade the whole zone in/out by its lifecycle
+    if(m>f) f=m;
+  }
+  return f;
+}
+
+// continuous gradient across the risk palette: green -> amber -> orange -> red
+// stops are [height, [r,g,b]]; we lerp between the two surrounding stops
+const RISK_STOPS = [
+  [4,   [44,82,52]],     // deep green  (#2C3934-ish, low)
+  [14,  [62,107,69]],    // green       #3E6B45
+  [30,  [201,150,46]],   // amber       #C9962E
+  [46,  [210,98,46]],    // orange      #D2622E
+  [62,  [192,36,31]],    // red         #C0241F
+  [85,  [232,20,16]],    // hot red     brighter peak
+];
+function lerp(a,b,u){ return a+(b-a)*u; }
+function riskRGB(h){
+  const s=RISK_STOPS;
+  if(h<=s[0][0]) return s[0][1];
+  if(h>=s[s.length-1][0]) return s[s.length-1][1];
+  for(let k=0;k<s.length-1;k++){
+    const [h0,c0]=s[k], [h1,c1]=s[k+1];
+    if(h>=h0 && h<=h1){
+      const u=(h-h0)/(h1-h0);
+      // smoothstep for softer transitions
+      const us=u*u*(3-2*u);
+      return [ lerp(c0[0],c1[0],us), lerp(c0[1],c1[1],us), lerp(c0[2],c1[2],us) ];
+    }
+  }
+  return s[s.length-1][1];
+}
+const BLUE=[37,99,176];
+function mix(a,b,u){ return [lerp(a[0],b[0],u),lerp(a[1],b[1],u),lerp(a[2],b[2],u)]; }
+function rgbStr(c){ return `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`; }
+
+let t = 0;
+let playing = !prefersReduced;
+let speed = 1;
+let showLegend = true;
+let last = performance.now();
+
+function draw(){
+  ctx.fillStyle = '#0B0E14';
+  ctx.fillRect(0,0,W,H);
+
+  // build quads, far to near
+  const quads = [];
+  for(let i=0;i<NX-1;i++){
+    for(let j=0;j<NY-1;j++){
+      const h00=heightAt(i,j,t), h10=heightAt(i+1,j,t),
+            h11=heightAt(i+1,j+1,t), h01=heightAt(i,j+1,t);
+      const havg=(h00+h10+h11+h01)/4;
+      const p0=iso(i,j,h00), p1=iso(i+1,j,h10), p2=iso(i+1,j+1,h11), p3=iso(i,j+1,h01);
+      const uf=(unknownFactor(i,j,t)+unknownFactor(i+1,j,t)
+               +unknownFactor(i+1,j+1,t)+unknownFactor(i,j+1,t))/4;
+      quads.push({d:i+j, p:[p0,p1,p2,p3], havg, uf});
+    }
+  }
+  quads.sort((a,b)=>a.d-b.d);
+
+  for(const q of quads){
+    ctx.beginPath();
+    ctx.moveTo(q.p[0][0],q.p[0][1]);
+    for(let k=1;k<4;k++) ctx.lineTo(q.p[k][0],q.p[k][1]);
+    ctx.closePath();
+    let col = riskRGB(q.havg);
+    if(q.uf>0){ col = mix(col, BLUE, 0.82*q.uf); }   // smoothly blend toward blue
+    ctx.fillStyle = rgbStr(col);
+    ctx.fill();
+    ctx.strokeStyle=rgbStr(col);
+    ctx.lineWidth=0.6;
+    ctx.stroke();
+  }
+
+  // axes
+  ctx.strokeStyle='#C9CCD2'; ctx.fillStyle='#E8E8EA';
+  ctx.lineWidth=1.4;
+  const frL=iso(NX-1,NY-1,0), frR=iso(NX-1,0,0);
+  const flL=iso(NX-1,NY-1,0), flR=iso(0,NY-1,0);
+  // asset diversity (front-right)
+  arrow(frL[0],frL[1]+10, frR[0],frR[1]+10);
+  label('Asset Categories', (frL[0]+frR[0])/2+64, (frL[1]+frR[1])/2+4, '#E8E8EA',16,'700','left');
+  label('endpoints, human and machine identities,', (frL[0]+frR[0])/2+64,(frL[1]+frR[1])/2+24,'#9AA0AA',12,'400','left');
+  label('servers, cloud workloads, data stores,', (frL[0]+frR[0])/2+64,(frL[1]+frR[1])/2+40,'#9AA0AA',12,'400','left');
+  label('containers, clusters, network components,', (frL[0]+frR[0])/2+64,(frL[1]+frR[1])/2+56,'#9AA0AA',12,'400','left');
+  label('APIs, MCP connections, third-party', (frL[0]+frR[0])/2+64,(frL[1]+frR[1])/2+72,'#9AA0AA',12,'400','left');
+  label('integrations, LLM models, agents', (frL[0]+frR[0])/2+64,(frL[1]+frR[1])/2+88,'#9AA0AA',12,'400','left');
+  // attack techniques (front-left)
+  arrow(flL[0],flL[1]+10, flR[0],flR[1]+10);
+  label('Attack Tactics & Techniques', (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+44,'#E8E8EA',16,'700','left');
+  label('100+ potential attack paths per asset type,', (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+64,'#9AA0AA',12,'400','left');
+  label('including identity compromise, supply-chain', (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+80,'#9AA0AA',12,'400','left');
+  label('threats, prompt injection, model manipulation,', (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+96,'#9AA0AA',12,'400','left');
+  label('lateral movement, data exfiltration, and abuse', (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+112,'#9AA0AA',12,'400','left');
+  label('of agent autonomy and tool access', (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+128,'#9AA0AA',12,'400','left');
+  // vertical risk axis
+  const bc=iso(0,NY-1,0);
+  arrow(bc[0]-26,bc[1], bc[0]-26,bc[1]-290);
+  label('Cyber', bc[0]-40, bc[1]-198, '#E8E8EA',16,'700','right');
+  label('Risk', bc[0]-40, bc[1]-180, '#E8E8EA',16,'700','right');
+
+  // legend, upper-right of the surface (matches the static images), toggleable
+  if(showLegend){
+    const legX = W-330, legY0 = 70;
+    const legItems = [
+      ['#3E6B45','low risk, the wide plain'],
+      ['#C9962E','elevated, the broad mass'],
+      ['#C0241F','sharp peaks, concentrated risk'],
+      ['#2563B0','blue fog, unknown surface not yet discovered'],
+    ];
+    for(let k=0;k<legItems.length;k++){
+      const yy = legY0 + k*24;
+      ctx.fillStyle = legItems[k][0];
+      ctx.fillRect(legX, yy, 14, 14);
+      ctx.fillStyle = '#9AA0AA';
+      ctx.font = '12px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText(legItems[k][1], legX+22, yy+11);
+    }
+  }
+}
+
+function arrow(x0,y0,x1,y1){
+  ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+  const ang=Math.atan2(y1-y0,x1-x0), L=9;
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x1-L*Math.cos(ang-0.4), y1-L*Math.sin(ang-0.4));
+  ctx.lineTo(x1-L*Math.cos(ang+0.4), y1-L*Math.sin(ang+0.4));
+  ctx.closePath(); ctx.fillStyle='#C9CCD2'; ctx.fill();
+}
+function label(txt,x,y,col,size,weight,align){
+  ctx.fillStyle=col; ctx.font=`${weight} ${size}px Arial`;
+  ctx.textAlign = align==='center'?'center':(align==='right'?'right':'left');
+  ctx.fillText(txt,x,y); ctx.textAlign='left';
+}
+
+function frame(now){
+  const dt=(now-last)/1000; last=now;
+  if(playing){ t += dt*0.9*speed; }
+  // respawn any peak that has finished its lifecycle, in a new zone
+  for(let k=0;k<peaks.length;k++){
+    if(peakAmp(peaks[k],t) < 0) respawn(peaks[k],k,t);
+  }
+  // respawn any fog zone that has finished its lifecycle, in a new zone
+  for(let k=0;k<unknownZones.length;k++){
+    if(fogEnv(unknownZones[k],t) < 0) fogRespawn(unknownZones[k],t);
+  }
+  draw();
+  requestAnimationFrame(frame);
+}
+
+// controls
+const playBtn=document.getElementById('play');
+playBtn.addEventListener('click',()=>{
+  playing=!playing;
+  playBtn.textContent=playing?'Pause':'Play';
+  playBtn.setAttribute('aria-pressed',String(playing));
+});
+document.getElementById('reset').addEventListener('click',()=>{ t=0; });
+const legendBtn=document.getElementById('toggleLegend');
+legendBtn.addEventListener('click',()=>{
+  showLegend=!showLegend;
+  legendBtn.textContent=showLegend?'Hide legend on chart':'Show legend on chart';
+  legendBtn.setAttribute('aria-pressed',String(showLegend));
+  if(!playing) draw();
+});
+const spd=document.getElementById('spd'), spdv=document.getElementById('spdv');
+spd.addEventListener('input',()=>{ speed=parseFloat(spd.value); spdv.innerHTML=speed.toFixed(1)+'&times;'; });
+
+if(!playing){ playBtn.textContent='Play'; draw(); }
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
