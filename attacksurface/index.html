@@ -68,44 +68,190 @@
     border-color:#C4322B;
     background-color:#C4322B;
   }
+  .lang-selector{
+    position:fixed;
+    top:20px;
+    right:24px;
+    z-index:50;
+    display:flex;
+    gap:4px;
+  }
+  .lang-selector button{
+    background:rgba(255,255,255,0.1);
+    color:#888;
+    border:none;
+    border-radius:5px;
+    padding:6px 11px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    cursor:pointer;
+    font-family:inherit;
+    transition:color 0.15s ease, background-color 0.15s ease;
+  }
+  .lang-selector button:hover{ color:#FFFFFF; }
+  .lang-selector button.active{ background:#E01C24; color:#FFFFFF; }
 </style>
 </head>
 <body>
+<div class="lang-selector">
+  <button id="btn-en" data-lang="en">EN</button>
+  <button id="btn-es" data-lang="es">ES</button>
+  <button id="btn-pt" data-lang="pt">PT</button>
+</div>
 <div class="wrap">
-  <div class="compass-eyebrow"><a class="compass-link" href="https://cybersecuritycompass.github.io/" target="_blank" rel="noopener">Cybersecurity Compass</a> · Before a Breach</div>
-  <h1>The attack surface is a <span class="r">living</span> three dimensional figure.</h1>
-  <p class="sub">Asset Categories on one axis, Attack Tactics &amp; Techniques on another, Cyber Risk as height. The colors are not fixed. Risk rises and falls across the surface in real time, peaks erupt where exposure concentrates, and the blue fog of the unknown spreads faster than anyone is watching.</p>
+  <div class="compass-eyebrow"><a class="compass-link" href="https://cybersecuritycompass.github.io/" target="_blank" rel="noopener">Cybersecurity Compass</a> · <span data-i18n="beforeBreach">Before a Breach</span></div>
+  <h1 data-i18n-html="h1">The attack surface is a <span class="r">living</span> three dimensional figure.</h1>
+  <p class="sub" data-i18n="sub">Asset Categories on one axis, Attack Tactics &amp; Techniques on another, Cyber Risk as height. The colors are not fixed. Risk rises and falls across the surface in real time, peaks erupt where exposure concentrates, and the blue fog of the unknown spreads faster than anyone is watching.</p>
   <a class="acronym" href="https://cybersecuritycompass.github.io/crml/" target="_blank" rel="noopener">CRML</a>
   <div class="rule"></div>
 
   <canvas id="c" width="1280" height="760" aria-label="Animated 3D attack surface terrain"></canvas>
 
   <div class="controls">
-    <button id="play" aria-pressed="true">Pause</button>
-    <button id="reset">Reset</button>
-    <button id="toggleLegend" aria-pressed="true">Hide legend on chart</button>
+    <button id="play" aria-pressed="true" data-i18n="pause">Pause</button>
+    <button id="reset" data-i18n="reset">Reset</button>
+    <button id="toggleLegend" aria-pressed="true" data-i18n="hideLegend">Hide legend on chart</button>
     <div class="speed">
-      <label for="spd">Speed</label>
+      <label for="spd" data-i18n="speed">Speed</label>
       <input id="spd" type="range" min="0.25" max="2.5" step="0.25" value="1" aria-label="Animation speed"/>
       <span id="spdv">1.0&times;</span>
     </div>
   </div>
 
   <div class="legend">
-    <span><span class="sw" style="background:#3E6B45"></span>low risk, the wide plain</span>
-    <span><span class="sw" style="background:#C9962E"></span>elevated, the broad mass</span>
-    <span><span class="sw" style="background:#C0241F"></span>sharp peaks, concentrated risk</span>
-    <span><span class="sw" style="background:#2563B0"></span>unknown surface, not yet discovered</span>
+    <span><span class="sw" style="background:#3E6B45"></span><span data-i18n="legLow">low risk, the wide plain</span></span>
+    <span><span class="sw" style="background:#C9962E"></span><span data-i18n="legElev">elevated, the broad mass</span></span>
+    <span><span class="sw" style="background:#C0241F"></span><span data-i18n="legPeak">sharp peaks, concentrated risk</span></span>
+    <span><span class="sw" style="background:#2563B0"></span><span data-i18n="legUnknown">unknown surface, not yet discovered</span></span>
   </div>
 
+
   <div class="foot">
-    <p class="lead">Cyber Risk is never still. By the time a periodic snapshot is read, the surface it described has already changed shape.</p>
-    <p class="tag" style="margin-top:16px;">A living surface is read continuously, asset by asset. That continuous reading is part of the Cyber Risk Management Lifecycle (CRML).</p>
-    <p class="tag" style="margin-top:6px;">Explore the interactive CRML: <a href="https://cybersecuritycompass.github.io/crml/" style="color:#E10600;text-decoration:none;">https://cybersecuritycompass.github.io/crml/</a></p>
+    <p class="lead" data-i18n="footLead">Cyber Risk is never still. By the time a periodic snapshot is read, the surface it described has already changed shape.</p>
+    <p class="tag" style="margin-top:16px;" data-i18n="footTag">A living surface is read continuously, asset by asset. That continuous reading is part of the Cyber Risk Management Lifecycle (CRML).</p>
+    <p class="tag" style="margin-top:6px;"><span data-i18n="footExplore">Explore the interactive CRML:</span> <a href="https://cybersecuritycompass.github.io/crml/" style="color:#E10600;text-decoration:none;">https://cybersecuritycompass.github.io/crml/</a></p>
   </div>
 </div>
 
 <script>
+// ===== Multilingual support (EN / ES / PT) =====
+const I18N = {
+  en: {
+    beforeBreach: 'Before a Breach',
+    h1: 'The attack surface is a <span class="r">living</span> three dimensional figure.',
+    sub: 'Asset Categories on one axis, Attack Tactics &amp; Techniques on another, Cyber Risk as height. The colors are not fixed. Risk rises and falls across the surface in real time, peaks erupt where exposure concentrates, and the blue fog of the unknown spreads faster than anyone is watching.',
+    pause: 'Pause', play: 'Play', reset: 'Reset',
+    hideLegend: 'Hide legend on chart', showLegend: 'Show legend on chart',
+    speed: 'Speed',
+    legLow: 'low risk, the wide plain',
+    legElev: 'elevated, the broad mass',
+    legPeak: 'sharp peaks, concentrated risk',
+    legUnknown: 'unknown surface, not yet discovered',
+    footLead: 'Cyber Risk is never still. By the time a periodic snapshot is read, the surface it described has already changed shape.',
+    footTag: 'A living surface is read continuously, asset by asset. That continuous reading is part of the Cyber Risk Management Lifecycle (CRML).',
+    footExplore: 'Explore the interactive CRML:',
+    // canvas
+    axisAssets: 'Asset Categories',
+    assetLines: ['endpoints, human and machine identities,','servers, cloud workloads, data stores,','containers, clusters, network components,','APIs, MCP connections, third-party','integrations, LLM models, agents'],
+    axisAttacks: 'Attack Tactics & Techniques',
+    attackLines: ['100+ potential attack paths per asset type,','including identity compromise, supply-chain','threats, prompt injection, model manipulation,','lateral movement, data exfiltration, and abuse','of agent autonomy and tool access'],
+    axisRisk1: 'Cyber', axisRisk2: 'Risk',
+    cLegLow: 'low risk, the wide plain',
+    cLegElev: 'elevated, the broad mass',
+    cLegPeak: 'sharp peaks, concentrated risk',
+    cLegUnknown: 'blue fog, unknown surface not yet discovered',
+  },
+  es: {
+    beforeBreach: 'Antes de una Brecha',
+    h1: 'La superficie de ataque es una figura tridimensional <span class="r">viva</span>.',
+    sub: 'Categorías de Activos en un eje, Tácticas y Técnicas de Ataque en otro, el Ciber Riesgo como altura. Los colores no son fijos. El riesgo sube y baja por la superficie en tiempo real, los picos brotan donde se concentra la exposición, y la niebla azul de lo desconocido se expande más rápido de lo que nadie observa.',
+    pause: 'Pausar', play: 'Reproducir', reset: 'Reiniciar',
+    hideLegend: 'Ocultar leyenda en el gráfico', showLegend: 'Mostrar leyenda en el gráfico',
+    speed: 'Velocidad',
+    legLow: 'riesgo bajo, la llanura amplia',
+    legElev: 'elevado, la masa extensa',
+    legPeak: 'picos agudos, riesgo concentrado',
+    legUnknown: 'superficie desconocida, aún no descubierta',
+    footLead: 'El Ciber Riesgo nunca está quieto. Para cuando se lee una instantánea periódica, la superficie que describía ya ha cambiado de forma.',
+    footTag: 'Una superficie viva se lee de forma continua, activo por activo. Esa lectura continua es parte del Ciclo de Vida de Gestión del Ciber Riesgo (CRML).',
+    footExplore: 'Explore el CRML interactivo:',
+    axisAssets: 'Categorías de Activos',
+    assetLines: ['endpoints, identidades humanas y de máquina,','servidores, cargas en la nube, almacenes de datos,','contenedores, clústeres, componentes de red,','APIs, conexiones MCP, integraciones','de terceros, modelos LLM, agentes'],
+    axisAttacks: 'Tácticas y Técnicas de Ataque',
+    attackLines: ['más de 100 rutas de ataque por tipo de activo,','incluyendo compromiso de identidad, amenazas de','cadena de suministro, inyección de prompts,','manipulación de modelos, movimiento lateral,','exfiltración de datos y abuso de la autonomía de agentes'],
+    axisRisk1: 'Ciber', axisRisk2: 'Riesgo',
+    cLegLow: 'riesgo bajo, la llanura amplia',
+    cLegElev: 'elevado, la masa extensa',
+    cLegPeak: 'picos agudos, riesgo concentrado',
+    cLegUnknown: 'niebla azul, superficie desconocida aún no descubierta',
+  },
+  pt: {
+    beforeBreach: 'Antes de uma Brecha',
+    h1: 'A superfície de ataque é uma figura tridimensional <span class="r">viva</span>.',
+    sub: 'Categorias de Ativos em um eixo, Táticas e Técnicas de Ataque em outro, o Ciber Risco como altura. As cores não são fixas. O risco sobe e desce pela superfície em tempo real, os picos surgem onde a exposição se concentra, e a névoa azul do desconhecido se espalha mais rápido do que qualquer um observa.',
+    pause: 'Pausar', play: 'Reproduzir', reset: 'Reiniciar',
+    hideLegend: 'Ocultar legenda no gráfico', showLegend: 'Mostrar legenda no gráfico',
+    speed: 'Velocidade',
+    legLow: 'risco baixo, a planície ampla',
+    legElev: 'elevado, a massa ampla',
+    legPeak: 'picos agudos, risco concentrado',
+    legUnknown: 'superfície desconhecida, ainda não descoberta',
+    footLead: 'O Ciber Risco nunca está parado. Quando um retrato periódico é lido, a superfície que ele descrevia já mudou de forma.',
+    footTag: 'Uma superfície viva é lida continuamente, ativo por ativo. Essa leitura contínua faz parte do Ciclo de Vida de Gestão do Ciber Risco (CRML).',
+    footExplore: 'Explore o CRML interativo:',
+    axisAssets: 'Categorias de Ativos',
+    assetLines: ['endpoints, identidades humanas e de máquina,','servidores, cargas em nuvem, repositórios de dados,','contêineres, clusters, componentes de rede,','APIs, conexões MCP, integrações','de terceiros, modelos LLM, agentes'],
+    axisAttacks: 'Táticas e Técnicas de Ataque',
+    attackLines: ['mais de 100 caminhos de ataque por tipo de ativo,','incluindo comprometimento de identidade, ameaças de','cadeia de suprimentos, injeção de prompts,','manipulação de modelos, movimento lateral,','exfiltração de dados e abuso da autonomia de agentes'],
+    axisRisk1: 'Ciber', axisRisk2: 'Risco',
+    cLegLow: 'risco baixo, a planície ampla',
+    cLegElev: 'elevado, a massa ampla',
+    cLegPeak: 'picos agudos, risco concentrado',
+    cLegUnknown: 'névoa azul, superfície desconhecida ainda não descoberta',
+  }
+};
+
+let currentLang = 'en';
+let T = I18N.en;
+
+function applyLanguage(lang){
+  if(!I18N[lang]) lang = 'en';
+  currentLang = lang;
+  T = I18N[lang];
+  document.documentElement.lang = lang;
+  // text nodes
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if(T[k] !== undefined) el.textContent = T[k];
+  });
+  // html nodes
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const k = el.getAttribute('data-i18n-html');
+    if(T[k] !== undefined) el.innerHTML = T[k];
+  });
+  // dynamic button labels reflecting current state
+  const pb = document.getElementById('play');
+  if(pb) pb.textContent = playing ? T.pause : T.play;
+  const lb = document.getElementById('toggleLegend');
+  if(lb) lb.textContent = showLegend ? T.hideLegend : T.showLegend;
+  // selector active state
+  document.querySelectorAll('.lang-selector button').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+  });
+  // redraw canvas with new labels even when paused
+  if(typeof draw === 'function' && !playing) draw();
+}
+
+function detectLang(){
+  const nav = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'en'];
+  for(const l of nav){
+    const code = (l || '').slice(0,2).toLowerCase();
+    if(code === 'es' || code === 'pt' || code === 'en') return code;
+  }
+  return 'en';
+}
+
 const cv = document.getElementById('c');
 const ctx = cv.getContext('2d');
 const W = cv.width, H = cv.height;   // logical drawing units (unchanged)
@@ -327,34 +473,30 @@ function draw(){
   const flL=iso(NX-1,NY-1,0), flR=iso(0,NY-1,0);
   // asset diversity (front-right)
   arrow(frL[0],frL[1]+10, frR[0],frR[1]+10);
-  label('Asset Categories', (frL[0]+frR[0])/2+64, (frL[1]+frR[1])/2+4, '#E8E8EA',16,'700','left');
-  label('endpoints, human and machine identities,', (frL[0]+frR[0])/2+64,(frL[1]+frR[1])/2+24,'#9AA0AA',12,'400','left');
-  label('servers, cloud workloads, data stores,', (frL[0]+frR[0])/2+64,(frL[1]+frR[1])/2+40,'#9AA0AA',12,'400','left');
-  label('containers, clusters, network components,', (frL[0]+frR[0])/2+64,(frL[1]+frR[1])/2+56,'#9AA0AA',12,'400','left');
-  label('APIs, MCP connections, third-party', (frL[0]+frR[0])/2+64,(frL[1]+frR[1])/2+72,'#9AA0AA',12,'400','left');
-  label('integrations, LLM models, agents', (frL[0]+frR[0])/2+64,(frL[1]+frR[1])/2+88,'#9AA0AA',12,'400','left');
+  label(T.axisAssets, (frL[0]+frR[0])/2+64, (frL[1]+frR[1])/2+4, '#E8E8EA',16,'700','left');
+  for(let k=0;k<T.assetLines.length;k++){
+    label(T.assetLines[k], (frL[0]+frR[0])/2+64,(frL[1]+frR[1])/2+24+k*16,'#9AA0AA',12,'400','left');
+  }
   // attack techniques (front-left)
   arrow(flL[0],flL[1]+10, flR[0],flR[1]+10);
-  label('Attack Tactics & Techniques', (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+44,'#E8E8EA',16,'700','left');
-  label('100+ potential attack paths per asset type,', (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+64,'#9AA0AA',12,'400','left');
-  label('including identity compromise, supply-chain', (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+80,'#9AA0AA',12,'400','left');
-  label('threats, prompt injection, model manipulation,', (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+96,'#9AA0AA',12,'400','left');
-  label('lateral movement, data exfiltration, and abuse', (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+112,'#9AA0AA',12,'400','left');
-  label('of agent autonomy and tool access', (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+128,'#9AA0AA',12,'400','left');
+  label(T.axisAttacks, (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+44,'#E8E8EA',16,'700','left');
+  for(let k=0;k<T.attackLines.length;k++){
+    label(T.attackLines[k], (flL[0]+flR[0])/2-250,(flL[1]+flR[1])/2+64+k*16,'#9AA0AA',12,'400','left');
+  }
   // vertical risk axis
   const bc=iso(0,NY-1,0);
   arrow(bc[0]-26,bc[1], bc[0]-26,bc[1]-290);
-  label('Cyber', bc[0]-40, bc[1]-198, '#E8E8EA',16,'700','right');
-  label('Risk', bc[0]-40, bc[1]-180, '#E8E8EA',16,'700','right');
+  label(T.axisRisk1, bc[0]-40, bc[1]-198, '#E8E8EA',16,'700','right');
+  label(T.axisRisk2, bc[0]-40, bc[1]-180, '#E8E8EA',16,'700','right');
 
   // legend, upper-right of the surface (matches the static images), toggleable
   if(showLegend){
     const legX = W-330, legY0 = 70;
     const legItems = [
-      ['#3E6B45','low risk, the wide plain'],
-      ['#C9962E','elevated, the broad mass'],
-      ['#C0241F','sharp peaks, concentrated risk'],
-      ['#2563B0','blue fog, unknown surface not yet discovered'],
+      ['#3E6B45',T.cLegLow],
+      ['#C9962E',T.cLegElev],
+      ['#C0241F',T.cLegPeak],
+      ['#2563B0',T.cLegUnknown],
     ];
     for(let k=0;k<legItems.length;k++){
       const yy = legY0 + k*24;
@@ -402,22 +544,28 @@ function frame(now){
 const playBtn=document.getElementById('play');
 playBtn.addEventListener('click',()=>{
   playing=!playing;
-  playBtn.textContent=playing?'Pause':'Play';
+  playBtn.textContent=playing?T.pause:T.play;
   playBtn.setAttribute('aria-pressed',String(playing));
 });
 document.getElementById('reset').addEventListener('click',()=>{ t=0; });
 const legendBtn=document.getElementById('toggleLegend');
 legendBtn.addEventListener('click',()=>{
   showLegend=!showLegend;
-  legendBtn.textContent=showLegend?'Hide legend on chart':'Show legend on chart';
+  legendBtn.textContent=showLegend?T.hideLegend:T.showLegend;
   legendBtn.setAttribute('aria-pressed',String(showLegend));
   if(!playing) draw();
 });
 const spd=document.getElementById('spd'), spdv=document.getElementById('spdv');
 spd.addEventListener('input',()=>{ speed=parseFloat(spd.value); spdv.innerHTML=speed.toFixed(1)+'&times;'; });
 
-if(!playing){ playBtn.textContent='Play'; draw(); }
+if(!playing){ playBtn.textContent=T.play; draw(); }
 requestAnimationFrame(frame);
+
+// language selector wiring + browser autodetect (run once everything is defined)
+document.querySelectorAll('.lang-selector button').forEach(b => {
+  b.addEventListener('click', () => applyLanguage(b.getAttribute('data-lang')));
+});
+applyLanguage(detectLang());
 </script>
 </body>
 </html>
