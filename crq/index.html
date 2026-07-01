@@ -82,7 +82,12 @@
   .node rect{transition:transform .15s ease, filter .15s ease}
   .node:hover .nbox,.node:focus-visible .nbox{filter:brightness(1.08)}
   .node .ring{fill:none;stroke:var(--accent);stroke-width:2.5;opacity:0;transition:opacity .15s ease}
-  .node.active .ring{opacity:1}
+  @keyframes ring-pulse{
+    0%{stroke-width:2.5;opacity:1}
+    50%{stroke-width:5;opacity:.45}
+    100%{stroke-width:2.5;opacity:1}
+  }
+  .node.active .ring{opacity:1;animation:ring-pulse 1.4s ease-in-out infinite}
   .node:hover .ring{opacity:.5}
   .nlabel{font-family:"Space Grotesk",sans-serif;font-weight:600;pointer-events:none}
   .nsub{font-family:"Inter",sans-serif;font-weight:500;pointer-events:none}
