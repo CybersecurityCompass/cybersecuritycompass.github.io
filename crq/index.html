@@ -54,13 +54,27 @@
     line-height:1.02;letter-spacing:-.02em;margin:0 0 14px;
   }
   .lede{color:var(--ink-dim);max-width:60ch;font-size:16.5px;margin:0}
+  .lede-action{
+    color:var(--ink);max-width:60ch;font-size:15px;font-weight:500;
+    margin:10px 0 0;padding:10px 16px;border-radius:10px;
+    background:rgba(255,106,44,.08);border:1px solid rgba(255,106,44,.25);
+    display:inline-block;
+  }
+  .lede-action a{
+    color:var(--accent-soft);font-weight:700;text-decoration:underline;
+    text-decoration-color:rgba(255,138,92,.4);text-underline-offset:3px;
+  }
+  .lede-action a:hover{text-decoration-color:var(--accent-soft)}
   .equation{
-    display:inline-flex;align-items:center;gap:14px;margin-top:24px;
+    display:inline-flex;align-items:center;gap:14px;margin-top:0;
     padding:11px 20px;border:1px solid var(--panel-edge);border-radius:999px;
     background:var(--panel);font-family:"Space Grotesk",sans-serif;
   }
   .equation b{color:var(--accent-soft);font-weight:600}
   .equation .x{color:var(--ink-faint)}
+  .equations-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+  .equation.secondary{opacity:.9}
+  .equation.secondary #eq-loss{color:#F19A38;font-weight:700}
 
   /* ---------- layout ---------- */
   .stage{display:grid;grid-template-columns:1fr 340px;gap:24px;margin-top:34px;align-items:start}
@@ -172,6 +186,33 @@
 
   footer{margin-top:46px;border-top:1px solid var(--panel-edge);padding-top:22px;color:var(--ink-faint);font-size:13px;max-width:78ch}
   footer b{color:var(--ink-dim)}
+  .glossary{margin-top:40px}
+  .glossary h3{
+    font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:20px;
+    letter-spacing:-.01em;margin:0 0 22px;color:var(--ink);
+  }
+  .gcat{margin-bottom:28px}
+  .gcat h4{
+    font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--gc,var(--accent-soft));margin:0 0 12px;
+    padding-bottom:8px;border-bottom:1px solid var(--panel-edge);
+  }
+  .glossary-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:14px 20px;margin:0;
+  }
+  .gterm{
+    background:var(--gc-bg,var(--panel));
+    border:1px solid var(--gc-border,var(--panel-edge));
+    border-radius:12px;padding:14px 16px;
+  }
+  .gterm dt{
+    font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:14px;
+    color:var(--gc,var(--ink));margin:0 0 5px;
+  }
+  .gterm dd{
+    margin:0;font-size:13px;color:var(--ink-dim);line-height:1.5;
+  }
   .lang-bar{display:flex;gap:8px;position:fixed;top:18px;right:24px;z-index:999}
   .lang-btn{
     font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.14em;
@@ -189,8 +230,12 @@
     <div class="lang-bar"><button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button><button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button><button class="lang-btn" data-lang="pt" onclick="setLang('pt')">PT</button></div>
     <p class="eyebrow" id="ui-eyebrow">Cyber Risk Quantification · Reference Model</p>
     <h1 id="ui-title">How cyber risk is quantified</h1>
-    <p class="lede" id="ui-lede">A scenario-based model that translates technical threats into a financial range. Three assessments feed two factors of a single equation. Select any node to see what it does and where it flows.</p>
-    <div class="equation"><span style="color:#E63A37;font-weight:700" id="eq-risk">Risk</span><span class="x">=</span><span id="eq-likelihood">Likelihood</span><span class="x">×</span><span id="eq-impact">Impact</span></div>
+    <p class="lede" id="ui-lede">A scenario-based model that translates technical threats into a financial range. Three assessments feed two factors of a single equation.</p>
+    <p class="lede-action" id="ui-lede-action">Select any node to see what it does and where it flows. A full <a href="#glossary" id="ui-glossary-link">glossary</a> is available at the bottom of the page.</p>
+    <div class="equations-row">
+      <div class="equation"><span style="color:#E63A37;font-weight:700" id="eq-risk">Risk</span><span class="x">=</span><span id="eq-likelihood">Likelihood</span><span class="x">×</span><span id="eq-impact">Impact</span></div>
+      <div class="equation secondary"><span id="eq-loss">Loss</span><span class="x">=</span><span id="eq-eventloss">Event Loss</span><span class="x">+</span><span id="eq-peloss">Post-Event Loss</span></div>
+    </div>
   </header>
 
   <div class="stage">
@@ -412,10 +457,10 @@
       <div class="feeds" id="p-feeds"><b id="ui-tip-label">Tip:</b> <span id="ui-tip-text">the three black nodes are the engines. Everything light feeds or results from them.</span></div>
     </aside>
   </div>
-
-  <footer id="ui-footer">
-    Parameters are expressed as three-point tuples (<b>min · most&nbsp;likely · max</b>) following a Beta-PERT distribution, giving the simulator a realistic range rather than a single guess. Likelihood and impact are then simulated jointly to generate the quantified result. This diagram is a generic, vendor-neutral rendering of a scenario-based CRQ methodology.
-  </footer>
+  <section class="glossary" id="glossary">
+    <h3 id="gl-heading">Glossary</h3>
+    <div id="gl-container"></div>
+  </section>
 </div>
 
 <script>
@@ -424,7 +469,8 @@ const UI = {
   en:{
     eyebrow:"Cyber Risk Quantification · Reference Model",
     title:"How cyber risk is quantified",
-    lede:"A scenario-based model that translates technical threats into a financial range. Three assessments feed two factors of a single equation. Select any node to see what it does and where it flows.",
+    lede:"A scenario-based model that translates technical threats into a financial range. Three assessments feed two factors of a single equation.",
+    ledeAction:'Select any node to see what it does and where it flows. A full <a href="#glossary" id="ui-glossary-link">glossary</a> is available at the bottom of the page.',
     hint:"click a node →",
     tipLabel:"Tip:",
     tipText:"the three black nodes are the engines. Everything light feeds or results from them.",
@@ -432,14 +478,14 @@ const UI = {
     defaultTitle:"The assessment model",
     defaultP1:"Quantified risk is the product of how likely a threat is and how much it could cost. The model splits that into two branches and resolves each with dedicated assessments, then runs the parameters through tens of thousands of Monte Carlo rounds to produce a financial range with a confidence interval.",
     defaultP2:"Select any node in the diagram to dig in.",
-    eqRisk:"Risk", eqLikelihood:"Likelihood", eqImpact:"Impact",
+    eqRisk:"Risk", eqLikelihood:"Likelihood", eqImpact:"Impact", eqLoss:"Loss", eqEventLoss:"Event Loss", eqPELoss:"Post-Event Loss",
     lgOutput:"Quantified risk", lgLike:"Likelihood factor", lgLoss:"Impact factor", lgEngine:"Assessment engine", lgInput:"Data input",
-    footer:`Parameters are expressed as three-point tuples (<b>min · most&nbsp;likely · max</b>) following a Beta-PERT distribution, giving the simulator a realistic range rather than a single guess. Likelihood and impact are then simulated jointly to generate the quantified result. This diagram is a generic, vendor-neutral rendering of a scenario-based CRQ methodology.`
   },
   es:{
     eyebrow:"Cuantificación del Ciber Riesgo · Modelo de Referencia",
     title:"Cómo se cuantifica el ciber riesgo",
-    lede:"Un modelo basado en escenarios que traduce amenazas técnicas en un rango financiero. Tres evaluaciones alimentan dos factores de una sola ecuación. Selecciona un nodo para ver qué hace y hacia dónde fluye.",
+    lede:"Un modelo basado en escenarios que traduce amenazas técnicas en un rango financiero. Tres evaluaciones alimentan dos factores de una sola ecuación.",
+    ledeAction:'Selecciona un nodo para ver qué hace y hacia dónde fluye. Hay un <a href="#glossary" id="ui-glossary-link">glosario</a> completo disponible al final de la página.',
     hint:"haz clic en un nodo →",
     tipLabel:"Consejo:",
     tipText:"los tres nodos negros son los motores. Todo lo demás alimenta o resulta de ellos.",
@@ -447,14 +493,14 @@ const UI = {
     defaultTitle:"El modelo de evaluación",
     defaultP1:"El riesgo cuantificado es el producto de la probabilidad de una amenaza y su impacto potencial. El modelo se divide en dos ramas y las resuelve con evaluaciones dedicadas, luego ejecuta los parámetros a través de decenas de miles de rondas de Monte Carlo para producir un rango financiero con intervalo de confianza.",
     defaultP2:"Selecciona cualquier nodo en el diagrama para profundizar.",
-    eqRisk:"Riesgo", eqLikelihood:"Probabilidad", eqImpact:"Impacto",
+    eqRisk:"Riesgo", eqLikelihood:"Probabilidad", eqImpact:"Impacto", eqLoss:"Pérdida", eqEventLoss:"Pérdida por Evento", eqPELoss:"Pérdida Post-Evento",
     lgOutput:"Ciber riesgo cuantificado", lgLike:"Factor de probabilidad", lgLoss:"Factor de impacto", lgEngine:"Motor de evaluación", lgInput:"Entrada de datos",
-    footer:`Los parámetros se expresan como tuplas de tres puntos (<b>mín · más&nbsp;probable · máx</b>) siguiendo una distribución Beta-PERT, proporcionando al simulador un rango realista en lugar de una estimación única. La probabilidad y el impacto se simulan conjuntamente para generar el resultado cuantificado. Este diagrama es una representación genérica y neutral de una metodología CRQ basada en escenarios.`
   },
   pt:{
     eyebrow:"Quantificação do Ciber Risco · Modelo de Referência",
     title:"Como o ciber risco é quantificado",
-    lede:"Um modelo baseado em cenários que traduz ameaças técnicas em um intervalo financeiro. Três avaliações alimentam dois fatores de uma única equação. Selecione um nó para ver o que ele faz e para onde flui.",
+    lede:"Um modelo baseado em cenários que traduz ameaças técnicas em um intervalo financeiro. Três avaliações alimentam dois fatores de uma única equação.",
+    ledeAction:'Selecione um nó para ver o que ele faz e para onde flui. Há um <a href="#glossary" id="ui-glossary-link">glossário</a> completo disponível no final da página.',
     hint:"clique em um nó →",
     tipLabel:"Dica:",
     tipText:"os três nós pretos são os motores. Tudo o mais alimenta ou resulta deles.",
@@ -462,9 +508,8 @@ const UI = {
     defaultTitle:"O modelo de avaliação",
     defaultP1:"O risco quantificado é o produto da probabilidade de uma ameaça e do seu impacto potencial. O modelo divide-se em dois ramos, resolve cada um com avaliações dedicadas e executa os parâmetros através de dezenas de milhares de rodadas de Monte Carlo para produzir um intervalo financeiro com intervalo de confiança.",
     defaultP2:"Selecione qualquer nó no diagrama para aprofundar.",
-    eqRisk:"Risco", eqLikelihood:"Probabilidade", eqImpact:"Impacto",
+    eqRisk:"Risco", eqLikelihood:"Probabilidade", eqImpact:"Impacto", eqLoss:"Perda", eqEventLoss:"Perda por Evento", eqPELoss:"Perda Pós-Evento",
     lgOutput:"Ciber risco quantificado", lgLike:"Fator de probabilidade", lgLoss:"Fator de impacto", lgEngine:"Motor de avaliação", lgInput:"Entrada de dados",
-    footer:`Os parâmetros são expressos como tuplas de três pontos (<b>mín · mais&nbsp;provável · máx</b>) seguindo uma distribuição Beta-PERT, fornecendo ao simulador um intervalo realista em vez de uma estimativa única. Probabilidade e impacto são simulados conjuntamente para gerar o resultado quantificado. Este diagrama é uma representação genérica e neutra de uma metodologia CRQ baseada em cenários.`
   }
 };
 
@@ -474,10 +519,10 @@ const DATA = {
     "quantified-risk":{tag:"Output",title:"Quantified Cyber Risk",body:`<p>The final result: a monetary range for a given risk scenario, expressed with a confidence interval. It is the product of the two branches below it.</p><p>The simulator feeds four parameters: threat frequency, cyber risk exposure, event loss, and post-event loss, through tens of thousands of Monte Carlo rounds to produce it.</p>`,feeds:"Built from <b>Likelihood</b> × <b>Loss Impact</b>."},
     "likelihood":{tag:"Likelihood Factor",title:"Likelihood",body:`<p>The probability that threats successfully exploit weaknesses (CVEs or misconfigurations) given the environment's architecture and existing controls.</p><p>Assessed through two parameters:</p><ul><li>Threat frequency</li><li>Cyber risk exposure</li></ul>`,feeds:"Resolved by the <b>Attack</b> and <b>Control</b> assessments."},
     "loss-impact":{tag:"Impact Factor",title:"Loss Impact",body:`<p>The extent of damage a risk event can cause, depending on which assets are hit and how the organization is structured.</p><p>Categorized into two parameters:</p><ul><li>Event loss: immediate damage</li><li>Post-event loss: long-term consequences</li></ul>`,feeds:"Resolved by the <b>Impact</b> assessment."},
-    "threat-frequency":{tag:"Parameter for Likelihood",title:"Threat Frequency",body:`<p>How often attacks of a given threat type could occur. Derived from the attack parameter by fitting a Poisson distribution.</p><div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div><p>The tuple captures the minimum, most likely, and maximum number of attacks for the designated threat type.</p>`,feeds:"Output of the <b>Attack Assessment</b>; rolls up into Likelihood."},
-    "cyber-risk-exposure":{tag:"Parameter for Likelihood",title:"Cyber Risk Exposure",body:`<p>The degree of exposure to a threat for the assets in scope, scored as a float between 0 and 1.</p><div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div><p>Mature prevention controls lower this value; disabled controls raise it.</p>`,feeds:"Shaped by the <b>Control Assessment</b>; rolls up into Likelihood."},
-    "event-loss":{tag:"Parameter for Loss Impact",title:"Event Loss",body:`<p>Immediate damage from a scenario, summed across mapped loss categories such as:</p><ul><li>Business interruption</li><li>Incident response</li><li>Incident recovery</li><li>Lost productivity</li></ul><div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div>`,feeds:"Output of the <b>Impact Assessment</b>; rolls up into Loss Impact."},
-    "post-event-loss":{tag:"Parameter for Loss Impact",title:"Post-Event Loss",body:`<p>Long-term consequences after the event, summed across categories such as:</p><ul><li>Company response &amp; customer liabilities</li><li>Regulatory penalties</li><li>Reputation &amp; market value loss</li><li>Customer attrition</li></ul><div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div>`,feeds:"Output of the <b>Impact Assessment</b>; rolls up into Loss Impact."},
+    "threat-frequency":{tag:"Parameter for Likelihood",title:"Threat Frequency",body:`<p>How often attacks of a given threat type could occur. Derived from the attack parameter by fitting a Poisson distribution.</p><div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div><p>These three numbers describe a range rather than a single guess: <b>min</b> is the optimistic case (fewest attacks expected), <b>most_likely</b> is the typical, best-estimate case, and <b>max</b> is the pessimistic case (most attacks expected). Feeding this range into the simulation, instead of one fixed number, lets the model reflect real uncertainty about the future.</p>`,feeds:"Output of the <b>Attack Assessment</b>; rolls up into Likelihood."},
+    "cyber-risk-exposure":{tag:"Parameter for Likelihood",title:"Cyber Risk Exposure",body:`<p>The degree of exposure to a threat for the assets in scope, scored as a float between 0 and 1.</p><div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div><p>Mature prevention controls lower this value; disabled controls raise it. Because control status can shift and evidence is imperfect, exposure is expressed as a range: a best-case (<b>min</b>), a realistic (<b>most_likely</b>), and a worst-case (<b>max</b>) exposure level, rather than one exact number.</p>`,feeds:"Shaped by the <b>Control Assessment</b>; rolls up into Likelihood."},
+    "event-loss":{tag:"Parameter for Loss Impact",title:"Event Loss",body:`<p>Immediate damage from a scenario, summed across mapped loss categories such as:</p><ul><li>Business interruption</li><li>Incident response</li><li>Incident recovery</li><li>Lost productivity</li></ul><div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div><p>Because a real incident's cost is never known in advance, each category is estimated as a range: a low, contained cost (<b>min</b>), a realistic expected cost (<b>most_likely</b>), and a severe, worst-case cost (<b>max</b>). Summing these ranges gives the overall Event Loss its own realistic spread.</p>`,feeds:"Output of the <b>Impact Assessment</b>; rolls up into Loss Impact."},
+    "post-event-loss":{tag:"Parameter for Loss Impact",title:"Post-Event Loss",body:`<p>Long-term consequences after the event, summed across categories such as:</p><ul><li>Company response &amp; customer liabilities</li><li>Regulatory penalties</li><li>Reputation &amp; market value loss</li><li>Customer attrition</li></ul><div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div><p>These long-tail costs are especially uncertain, so each is captured as a range: a mild outcome (<b>min</b>), an expected outcome (<b>most_likely</b>), and a severe outcome (<b>max</b>), rather than a single number that would hide how much the real cost could vary.</p>`,feeds:"Output of the <b>Impact Assessment</b>; rolls up into Loss Impact."},
     "attack-assessment":{tag:"Assessment Engine for Likelihood",title:"Attack Assessment",body:`<p>Estimates the attack parameter and threat frequency. It combines three data inputs, then adjusts the raw result for control maturity, especially detection efficacy, since visible attacks are more likely to fail.</p><ul><li>Global threat intelligence</li><li>Self-detection history (analysed over rolling time windows)</li><li>Peer reference from similar, anonymized profiles</li></ul>`,feeds:"Feeds <b>Threat Frequency</b> and <b>Cyber Risk Exposure</b>. Receives findings from <b>Control Assessment</b>."},
     "control-assessment":{tag:"Assessment Engine for Attack, Impact & Exposure",title:"Control Assessment",body:`<p>Maps exposures and controls to NIST SP 800-53 items, then sorts every control into six categories and models how they interact.</p><ul><li><b>Detection</b> → Threat Frequency</li><li><b>Prevention</b> → Cyber Risk Exposure</li><li><b>Recovery</b> → Event Loss</li><li><b>Mitigation</b> → Post-Event Loss</li><li><b>Support</b> &amp; <b>Procedure</b> → indirectly strengthen the other four</li></ul>`,feeds:"Its results flow into both the <b>Attack</b> and <b>Impact</b> assessments and set <b>Cyber Risk Exposure</b>."},
     "impact-assessment":{tag:"Assessment Engine for Loss Impact",title:"Impact Assessment",body:`<p>Evaluates event and post-event loss. It maps loss categories to the scenario, adjusts them for mitigation and recovery controls, then sums them.</p><p>Many categories are non-security (finance, legal, PR), so business data is gathered through structured questions and validated inputs.</p>`,feeds:"Produces <b>Event Loss</b> and <b>Post-Event Loss</b>. Uses <b>Control Assessment</b> findings and global impact intelligence."},
@@ -492,10 +537,10 @@ const DATA = {
     "quantified-risk":{tag:"Resultado",title:"Ciber Riesgo Cuantificado",body:`<p>El resultado final: un rango monetario para un escenario de riesgo dado, expresado con un intervalo de confianza. Es el producto de las dos ramas que lo componen.</p><p>El simulador procesa cuatro parámetros: frecuencia de amenaza, exposición al ciber riesgo, pérdida por evento y pérdida post-evento, a través de decenas de miles de rondas de Monte Carlo.</p>`,feeds:"Construido a partir de <b>Probabilidad</b> × <b>Impacto de Pérdida</b>."},
     "likelihood":{tag:"Factor de Probabilidad",title:"Probabilidad",body:`<p>La probabilidad de que las amenazas exploten con éxito las debilidades (CVEs o configuraciones incorrectas) dada la arquitectura del entorno y los controles existentes.</p><p>Se evalúa a través de dos parámetros:</p><ul><li>Frecuencia de amenaza</li><li>Exposición al ciber riesgo</li></ul>`,feeds:"Resuelta por las evaluaciones de <b>Ataque</b> y <b>Control</b>."},
     "loss-impact":{tag:"Factor de Impacto",title:"Impacto de Pérdida",body:`<p>La magnitud del daño que puede causar un evento de riesgo, dependiendo de qué activos son afectados y cómo está estructurada la organización.</p><p>Categorizado en dos parámetros:</p><ul><li>Pérdida por evento: daño inmediato</li><li>Pérdida post-evento: consecuencias a largo plazo</li></ul>`,feeds:"Resuelta por la evaluación de <b>Impacto</b>."},
-    "threat-frequency":{tag:"Parámetro para Probabilidad",title:"Frecuencia de Amenaza",body:`<p>Con qué frecuencia podrían ocurrir ataques de un tipo de amenaza dado. Se deriva del parámetro de ataque ajustando una distribución de Poisson.</p><div class="tuple"><code>min</code><code>más_probable</code><code>max</code></div><p>La tupla captura el mínimo, el más probable y el máximo número de ataques para el tipo de amenaza designado.</p>`,feeds:"Salida de la <b>Evaluación de Ataque</b>; se integra en Probabilidad."},
-    "cyber-risk-exposure":{tag:"Parámetro para Probabilidad",title:"Exposición al Ciber Riesgo",body:`<p>El grado de exposición a una amenaza para los activos en alcance, puntuado como un valor entre 0 y 1.</p><div class="tuple"><code>min</code><code>más_probable</code><code>max</code></div><p>Los controles de prevención maduros reducen este valor; los controles deshabilitados lo aumentan.</p>`,feeds:"Determinada por la <b>Evaluación de Control</b>; se integra en Probabilidad."},
-    "event-loss":{tag:"Parámetro para Impacto de Pérdida",title:"Pérdida por Evento",body:`<p>Daño inmediato de un escenario, sumado entre categorías de pérdida como:</p><ul><li>Interrupción del negocio</li><li>Respuesta al incidente</li><li>Recuperación del incidente</li><li>Pérdida de productividad</li></ul><div class="tuple"><code>min</code><code>más_probable</code><code>max</code></div>`,feeds:"Salida de la <b>Evaluación de Impacto</b>; se integra en Impacto de Pérdida."},
-    "post-event-loss":{tag:"Parámetro para Impacto de Pérdida",title:"Pérdida Post-Evento",body:`<p>Consecuencias a largo plazo tras el evento, sumadas entre categorías como:</p><ul><li>Respuesta corporativa y responsabilidades con clientes</li><li>Sanciones regulatorias</li><li>Pérdida de reputación y valor de mercado</li><li>Deserción de clientes</li></ul><div class="tuple"><code>min</code><code>más_probable</code><code>max</code></div>`,feeds:"Salida de la <b>Evaluación de Impacto</b>; se integra en Impacto de Pérdida."},
+    "threat-frequency":{tag:"Parámetro para Probabilidad",title:"Frecuencia de Amenaza",body:`<p>Con qué frecuencia podrían ocurrir ataques de un tipo de amenaza dado. Se deriva del parámetro de ataque ajustando una distribución de Poisson.</p><div class="tuple"><code>min</code><code>más_probable</code><code>max</code></div><p>Estos tres valores describen un rango en lugar de una única estimación: <b>min</b> es el caso optimista (menor cantidad de ataques esperados), <b>más_probable</b> es el caso típico y mejor estimado, y <b>max</b> es el caso pesimista (mayor cantidad de ataques esperados). Alimentar la simulación con este rango, en lugar de un número fijo, permite que el modelo refleje la incertidumbre real sobre el futuro.</p>`,feeds:"Salida de la <b>Evaluación de Ataque</b>; se integra en Probabilidad."},
+    "cyber-risk-exposure":{tag:"Parámetro para Probabilidad",title:"Exposición al Ciber Riesgo",body:`<p>El grado de exposición a una amenaza para los activos en alcance, puntuado como un valor entre 0 y 1.</p><div class="tuple"><code>min</code><code>más_probable</code><code>max</code></div><p>Los controles de prevención maduros reducen este valor; los controles deshabilitados lo aumentan. Como el estado de los controles puede cambiar y la evidencia no siempre es perfecta, la exposición se expresa como un rango: un nivel de exposición óptimo (<b>min</b>), uno realista (<b>más_probable</b>) y uno pesimista (<b>max</b>), en lugar de un único número exacto.</p>`,feeds:"Determinada por la <b>Evaluación de Control</b>; se integra en Probabilidad."},
+    "event-loss":{tag:"Parámetro para Impacto de Pérdida",title:"Pérdida por Evento",body:`<p>Daño inmediato de un escenario, sumado entre categorías de pérdida como:</p><ul><li>Interrupción del negocio</li><li>Respuesta al incidente</li><li>Recuperación del incidente</li><li>Pérdida de productividad</li></ul><div class="tuple"><code>min</code><code>más_probable</code><code>max</code></div><p>Como el costo real de un incidente nunca se conoce por adelantado, cada categoría se estima como un rango: un costo bajo y controlado (<b>min</b>), un costo esperado y realista (<b>más_probable</b>), y un costo severo en el peor caso (<b>max</b>). Sumar estos rangos le da a la Pérdida por Evento su propio rango realista.</p>`,feeds:"Salida de la <b>Evaluación de Impacto</b>; se integra en Impacto de Pérdida."},
+    "post-event-loss":{tag:"Parámetro para Impacto de Pérdida",title:"Pérdida Post-Evento",body:`<p>Consecuencias a largo plazo tras el evento, sumadas entre categorías como:</p><ul><li>Respuesta corporativa y responsabilidades con clientes</li><li>Sanciones regulatorias</li><li>Pérdida de reputación y valor de mercado</li><li>Deserción de clientes</li></ul><div class="tuple"><code>min</code><code>más_probable</code><code>max</code></div><p>Estos costos de largo plazo son especialmente incierto así que cada uno se captura como un rango: un resultado leve (<b>min</b>), un resultado esperado (<b>más_probable</b>) y un resultado severo (<b>max</b>), en lugar de un único número que ocultaría cuánto podría variar el costo real.</p>`,feeds:"Salida de la <b>Evaluación de Impacto</b>; se integra en Impacto de Pérdida."},
     "attack-assessment":{tag:"Motor de Evaluación para Probabilidad",title:"Evaluación de Ataque",body:`<p>Estima el parámetro de ataque y la frecuencia de amenaza. Combina tres fuentes de datos y ajusta el resultado bruto por madurez de controles, especialmente eficacia de detección, ya que los ataques visibles tienen más probabilidades de fallar.</p><ul><li>Inteligencia global de amenazas</li><li>Historial propio de detección (analizado en ventanas de tiempo)</li><li>Referencia de pares con perfiles similares y anonimizados</li></ul>`,feeds:"Alimenta <b>Frecuencia de Amenaza</b> y <b>Exposición al Ciber Riesgo</b>. Recibe resultados de la <b>Evaluación de Control</b>."},
     "control-assessment":{tag:"Motor de Evaluación para Ataque, Impacto y Exposición",title:"Evaluación de Control",body:`<p>Mapea exposiciones y controles a elementos NIST SP 800-53, luego clasifica cada control en seis categorías y modela sus interacciones.</p><ul><li><b>Detección</b> → Frecuencia de Amenaza</li><li><b>Prevención</b> → Exposición al Ciber Riesgo</li><li><b>Recuperación</b> → Pérdida por Evento</li><li><b>Mitigación</b> → Pérdida Post-Evento</li><li><b>Soporte</b> y <b>Procedimiento</b> → fortalecen indirectamente los otros cuatro</li></ul>`,feeds:"Sus resultados fluyen hacia las evaluaciones de <b>Ataque</b> e <b>Impacto</b> y establecen la <b>Exposición al Ciber Riesgo</b>."},
     "impact-assessment":{tag:"Motor de Evaluación para Impacto de Pérdida",title:"Evaluación de Impacto",body:`<p>Evalúa la pérdida por evento y post-evento. Mapea categorías de pérdida al escenario, las ajusta por controles de mitigación y recuperación, y las suma.</p><p>Muchas categorías no son de seguridad (finanzas, legal, relaciones públicas), por lo que los datos de negocio se recopilan mediante preguntas estructuradas.</p>`,feeds:"Produce <b>Pérdida por Evento</b> y <b>Pérdida Post-Evento</b>. Usa resultados de la <b>Evaluación de Control</b> e inteligencia global de impacto."},
@@ -510,10 +555,10 @@ const DATA = {
     "quantified-risk":{tag:"Resultado",title:"Ciber Risco Quantificado",body:`<p>O resultado final: um intervalo monetário para um cenário de risco específico, expresso com um intervalo de confiança. É o produto dos dois ramos abaixo dele.</p><p>O simulador processa quatro parâmetros: frequência de ameaça, exposição ao ciber risco, perda por evento e perda pós-evento, através de dezenas de milhares de rodadas de Monte Carlo.</p>`,feeds:"Construído a partir de <b>Probabilidade</b> × <b>Impacto de Perda</b>."},
     "likelihood":{tag:"Fator de Probabilidade",title:"Probabilidade",body:`<p>A probabilidade de que ameaças explorem com sucesso fraquezas (CVEs ou configurações incorretas) dada a arquitetura do ambiente e os controles existentes.</p><p>Avaliada por meio de dois parâmetros:</p><ul><li>Frequência de ameaça</li><li>Exposição ao ciber risco</li></ul>`,feeds:"Resolvida pelas avaliações de <b>Ataque</b> e <b>Controle</b>."},
     "loss-impact":{tag:"Fator de Impacto",title:"Impacto de Perda",body:`<p>A extensão do dano que um evento de risco pode causar, dependendo de quais ativos são afetados e como a organização está estruturada.</p><p>Categorizado em dois parâmetros:</p><ul><li>Perda por evento: dano imediato</li><li>Perda pós-evento: consequências de longo prazo</li></ul>`,feeds:"Resolvida pela avaliação de <b>Impacto</b>."},
-    "threat-frequency":{tag:"Parâmetro para Probabilidade",title:"Frequência de Ameaça",body:`<p>Com que frequência ataques de um determinado tipo de ameaça podem ocorrer. Derivada do parâmetro de ataque ajustando uma distribuição de Poisson.</p><div class="tuple"><code>min</code><code>mais_provável</code><code>max</code></div><p>A tupla captura o mínimo, o mais provável e o máximo número de ataques para o tipo de ameaça designado.</p>`,feeds:"Saída da <b>Avaliação de Ataque</b>; integra-se à Probabilidade."},
-    "cyber-risk-exposure":{tag:"Parâmetro para Probabilidade",title:"Exposição ao Ciber Risco",body:`<p>O grau de exposição a uma ameaça para os ativos em escopo, pontuado como um valor entre 0 e 1.</p><div class="tuple"><code>min</code><code>mais_provável</code><code>max</code></div><p>Controles de prevenção maduros reduzem este valor; controles desabilitados o aumentam.</p>`,feeds:"Determinada pela <b>Avaliação de Controle</b>; integra-se à Probabilidade."},
-    "event-loss":{tag:"Parâmetro para Impacto de Perda",title:"Perda por Evento",body:`<p>Dano imediato de um cenário, somado entre categorias de perda como:</p><ul><li>Interrupção de negócios</li><li>Resposta ao incidente</li><li>Recuperação do incidente</li><li>Perda de produtividade</li></ul><div class="tuple"><code>min</code><code>mais_provável</code><code>max</code></div>`,feeds:"Saída da <b>Avaliação de Impacto</b>; integra-se ao Impacto de Perda."},
-    "post-event-loss":{tag:"Parâmetro para Impacto de Perda",title:"Perda Pós-Evento",body:`<p>Consequências de longo prazo após o evento, somadas entre categorias como:</p><ul><li>Resposta corporativa e responsabilidades com clientes</li><li>Penalidades regulatórias</li><li>Perda de reputação e valor de mercado</li><li>Deserção de clientes</li></ul><div class="tuple"><code>min</code><code>mais_provável</code><code>max</code></div>`,feeds:"Saída da <b>Avaliação de Impacto</b>; integra-se ao Impacto de Perda."},
+    "threat-frequency":{tag:"Parâmetro para Probabilidade",title:"Frequência de Ameaça",body:`<p>Com que frequência ataques de um determinado tipo de ameaça podem ocorrer. Derivada do parâmetro de ataque ajustando uma distribuição de Poisson.</p><div class="tuple"><code>min</code><code>mais_provável</code><code>max</code></div><p>Esses três valores descrevem um intervalo em vez de uma única estimativa: <b>min</b> é o caso otimista (menor número de ataques esperados), <b>mais_provável</b> é o caso típico e melhor estimado, e <b>max</b> é o caso pessimista (maior número de ataques esperados). Alimentar a simulação com esse intervalo, em vez de um número fixo, permite que o modelo reflita a incerteza real sobre o futuro.</p>`,feeds:"Saída da <b>Avaliação de Ataque</b>; integra-se à Probabilidade."},
+    "cyber-risk-exposure":{tag:"Parâmetro para Probabilidade",title:"Exposição ao Ciber Risco",body:`<p>O grau de exposição a uma ameaça para os ativos em escopo, pontuado como um valor entre 0 e 1.</p><div class="tuple"><code>min</code><code>mais_provável</code><code>max</code></div><p>Controles de prevenção maduros reduzem este valor; controles desabilitados o aumentam. Como o status dos controles pode mudar e a evidência nem sempre é perfeita, a exposição é expressa como um intervalo: um nível de exposição ótimo (<b>min</b>), um realista (<b>mais_provável</b>) e um pessimista (<b>max</b>), em vez de um único número exato.</p>`,feeds:"Determinada pela <b>Avaliação de Controle</b>; integra-se à Probabilidade."},
+    "event-loss":{tag:"Parâmetro para Impacto de Perda",title:"Perda por Evento",body:`<p>Dano imediato de um cenário, somado entre categorias de perda como:</p><ul><li>Interrupção de negócios</li><li>Resposta ao incidente</li><li>Recuperação do incidente</li><li>Perda de produtividade</li></ul><div class="tuple"><code>min</code><code>mais_provável</code><code>max</code></div><p>Como o custo real de um incidente nunca é conhecido de antemão, cada categoria é estimada como um intervalo: um custo baixo e controlado (<b>min</b>), um custo esperado e realista (<b>mais_provável</b>), e um custo severo no pior caso (<b>max</b>). Somar esses intervalos dá à Perda por Evento seu próprio intervalo realista.</p>`,feeds:"Saída da <b>Avaliação de Impacto</b>; integra-se ao Impacto de Perda."},
+    "post-event-loss":{tag:"Parâmetro para Impacto de Perda",title:"Perda Pós-Evento",body:`<p>Consequências de longo prazo após o evento, somadas entre categorias como:</p><ul><li>Resposta corporativa e responsabilidades com clientes</li><li>Penalidades regulatórias</li><li>Perda de reputação e valor de mercado</li><li>Deserção de clientes</li></ul><div class="tuple"><code>min</code><code>mais_provável</code><code>max</code></div><p>Esses custos de longo prazo são especialmente incertos, então cada um é capturado como um intervalo: um resultado leve (<b>min</b>), um resultado esperado (<b>mais_provável</b>) e um resultado severo (<b>max</b>), em vez de um único número que ocultaria o quanto o custo real poderia variar.</p>`,feeds:"Saída da <b>Avaliação de Impacto</b>; integra-se ao Impacto de Perda."},
     "attack-assessment":{tag:"Motor de Avaliação para Probabilidade",title:"Avaliação de Ataque",body:`<p>Estima o parâmetro de ataque e a frequência de ameaça. Combina três fontes de dados e ajusta o resultado bruto pela maturidade dos controles, especialmente eficácia de detecção, pois ataques visíveis têm maior probabilidade de falhar.</p><ul><li>Inteligência global de ameaças</li><li>Histórico próprio de detecção (analisado em janelas de tempo)</li><li>Referência de pares com perfis similares e anonimizados</li></ul>`,feeds:"Alimenta <b>Frequência de Ameaça</b> e <b>Exposição ao Ciber Risco</b>. Recebe resultados da <b>Avaliação de Controle</b>."},
     "control-assessment":{tag:"Motor de Avaliação para Ataque, Impacto e Exposição",title:"Avaliação de Controle",body:`<p>Mapeia exposições e controles para itens NIST SP 800-53, depois classifica cada controle em seis categorias e modela suas interações.</p><ul><li><b>Detecção</b> → Frequência de Ameaça</li><li><b>Prevenção</b> → Exposição ao Ciber Risco</li><li><b>Recuperação</b> → Perda por Evento</li><li><b>Mitigação</b> → Perda Pós-Evento</li><li><b>Suporte</b> e <b>Procedimento</b> → fortalecem indiretamente os outros quatro</li></ul>`,feeds:"Seus resultados fluem para as avaliações de <b>Ataque</b> e <b>Impacto</b> e definem a <b>Exposição ao Ciber Risco</b>."},
     "impact-assessment":{tag:"Motor de Avaliação para Impacto de Perda",title:"Avaliação de Impacto",body:`<p>Avalia a perda por evento e pós-evento. Mapeia categorias de perda ao cenário, ajusta-as pelos controles de mitigação e recuperação, e as soma.</p><p>Muitas categorias não são de segurança (finanças, jurídico, relações públicas), portanto os dados de negócio são coletados por meio de perguntas estruturadas.</p>`,feeds:"Produz <b>Perda por Evento</b> e <b>Perda Pós-Evento</b>. Usa resultados da <b>Avaliação de Controle</b> e inteligência global de impacto."},
@@ -549,10 +594,13 @@ function applyLang(lang){
   document.getElementById('ui-eyebrow').textContent = u.eyebrow;
   document.getElementById('ui-title').textContent = u.title;
   document.getElementById('ui-lede').textContent = u.lede;
-  document.getElementById('ui-footer').innerHTML = u.footer;
+  document.getElementById('ui-lede-action').innerHTML = u.ledeAction;
   document.getElementById('eq-risk').textContent = u.eqRisk;
   document.getElementById('eq-likelihood').textContent = u.eqLikelihood;
   document.getElementById('eq-impact').textContent = u.eqImpact;
+  document.getElementById('eq-loss').textContent = u.eqLoss;
+  document.getElementById('eq-eventloss').textContent = u.eqEventLoss;
+  document.getElementById('eq-peloss').textContent = u.eqPELoss;
   document.getElementById('lg-output').textContent = u.lgOutput;
   document.getElementById('lg-like').textContent = u.lgLike;
   document.getElementById('lg-loss').textContent = u.lgLoss;
@@ -564,6 +612,7 @@ function applyLang(lang){
     b.classList.toggle('lang-active', b.dataset.lang===lang);
   });
   updateSvgLabels(lang);
+  applyGlossary(lang);
 
   // refresh panel
   if(selectedId){
@@ -716,6 +765,263 @@ function setBoxLines(key, lines, y2a, y2b, y1){
   }
 }
 // ─── INIT ─────────────────────────────────────────────────────────────────────
+// ─── GLOSSARY ─────────────────────────────────────────────────────────────────
+const GLOSSARY = {
+  en:{
+    heading:"Glossary",
+    categories:[
+      {name:"Core Risk Concepts", color:"#E63A37", terms:[
+        ["Risk","The quantified outcome of a scenario, calculated as Likelihood times Impact. Expressed as a monetary range with a confidence interval."],
+        ["Likelihood","The probability that a threat successfully exploits a weakness, given the environment's architecture and existing controls. Assessed via Threat Frequency and Cyber Risk Exposure."],
+        ["Impact","The extent of damage a risk event can cause. Categorized into Event Loss (immediate) and Post Event Loss (long term)."],
+        ["Risk Scenario","A structured, plausible narrative describing how a threat actor could exploit an exposure to impact assets, operations, or reputation."]
+      ]},
+      {name:"Risk Model Parameters", color:"#FF6A2C", terms:[
+        ["Threat Frequency","How often attacks of a given threat type could occur, modeled with a Poisson distribution and expressed as a three point tuple."],
+        ["Cyber Risk Exposure","The degree of exposure to a threat for assets in scope, scored as a float between 0 and 1 based on control maturity."],
+        ["Event Loss","Immediate financial damage from a scenario, such as business interruption, incident response, and incident recovery."],
+        ["Post Event Loss","Long term consequences after an event, such as regulatory penalties, reputation loss, and customer attrition."]
+      ]},
+      {name:"Risk Scenario Structure", color:"#F19A38", terms:[
+        ["Analysis","Defines the scope of what is being analyzed and sets boundaries that specify assets, threat actors, and outcomes, ensuring stakeholders are aligned on what is and isn't being quantified."],
+        ["Assessment","Enables consistency in how risks are assessed and compared, avoiding ambiguity and permitting repeatability across scenarios."],
+        ["Modeling","Provides structure for data collection so scenarios are relevant, not generic, and built unique to the organization being assessed."],
+        ["Decision Making","Assesses and recommends priorities for investments and resource allocation for controls, insurance, and response planning by comparing mitigation costs with anticipated losses."]
+      ]},
+      {name:"Risk Scenario Components", color:"#4FB4A6", terms:[
+        ["Asset at Risk","The specific system, data, process, or resource that could be affected, such as personally identifiable customer information stored in a cloud database."],
+        ["Threat Actor","An individual or group who could instigate a risk event, such as a cybercriminal, nation state, or insider, whether malicious or non malicious."],
+        ["Exposures","Weaknesses or flaws in organizational systems, processes, or behavior that could be exploited to cause damage, including weak passwords, unpatched software, or incomplete processes."],
+        ["Attack Vector","The method or pathway used for an attack, such as a phishing email, malware, social engineering, or physical access."],
+        ["Event Sequence","The steps or events leading from a threat actor's actions to the impact on the organization."],
+        ["Business Impact","The potential financial and operational consequences a cyber event could have, such as monetary loss or operational disruption."]
+      ]},
+      {name:"CRQ Task Elements", color:"#5B8FE0", terms:[
+        ["Threat Types","The kind or kinds of threats that occur in a selected risk scenario for analysis, such as ransomware or data exfiltration."],
+        ["Attack Techniques","The methods actors employ during the attack phases, such as brute force or process injection, typically mapped to a known attack matrix."],
+        ["Asset Scope","The assets included in a scenario as the targets for assessment, which can be a single asset or a group of devices, accounts, or data."],
+        ["Security Controls","The control measures that could be used to defend against attack techniques for a given threat type, typically mapped to a recognized control catalog."],
+        ["Loss Categories","The kinds of losses or costs considered based on the reflected threat type, such as business interruption, investigation cost, or reputational loss, displayed as event or post event parameters."]
+      ]},
+      {name:"Statistical Modeling", color:"#9B7FE0", terms:[
+        ["Three Point Tuple","A representation of the minimum, most likely, and maximum values for a variable, following a Beta PERT distribution to define a realistic range."],
+        ["Beta PERT Distribution","A statistical distribution used to model the three point tuples, weighting the most likely value while allowing for a realistic spread between the minimum and maximum."],
+        ["Poisson Distribution","A statistical distribution used to model how often discrete events, such as attacks, occur within a fixed period, used to derive the Threat Frequency tuple."],
+        ["Monte Carlo Simulation","A computational technique that feeds the model's parameter tuples through tens of thousands of randomized simulation rounds. Rather than producing a single outcome, it generates a full distribution of possible results, letting the simulator quantify variability and express the final quantified risk together with a confidence interval. Results are typically visualized as risk distribution histograms and loss exceedance curves."],
+        ["Confidence Interval","A statistical range around the quantified result indicating the level of certainty in the simulated outcome."],
+        ["Loss Exceedance Curve","A chart showing the probability that a loss will exceed a given monetary threshold, derived from Monte Carlo simulation output."]
+      ]},
+      {name:"Frameworks and Systems", color:"#E07FB8", terms:[
+        ["FAIR","Factor Analysis of Information Risk, an industry recognized methodology for quantifying information risk that inspired aspects of this model's structure."],
+        ["NIST SP 800 53","A catalog of security and privacy controls used to classify and map identified exposures into functional control categories."],
+        ["MITRE ATT&CK Matrix","A knowledge base of adversary tactics and techniques used to map attack related risk events to known attack patterns."],
+        ["Control Categories","Six functional groups, Detection, Prevention, Recovery, Mitigation, Support, and Procedure, used to classify controls and model their effect on risk parameters."],
+        ["Cyber Risk Index","A company wide qualitative risk score, expressed as a floating point number between 0 and 100, distilled from individual asset risk scores."],
+        ["Peer Reference","Anonymized detection or loss data from organizations with a similar industry, size, location, and revenue profile, used to benchmark a customer's own results."],
+        ["CREM","Cyber Risk Exposure Management, the broader discipline that tracks exposure and control status across an environment. CREM history and findings feed the Control Assessment and, in turn, the Cyber Risk Exposure parameter."]
+      ]},
+      {name:"Control Category Types", color:"#6FCF97", terms:[
+        ["Support","Controls that set up the procedure or improve the process when applied to other controls or practices in an organization. Doesn't affect risk parameters directly, but strengthens the other five categories."],
+        ["Procedure","Controls or practices acknowledged as the initial step to handle a security issue or problem. Like Support, it strengthens the other categories rather than affecting parameters directly."],
+        ["Detection","Controls that can detect attack attempts and behaviors. Directly lowers Threat Frequency, since visible attacks are more likely to be exposed and fail."],
+        ["Prevention","Controls that can prevent an attack from being launched successfully. Directly lowers Cyber Risk Exposure."],
+        ["Recovery","When loss happens, controls that help the organization return to its original state after the event. Directly lowers Event Loss."],
+        ["Mitigation","When loss happens, controls that mitigate the post loss state. Directly lowers Post Event Loss."]
+      ]},
+      {name:"Data Inputs and Systems", color:"#D9A94E", terms:[
+        ["Global Attack Intelligence","Extracted results from public intelligence sources, used to evaluate attack parameters with real world context, such as industry wide attack rates."],
+        ["Self Attack Detection History","A customer's own attack and threat detection history, analyzed to calculate the attack parameter and reflect the organization's specific environment."],
+        ["Peer Attack Reference","CRQ based detection results from peers with similar profiles, used to inform and benchmark a customer's own attack parameter."],
+        ["Customer Profile","Anonymized business data on location, industry, size, and revenue, used to create benchmarks for peer comparison."],
+        ["Event Library","A system that correlates a customer's threat detection and exposure history within the CRQ capability's statistical analysis."],
+        ["Intelligence Hub","A system that monitors, collects, purifies, and refines data from public intelligence sources."]
+      ]}
+    ]
+  },
+  es:{
+    heading:"Glosario",
+    categories:[
+      {name:"Conceptos Centrales de Riesgo", color:"#E63A37", terms:[
+        ["Riesgo","El resultado cuantificado de un escenario, calculado como Probabilidad multiplicada por Impacto. Se expresa como un rango monetario con un intervalo de confianza."],
+        ["Probabilidad","La probabilidad de que una amenaza explote con éxito una debilidad, dada la arquitectura del entorno y los controles existentes. Se evalúa mediante Frecuencia de Amenaza y Exposición al Ciber Riesgo."],
+        ["Impacto","La magnitud del daño que puede causar un evento de riesgo. Se categoriza en Pérdida por Evento (inmediata) y Pérdida Post Evento (a largo plazo)."],
+        ["Escenario de Riesgo","Una narrativa estructurada y plausible que describe cómo un actor de amenaza podría explotar una exposición para impactar activos, operaciones o reputación."]
+      ]},
+      {name:"Parámetros del Modelo de Riesgo", color:"#FF6A2C", terms:[
+        ["Frecuencia de Amenaza","Con qué frecuencia podrían ocurrir ataques de un tipo de amenaza dado, modelado con una distribución de Poisson y expresado como una tupla de tres puntos."],
+        ["Exposición al Ciber Riesgo","El grado de exposición a una amenaza para los activos en alcance, puntuado como un valor entre 0 y 1 según la madurez de los controles."],
+        ["Pérdida por Evento","Daño financiero inmediato de un escenario, como interrupción del negocio, respuesta al incidente y recuperación del incidente."],
+        ["Pérdida Post Evento","Consecuencias a largo plazo tras un evento, como sanciones regulatorias, pérdida de reputación y deserción de clientes."]
+      ]},
+      {name:"Estructura del Escenario de Riesgo", color:"#F19A38", terms:[
+        ["Análisis","Define el alcance de lo que se está analizando y establece límites que especifican activos, actores de amenaza y resultados, asegurando que los interesados estén alineados sobre qué se está cuantificando y qué no."],
+        ["Evaluación","Permite consistencia en cómo se evalúan y comparan los riesgos, evitando la ambigüedad y permitiendo la repetibilidad entre escenarios."],
+        ["Modelado","Proporciona estructura para la recolección de datos de modo que los escenarios sean relevantes, no genéricos, y construidos de forma única para la organización evaluada."],
+        ["Toma de Decisiones","Evalúa y recomienda prioridades para inversiones y asignación de recursos en controles, seguros y planificación de respuesta, comparando los costos de mitigación con las pérdidas anticipadas."]
+      ]},
+      {name:"Componentes del Escenario de Riesgo", color:"#4FB4A6", terms:[
+        ["Activo en Riesgo","El sistema, dato, proceso o recurso específico que podría verse afectado, como información de clientes identificable almacenada en una base de datos en la nube."],
+        ["Actor de Amenaza","Un individuo o grupo que podría instigar un evento de riesgo, como un cibercriminal, un estado nación o un interno, sea malicioso o no."],
+        ["Exposiciones","Debilidades o fallas en los sistemas, procesos o comportamiento organizacional que podrían ser explotadas para causar daño, incluyendo contraseñas débiles, software sin parches o procesos incompletos."],
+        ["Vector de Ataque","El método o vía usada para el ataque, como un correo de phishing, malware, ingeniería social o acceso físico."],
+        ["Secuencia del Evento","Los pasos o eventos que llevan desde las acciones del actor de amenaza hasta el impacto en la organización."],
+        ["Impacto en el Negocio","Las posibles consecuencias financieras y operativas que podría tener un evento cibernético, como pérdida monetaria o interrupción operativa."]
+      ]},
+      {name:"Elementos de la Tarea CRQ", color:"#5B8FE0", terms:[
+        ["Tipos de Amenaza","El tipo o tipos de amenazas que ocurren en un escenario de riesgo seleccionado para análisis, como ransomware o exfiltración de datos."],
+        ["Técnicas de Ataque","Los métodos que emplean los actores durante las fases del ataque, como fuerza bruta o inyección de procesos, típicamente mapeados a una matriz de ataque conocida."],
+        ["Alcance del Activo","Los activos incluidos en un escenario como objetivos de la evaluación, que puede ser un único activo o un grupo de dispositivos, cuentas o datos."],
+        ["Controles de Seguridad","Las medidas de control que podrían usarse para defender contra las técnicas de ataque de un tipo de amenaza dado, típicamente mapeadas a un catálogo de controles reconocido."],
+        ["Categorías de Pérdida","Los tipos de pérdidas o costos considerados según el tipo de amenaza reflejado, como interrupción del negocio, costo de investigación o pérdida reputacional, mostrados como parámetros de evento o post evento."]
+      ]},
+      {name:"Modelado Estadístico", color:"#9B7FE0", terms:[
+        ["Tupla de Tres Puntos","Una representación de los valores mínimo, más probable y máximo de una variable, siguiendo una distribución Beta PERT para definir un rango realista."],
+        ["Distribución Beta PERT","Una distribución estadística usada para modelar las tuplas de tres puntos, ponderando el valor más probable mientras permite un rango realista entre el mínimo y el máximo."],
+        ["Distribución de Poisson","Una distribución estadística usada para modelar la frecuencia de eventos discretos, como ataques, dentro de un período fijo, usada para derivar la tupla de Frecuencia de Amenaza."],
+        ["Simulación de Monte Carlo","Una técnica computacional que procesa las tuplas de parámetros del modelo a través de decenas de miles de rondas de simulación aleatoria. En lugar de producir un único resultado, genera una distribución completa de resultados posibles, permitiendo al simulador cuantificar la variabilidad y expresar el riesgo cuantificado final junto con un intervalo de confianza. Los resultados se visualizan típicamente como histogramas de distribución de riesgo y curvas de excedencia de pérdida."],
+        ["Intervalo de Confianza","Un rango estadístico alrededor del resultado cuantificado que indica el nivel de certeza en el resultado simulado."],
+        ["Curva de Excedencia de Pérdida","Un gráfico que muestra la probabilidad de que una pérdida supere un umbral monetario dado, derivado de la salida de la simulación de Monte Carlo."]
+      ]},
+      {name:"Marcos y Sistemas", color:"#E07FB8", terms:[
+        ["FAIR","Factor Analysis of Information Risk, una metodología reconocida en la industria para cuantificar el riesgo de información que inspiró aspectos de la estructura de este modelo."],
+        ["NIST SP 800 53","Un catálogo de controles de seguridad y privacidad usado para clasificar y mapear las exposiciones identificadas en categorías funcionales de control."],
+        ["Matriz MITRE ATT&CK","Una base de conocimiento de tácticas y técnicas de adversarios usada para mapear eventos de riesgo relacionados con ataques a patrones de ataque conocidos."],
+        ["Categorías de Control","Seis grupos funcionales, Detección, Prevención, Recuperación, Mitigación, Soporte y Procedimiento, usados para clasificar controles y modelar su efecto en los parámetros de riesgo."],
+        ["Índice de Ciber Riesgo","Una puntuación de riesgo cualitativa a nivel de toda la empresa, expresada como un número de punto flotante entre 0 y 100, obtenida a partir de las puntuaciones de riesgo de activos individuales."],
+        ["Referencia de Pares","Datos anonimizados de detección o pérdida de organizaciones con un perfil similar de industria, tamaño, ubicación e ingresos, usados para comparar los resultados propios del cliente."],
+        ["CREM","Gestión de Exposición al Ciber Riesgo (Cyber Risk Exposure Management), la disciplina más amplia que rastrea el estado de exposición y controles en todo el entorno. El historial y los hallazgos de CREM alimentan la Evaluación de Control y, a su vez, el parámetro de Exposición al Ciber Riesgo."]
+      ]},
+      {name:"Tipos de Categoría de Control", color:"#6FCF97", terms:[
+        ["Soporte","Controles que establecen el procedimiento o mejoran el proceso al aplicarse a otros controles o prácticas en una organización. No afecta los parámetros de riesgo directamente, pero fortalece las otras cinco categorías."],
+        ["Procedimiento","Controles o prácticas reconocidas como el paso inicial para manejar un problema de seguridad. Igual que Soporte, fortalece las otras categorías en lugar de afectar los parámetros directamente."],
+        ["Detección","Controles que pueden detectar intentos y comportamientos de ataque. Reduce directamente la Frecuencia de Amenaza, ya que los ataques visibles tienen más probabilidades de ser expuestos y fallar."],
+        ["Prevención","Controles que pueden prevenir que un ataque se lance con éxito. Reduce directamente la Exposición al Ciber Riesgo."],
+        ["Recuperación","Cuando ocurre una pérdida, controles que ayudan a la organización a volver a su estado original después del evento. Reduce directamente la Pérdida por Evento."],
+        ["Mitigación","Cuando ocurre una pérdida, controles que mitigan el estado posterior a la pérdida. Reduce directamente la Pérdida Post Evento."]
+      ]},
+      {name:"Entradas de Datos y Sistemas", color:"#D9A94E", terms:[
+        ["Inteligencia Global de Ataque","Resultados extraídos de fuentes de inteligencia pública, usados para evaluar los parámetros de ataque con contexto del mundo real, como tasas de ataque por industria."],
+        ["Historial de Autodetección de Ataques","El historial propio de detección de ataques y amenazas de un cliente, analizado para calcular el parámetro de ataque y reflejar el entorno específico de la organización."],
+        ["Referencia de Ataque de Pares","Resultados de detección basados en CRQ de pares con perfiles similares, usados para informar y comparar el parámetro de ataque propio del cliente."],
+        ["Perfil del Cliente","Datos de negocio anonimizados sobre ubicación, industria, tamaño e ingresos, usados para crear puntos de referencia para la comparación entre pares."],
+        ["Biblioteca de Eventos","Un sistema que correlaciona el historial de detección de amenazas y exposición de un cliente dentro del análisis estadístico de la capacidad CRQ."],
+        ["Centro de Inteligencia","Un sistema que monitorea, recopila, purifica y refina datos de fuentes de inteligencia pública."]
+      ]}
+    ]
+  },
+  pt:{
+    heading:"Glossário",
+    categories:[
+      {name:"Conceitos Centrais de Risco", color:"#E63A37", terms:[
+        ["Risco","O resultado quantificado de um cenário, calculado como Probabilidade multiplicada por Impacto. Expresso como um intervalo monetário com um intervalo de confiança."],
+        ["Probabilidade","A probabilidade de que uma ameaça explore com sucesso uma fraqueza, dada a arquitetura do ambiente e os controles existentes. Avaliada por meio de Frequência de Ameaça e Exposição ao Ciber Risco."],
+        ["Impacto","A extensão do dano que um evento de risco pode causar. Categorizado em Perda por Evento (imediata) e Perda Pós Evento (longo prazo)."],
+        ["Cenário de Risco","Uma narrativa estruturada e plausível que descreve como um agente de ameaça poderia explorar uma exposição para impactar ativos, operações ou reputação."]
+      ]},
+      {name:"Parâmetros do Modelo de Risco", color:"#FF6A2C", terms:[
+        ["Frequência de Ameaça","Com que frequência ataques de um determinado tipo de ameaça podem ocorrer, modelada com uma distribuição de Poisson e expressa como uma tupla de três pontos."],
+        ["Exposição ao Ciber Risco","O grau de exposição a uma ameaça para os ativos em escopo, pontuado como um valor entre 0 e 1 com base na maturidade dos controles."],
+        ["Perda por Evento","Dano financeiro imediato de um cenário, como interrupção de negócios, resposta ao incidente e recuperação do incidente."],
+        ["Perda Pós Evento","Consequências de longo prazo após um evento, como penalidades regulatórias, perda de reputação e deserção de clientes."]
+      ]},
+      {name:"Estrutura do Cenário de Risco", color:"#F19A38", terms:[
+        ["Análise","Define o escopo do que está sendo analisado e estabelece limites que especificam ativos, agentes de ameaça e resultados, garantindo que os interessados estejam alinhados sobre o que está sendo quantificado e o que não está."],
+        ["Avaliação","Permite consistência em como os riscos são avaliados e comparados, evitando ambiguidade e permitindo repetibilidade entre cenários."],
+        ["Modelagem","Fornece estrutura para a coleta de dados de modo que os cenários sejam relevantes, não genéricos, e construídos de forma única para a organização avaliada."],
+        ["Tomada de Decisão","Avalia e recomenda prioridades para investimentos e alocação de recursos em controles, seguros e planejamento de resposta, comparando os custos de mitigação com as perdas previstas."]
+      ]},
+      {name:"Componentes do Cenário de Risco", color:"#4FB4A6", terms:[
+        ["Ativo em Risco","O sistema, dado, processo ou recurso específico que poderia ser afetado, como informações de clientes identificáveis armazenadas em um banco de dados na nuvem."],
+        ["Agente de Ameaça","Um indivíduo ou grupo que poderia instigar um evento de risco, como um cibercriminoso, um estado nação ou um interno, seja malicioso ou não."],
+        ["Exposições","Fraquezas ou falhas nos sistemas, processos ou comportamento organizacional que poderiam ser exploradas para causar dano, incluindo senhas fracas, software sem correções ou processos incompletos."],
+        ["Vetor de Ataque","O método ou caminho usado para o ataque, como um email de phishing, malware, engenharia social ou acesso físico."],
+        ["Sequência do Evento","Os passos ou eventos que levam das ações do agente de ameaça ao impacto na organização."],
+        ["Impacto no Negócio","As possíveis consequências financeiras e operacionais que um evento cibernético poderia ter, como perda monetária ou interrupção operacional."]
+      ]},
+      {name:"Elementos da Tarefa CRQ", color:"#5B8FE0", terms:[
+        ["Tipos de Ameaça","O tipo ou tipos de ameaças que ocorrem em um cenário de risco selecionado para análise, como ransomware ou exfiltração de dados."],
+        ["Técnicas de Ataque","Os métodos que os agentes empregam durante as fases do ataque, como força bruta ou injeção de processos, tipicamente mapeados para uma matriz de ataque conhecida."],
+        ["Escopo do Ativo","Os ativos incluídos em um cenário como alvos da avaliação, que pode ser um único ativo ou um grupo de dispositivos, contas ou dados."],
+        ["Controles de Segurança","As medidas de controle que poderiam ser usadas para defender contra as técnicas de ataque de um determinado tipo de ameaça, tipicamente mapeadas para um catálogo de controles reconhecido."],
+        ["Categorias de Perda","Os tipos de perdas ou custos considerados com base no tipo de ameaça refletido, como interrupção de negócios, custo de investigação ou perda reputacional, exibidos como parâmetros de evento ou pós evento."]
+      ]},
+      {name:"Modelagem Estatística", color:"#9B7FE0", terms:[
+        ["Tupla de Três Pontos","Uma representação dos valores mínimo, mais provável e máximo de uma variável, seguindo uma distribuição Beta PERT para definir um intervalo realista."],
+        ["Distribuição Beta PERT","Uma distribuição estatística usada para modelar as tuplas de três pontos, ponderando o valor mais provável enquanto permite um intervalo realista entre o mínimo e o máximo."],
+        ["Distribuição de Poisson","Uma distribuição estatística usada para modelar a frequência de eventos discretos, como ataques, dentro de um período fixo, usada para derivar a tupla de Frequência de Ameaça."],
+        ["Simulação de Monte Carlo","Uma técnica computacional que processa as tuplas de parâmetros do modelo através de dezenas de milhares de rodadas de simulação aleatória. Em vez de produzir um único resultado, gera uma distribuição completa de resultados possíveis, permitindo ao simulador quantificar a variabilidade e expressar o risco quantificado final junto com um intervalo de confiança. Os resultados são tipicamente visualizados como histogramas de distribuição de risco e curvas de excedência de perda."],
+        ["Intervalo de Confiança","Um intervalo estatístico em torno do resultado quantificado que indica o nível de certeza no resultado simulado."],
+        ["Curva de Excedência de Perda","Um gráfico que mostra a probabilidade de que uma perda exceda um determinado limite monetário, derivado da saída da simulação de Monte Carlo."]
+      ]},
+      {name:"Estruturas e Sistemas", color:"#E07FB8", terms:[
+        ["FAIR","Factor Analysis of Information Risk, uma metodologia reconhecida na indústria para quantificar o risco de informação que inspirou aspectos da estrutura deste modelo."],
+        ["NIST SP 800 53","Um catálogo de controles de segurança e privacidade usado para classificar e mapear as exposições identificadas em categorias funcionais de controle."],
+        ["Matriz MITRE ATT&CK","Uma base de conhecimento de táticas e técnicas de adversários usada para mapear eventos de risco relacionados a ataques a padrões de ataque conhecidos."],
+        ["Categorias de Controle","Seis grupos funcionais, Detecção, Prevenção, Recuperação, Mitigação, Suporte e Procedimento, usados para classificar controles e modelar seu efeito nos parâmetros de risco."],
+        ["Índice de Ciber Risco","Uma pontuação de risco qualitativa em toda a empresa, expressa como um número de ponto flutuante entre 0 e 100, obtida a partir das pontuações de risco de ativos individuais."],
+        ["Referência de Pares","Dados anonimizados de detecção ou perda de organizações com perfil semelhante de setor, tamanho, localização e receita, usados para comparar os resultados próprios do cliente."],
+        ["CREM","Gestão de Exposição ao Ciber Risco (Cyber Risk Exposure Management), a disciplina mais amplia que rastreia o status de exposição e controles em todo o ambiente. O histórico e os achados do CREM alimentam a Avaliação de Controle e, por sua vez, o parâmetro de Exposição ao Ciber Risco."]
+      ]},
+      {name:"Tipos de Categoria de Controle", color:"#6FCF97", terms:[
+        ["Suporte","Controles que estabelecem o procedimento ou melhoram o processo quando aplicados a outros controles ou práticas em uma organização. Não afeta os parâmetros de risco diretamente, mas fortalece as outras cinco categorias."],
+        ["Procedimento","Controles ou práticas reconhecidas como o passo inicial para lidar com um problema de segurança. Assim como Suporte, fortalece as outras categorias em vez de afetar os parâmetros diretamente."],
+        ["Detecção","Controles que podem detectar tentativas e comportamentos de ataque. Reduz diretamente a Frequência de Ameaça, já que ataques visíveis têm mais probabilidade de serem expostos e falharem."],
+        ["Prevenção","Controles que podem impedir que um ataque seja lançado com sucesso. Reduz diretamente a Exposição ao Ciber Risco."],
+        ["Recuperação","Quando ocorre uma perda, controles que ajudam a organização a voltar ao seu estado original após o evento. Reduz diretamente a Perda por Evento."],
+        ["Mitigação","Quando ocorre uma perda, controles que mitigam o estado pós perda. Reduz diretamente a Perda Pós Evento."]
+      ]},
+      {name:"Entradas de Dados e Sistemas", color:"#D9A94E", terms:[
+        ["Inteligência Global de Ataque","Resultados extraídos de fontes de inteligência pública, usados para avaliar os parâmetros de ataque com contexto do mundo real, como taxas de ataque por setor."],
+        ["Histórico de Autodetecção de Ataques","O histórico próprio de detecção de ataques e ameaças de um cliente, analisado para calcular o parâmetro de ataque e refletir o ambiente específico da organização."],
+        ["Referência de Ataque de Pares","Resultados de detecção baseados em CRQ de pares com perfis semelhantes, usados para informar e comparar o parâmetro de ataque próprio do cliente."],
+        ["Perfil do Cliente","Dados de negócio anonimizados sobre localização, setor, tamanho e receita, usados para criar referências de comparação entre pares."],
+        ["Biblioteca de Eventos","Um sistema que correlaciona o histórico de detecção de ameaças e exposição de um cliente dentro da análise estatística da capacidade CRQ."],
+        ["Central de Inteligência","Um sistema que monitora, coleta, purifica e refina dados de fontes de inteligência pública."]
+      ]}
+    ]
+  }
+};
+
+function hexToRgba(hex, alpha){
+  const h = hex.replace('#','');
+  const r = parseInt(h.substring(0,2),16);
+  const g = parseInt(h.substring(2,4),16);
+  const b = parseInt(h.substring(4,6),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function applyGlossary(lang){
+  const g = GLOSSARY[lang] || GLOSSARY.en;
+  document.getElementById('gl-heading').textContent = g.heading;
+  const container = document.getElementById('gl-container');
+  container.innerHTML = '';
+  g.categories.forEach(cat=>{
+    const catDiv = document.createElement('div');
+    catDiv.className = 'gcat';
+    catDiv.style.setProperty('--gc', cat.color);
+    catDiv.style.setProperty('--gc-bg', hexToRgba(cat.color, 0.10));
+    catDiv.style.setProperty('--gc-border', hexToRgba(cat.color, 0.35));
+    const h4 = document.createElement('h4');
+    h4.textContent = cat.name;
+    catDiv.appendChild(h4);
+    const dl = document.createElement('dl');
+    dl.className = 'glossary-grid';
+    cat.terms.forEach(([term, def])=>{
+      const div = document.createElement('div');
+      div.className = 'gterm';
+      const dt = document.createElement('dt');
+      dt.textContent = term;
+      const dd = document.createElement('dd');
+      dd.textContent = def;
+      div.appendChild(dt);
+      div.appendChild(dd);
+      dl.appendChild(div);
+    });
+    catDiv.appendChild(dl);
+    container.appendChild(catDiv);
+  });
+}
+
 applyLang(detectLang());
 </script>
 </body>
