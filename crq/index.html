@@ -393,11 +393,11 @@
 const DATA = {
   "quantified-risk":{tag:"Output",title:"Quantified Cyber Risk",body:`
     <p>The final result: a monetary range for a given risk scenario, expressed with a confidence interval. It is the product of the two branches below it.</p>
-    <p>The simulator feeds four parameters — threat frequency, cyber risk exposure, event loss, and post-event loss — through tens of thousands of Monte Carlo rounds to produce it.</p>`,
+    <p>The simulator feeds four parameters: threat frequency, cyber risk exposure, event loss, and post-event loss, through tens of thousands of Monte Carlo rounds to produce it.</p>`,
     feeds:"Built from <b>Likelihood</b> × <b>Loss Impact</b>."},
 
   "likelihood":{tag:"Risk Likelihood Component",title:"Likelihood",body:`
-    <p>The probability that threats successfully exploit weaknesses — CVEs or misconfigurations — given the environment's architecture and existing controls.</p>
+    <p>The probability that threats successfully exploit weaknesses (CVEs or misconfigurations) given the environment's architecture and existing controls.</p>
     <p>Assessed through two parameters:</p>
     <ul><li>Threat frequency</li><li>Cyber risk exposure</li></ul>`,
     feeds:"Resolved by the <b>Attack</b> and <b>Control</b> assessments."},
@@ -405,7 +405,7 @@ const DATA = {
   "loss-impact":{tag:"Risk Impact Component",title:"Loss Impact",body:`
     <p>The extent of damage a risk event can cause, depending on which assets are hit and how the organization is structured.</p>
     <p>Categorized into two parameters:</p>
-    <ul><li>Event loss — immediate damage</li><li>Post-event loss — long-term consequences</li></ul>`,
+    <ul><li>Event loss: immediate damage</li><li>Post-event loss: long-term consequences</li></ul>`,
     feeds:"Resolved by the <b>Impact</b> assessment."},
 
   "threat-frequency":{tag:"Parameter",title:"Threat Frequency",body:`
@@ -433,7 +433,7 @@ const DATA = {
     feeds:"Output of the <b>Impact Assessment</b>; rolls up into Loss Impact."},
 
   "attack-assessment":{tag:"Assessment · engine",title:"Attack Assessment",body:`
-    <p>Estimates the attack parameter and threat frequency. It combines three data inputs, then adjusts the raw result for control maturity — especially detection efficacy, since visible attacks are more likely to fail.</p>
+    <p>Estimates the attack parameter and threat frequency. It combines three data inputs, then adjusts the raw result for control maturity, especially detection efficacy, since visible attacks are more likely to fail.</p>
     <ul><li>Global threat intelligence</li><li>Self-detection history (analysed over rolling time windows)</li><li>Peer reference from similar, anonymized profiles</li></ul>`,
     feeds:"Feeds <b>Threat Frequency</b> and <b>Cyber Risk Exposure</b>. Receives findings from <b>Control Assessment</b>."},
 
@@ -450,11 +450,11 @@ const DATA = {
 
   "impact-assessment":{tag:"Assessment · engine",title:"Impact Assessment",body:`
     <p>Evaluates event and post-event loss. It maps loss categories to the scenario, adjusts them for mitigation and recovery controls, then sums them.</p>
-    <p>Many categories are non-security — finance, legal, PR — so business data is gathered through structured questions and validated inputs.</p>`,
+    <p>Many categories are non-security (finance, legal, PR), so business data is gathered through structured questions and validated inputs.</p>`,
     feeds:"Produces <b>Event Loss</b> and <b>Post-Event Loss</b>. Uses <b>Control Assessment</b> findings and global impact intelligence."},
 
   "global-attack":{tag:"Data input",title:"Global Threat Intelligence · Attack",body:`
-    <p>Real-world attack data extracted from public sources — for example, industry-wide attack rates from security reports — used to enhance the attack parameter.</p>`,
+    <p>Real-world attack data extracted from public sources, for example industry-wide attack rates from security reports, used to enhance the attack parameter.</p>`,
     feeds:"Feeds the <b>Attack Assessment</b>."},
 
   "peer-history":{tag:"Data input",title:"Peer / Region Detection History",body:`
@@ -466,12 +466,12 @@ const DATA = {
     feeds:"Feeds the <b>Attack Assessment</b>."},
 
   "exposure-history":{tag:"Data input",title:"Exposure History",body:`
-    <p>The record of exposure and control status changes in the environment — including remediations — so improvements are reflected positively in the next assessment cycle.</p>`,
+    <p>The record of exposure and control status changes in the environment, including remediations, so improvements are reflected positively in the next assessment cycle.</p>`,
     feeds:"Feeds the <b>Control Assessment</b>."},
 
   "scenario-inputs":{tag:"Data input",title:"Scenario Inputs",body:`
     <p>Control-related and impact-related inputs supplied by the customer when sensor visibility alone isn't enough.</p>
-    <ul><li><b>Control related</b> — which additional controls exist and how fully they're implemented</li><li><b>Impact related</b> — revenue, business lines, legal exposure, data volumes</li></ul>
+    <ul><li><b>Control related</b>: which additional controls exist and how fully they're implemented</li><li><b>Impact related</b>: revenue, business lines, legal exposure, data volumes</li></ul>
     <p>Gathered during scenario development via questionnaires and documents.</p>`,
     feeds:"Feeds the <b>Control Assessment</b> (control-related) and <b>Impact Assessment</b> (impact-related)."},
 
