@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Risk Quantification — Assessment Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d10;
+    --panel:#16161b;
+    --panel-edge:#26262e;
+    --ink:#f3f3f5;
+    --ink-dim:#a6a6b0;
+    --ink-faint:#6c6c78;
+    --accent:#E63A37;
+    --accent-soft:#ff8a5c;
+    --line:#6f6f7d;
+
+    /* node tiers */
+    --output:#E63A37;
+    --group:#d9d9dd;
+    --param:#c6c6cc;
+    --assess:#101014;
+    --in1:#8c8c96;
+    --in2:#6f6f79;
+    --in3:#52525c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1200px 600px at 70% -10%, rgba(196,50,43,.10), transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"Inter",system-ui,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:100%;margin:0;padding:32px 32px 64px}
+
+  /* ---------- header ---------- */
+  header{margin-bottom:30px}
+  .eyebrow{
+    font-family:"JetBrains Mono",monospace;
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent-soft);margin:0 0 14px;
+  }
+  h1{
+    font-family:"Space Grotesk",sans-serif;
+    font-weight:700;font-size:clamp(30px,4.4vw,52px);
+    line-height:1.02;letter-spacing:-.02em;margin:0 0 14px;
+  }
+  .lede{color:var(--ink-dim);max-width:60ch;font-size:16.5px;margin:0}
+  .equation{
+    display:inline-flex;align-items:center;gap:14px;margin-top:24px;
+    padding:11px 20px;border:1px solid var(--panel-edge);border-radius:999px;
+    background:var(--panel);font-family:"Space Grotesk",sans-serif;
+  }
+  .equation b{color:var(--accent-soft);font-weight:600}
+  .equation .x{color:var(--ink-faint)}
+
+  /* ---------- layout ---------- */
+  .stage{display:grid;grid-template-columns:1fr 340px;gap:24px;margin-top:34px;align-items:start}
+
+  .canvas{
+    background:linear-gradient(180deg,#101014,#0c0c0f);
+    border:1px solid var(--panel-edge);border-radius:18px;
+    padding:18px 14px;position:relative;overflow:hidden;
+  }
+  .canvas .hint{
+    position:absolute;top:14px;right:18px;
+    font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.12em;
+    color:var(--ink-faint);text-transform:uppercase;pointer-events:none;
+  }
+  svg{width:100%;height:auto;display:block}
+
+  /* node styling */
+  .node{cursor:pointer;outline:none}
+  .node rect{transition:transform .15s ease, filter .15s ease}
+  .node:hover .nbox,.node:focus-visible .nbox{filter:brightness(1.08)}
+  .node .ring{fill:none;stroke:var(--accent);stroke-width:2.5;opacity:0;transition:opacity .15s ease}
+  .node.active .ring{opacity:1}
+  .node:hover .ring{opacity:.5}
+  .nlabel{font-family:"Space Grotesk",sans-serif;font-weight:600;pointer-events:none}
+  .nsub{font-family:"Inter",sans-serif;font-weight:500;pointer-events:none}
+  .edge{fill:none;stroke:var(--line);stroke-width:1.6}
+  .edge.flow{stroke:#3a3a48;stroke-width:1.5}
+  .tree{fill:none;stroke:#7a7a88;stroke-width:1.7}
+  @keyframes dash-flow{
+    from{stroke-dashoffset:24}
+    to{stroke-dashoffset:0}
+  }
+  @keyframes dash-flow-reverse{
+    from{stroke-dashoffset:0}
+    to{stroke-dashoffset:24}
+  }
+  .aflow-rev{
+    fill:none;stroke-width:2.4;stroke-linecap:round;
+    stroke-dasharray:6 18;
+    animation:dash-flow-reverse .85s linear infinite;
+    pointer-events:none;
+  }
+  .aflow{
+    fill:none;stroke-width:2.4;stroke-linecap:round;
+    stroke-dasharray:6 18;
+    animation:dash-flow .85s linear infinite;
+    pointer-events:none;
+  }
+
+
+  /* legend */
+  .legend{display:flex;flex-wrap:wrap;gap:7px 16px;margin-top:16px;padding:0 6px}
+  .legend span{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-dim)}
+  .sw{width:13px;height:13px;border-radius:3px;display:inline-block;border:1px solid rgba(255,255,255,.12)}
+
+  /* ---------- detail panel (right sidebar) ---------- */
+  .panel{
+    background:var(--panel);border:1px solid var(--panel-edge);border-radius:18px;
+    padding:24px 22px 26px;position:sticky;top:20px;
+    max-height:calc(100vh - 40px);overflow-y:auto;
+  }
+  .panel-grid{display:block}
+  @media(max-width:900px){.stage{grid-template-columns:1fr}.panel{position:static;max-height:none}}
+  .tag{
+    display:inline-block;font-family:"JetBrains Mono",monospace;
+    font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    padding:4px 10px;border-radius:6px;margin-bottom:16px;
+    background:rgba(196,50,43,.14);color:var(--accent-soft);border:1px solid rgba(196,50,43,.3);
+  }
+  .panel h2{
+    font-family:"Space Grotesk",sans-serif;font-weight:700;
+    font-size:24px;letter-spacing:-.01em;margin:0 0 12px;line-height:1.1;
+  }
+  .panel p{color:var(--ink-dim);font-size:15px;margin:0 0 14px}
+  .panel ul{margin:0 0 14px;padding-left:18px;color:var(--ink-dim);font-size:14.5px}
+  .panel li{margin-bottom:5px}
+  .panel li::marker{color:var(--accent)}
+  .feeds{font-size:13px;color:var(--ink-faint);border-top:1px solid var(--panel-edge);padding-top:14px;margin-top:18px}
+  .feeds b{color:var(--ink-dim);font-weight:600}
+  .tuple{
+    display:flex;gap:8px;margin:4px 0 16px;flex-wrap:wrap;
+  }
+  .tuple code{
+    font-family:"JetBrains Mono",monospace;font-size:12px;
+    background:#0e0e12;border:1px solid var(--panel-edge);border-radius:6px;
+    padding:6px 10px;color:var(--accent-soft);
+  }
+  .placeholder{color:var(--ink-faint)}
+
+  footer{margin-top:46px;border-top:1px solid var(--panel-edge);padding-top:22px;color:var(--ink-faint);font-size:13px;max-width:78ch}
+  footer b{color:var(--ink-dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Cyber Risk Quantification · Reference Model</p>
+    <h1>How cyber risk is quantified</h1>
+    <p class="lede">A scenario-based model that translates technical threats into a financial range. Three assessments feed two halves of a single equation. Select any node to see what it does and where it flows.</p>
+    <div class="equation"><span style="color:#E63A37;font-weight:700">Risk</span><span class="x">=</span><span>Likelihood</span><span class="x">×</span><span>Impact</span></div>
+  </header>
+
+  <div class="stage">
+    <div class="canvas">
+      <div class="hint">click a node →</div>
+      <svg id="map" viewBox="0 0 1280 660" role="img" aria-label="Cyber risk quantification assessment model diagram">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#c9c7d4"/>
+          </marker>
+          <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#F19A38"/>
+          </marker>
+          <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#FF6A2C"/>
+          </marker>
+          <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#E63A37"/>
+          </marker>
+        </defs>
+
+        <!-- ===== HIERARCHY (plain lines) ===== -->
+        <path class="tree" d="M660,128 H1075"/>
+        <path class="aflow-rev" d="M867,128 H660" stroke="#FF6A2C" style="animation-delay:0.0s"/>
+        <path class="aflow-rev" d="M867,128 H1075" stroke="#F19A38" style="animation-delay:0.0s"/>
+        <path class="tree" d="M660,150 V128"/>
+        <path class="aflow" d="M660,150 V128" stroke="#FF6A2C" style="animation-delay:0.1s"/>
+        <path class="tree" d="M1075,150 V128"/>
+        <path class="aflow" d="M1075,150 V128" stroke="#F19A38" style="animation-delay:0.1s"/>
+        <path class="tree" marker-end="url(#arrow-red)" d="M867,128 V104"/>
+        <path class="aflow" d="M867,128 V104" stroke="#E63A37" style="animation-delay:0.05s"/>
+        <path class="tree" d="M575,252 H745"/>
+        <path class="aflow" d="M575,252 H660" stroke="#FF6A2C" style="animation-delay:0.2s"/>
+        <path class="aflow" d="M745,252 H660" stroke="#FF6A2C" style="animation-delay:0.2s"/>
+        <path class="tree" d="M575,280 V252"/>
+        <path class="aflow" d="M575,280 V252" stroke="#FF6A2C" style="animation-delay:0.2s"/>
+        <path class="tree" d="M745,280 V252"/>
+        <path class="aflow" d="M745,280 V252" stroke="#FF6A2C" style="animation-delay:0.2s"/>
+        <path class="tree" marker-end="url(#arrow-orange)" d="M660,252 V225"/>
+        <path class="aflow" d="M660,252 V225" stroke="#FF6A2C" style="animation-delay:0.25s"/>
+        <path class="tree" d="M990,252 H1160"/>
+        <path class="aflow" d="M990,252 H1075" stroke="#F19A38" style="animation-delay:0.2s"/>
+        <path class="aflow" d="M1160,252 H1075" stroke="#F19A38" style="animation-delay:0.2s"/>
+        <path class="tree" d="M990,280 V252"/>
+        <path class="aflow" d="M990,280 V252" stroke="#F19A38" style="animation-delay:0.2s"/>
+        <path class="tree" d="M1160,280 V252"/>
+        <path class="aflow" d="M1160,280 V252" stroke="#F19A38" style="animation-delay:0.2s"/>
+        <path class="tree" marker-end="url(#arrow-amber)" d="M1075,252 V225"/>
+        <path class="aflow" d="M1075,252 V225" stroke="#F19A38" style="animation-delay:0.25s"/>
+
+        <!-- ===== DATA FLOWS (arrowheads) ===== -->
+        <!-- animated flows -->
+        <path class="edge flow" d="M214,238 H255"/>
+        <path class="edge flow" d="M214,320 H255"/>
+        <path class="edge flow" d="M214,402 H255"/>
+        <path class="edge flow" d="M255,238 V402"/>
+        <path class="edge flow" marker-end="url(#arrow-orange)" d="M255,320 H290"/>
+        <path class="edge flow" marker-end="url(#arrow-orange)" d="M420,320 H498"/>
+        <path class="edge flow" marker-end="url(#arrow-red)" d="M748,400 V360"/>
+        <path class="edge flow" marker-end="url(#arrow-orange)" d="M680,438 H355 V358"/>
+        <path class="edge flow" marker-end="url(#arrow-amber)" d="M820,438 H1000"/>
+        <path class="edge flow" d="M1075,400 V385 M990,385 H1160" stroke="#F19A38"/>
+        <path class="edge flow" marker-end="url(#arrow-amber)" d="M990,385 V360" stroke="#F19A38"/>
+        <path class="edge flow" marker-end="url(#arrow-amber)" d="M1160,385 V360" stroke="#F19A38"/>
+        <path class="edge flow" marker-end="url(#arrow-red)" d="M630,560 V510 H705 V476"/>
+        <path class="edge flow" marker-end="url(#arrow-red)" d="M864,560 V520 H795 V476"/>
+        <path class="edge flow" marker-end="url(#arrow-amber)" d="M960,560 V520 H1025 V476"/>
+        <path class="edge flow" marker-end="url(#arrow-amber)" d="M1190,556 V510 H1115 V476"/>
+
+        <!-- animated overlays (rendered first so arrowheads sit on top) -->
+        <path class="aflow" d="M214,238 H255" stroke="#FF6A2C" style="animation-delay:0.0s"/>
+        <path class="aflow" d="M214,320 H255" stroke="#FF6A2C" style="animation-delay:0.1s"/>
+        <path class="aflow" d="M214,402 H255" stroke="#FF6A2C" style="animation-delay:0.2s"/>
+        <path class="aflow" d="M255,238 V320" stroke="#FF6A2C" style="animation-delay:0.0s"/>
+        <path class="aflow-rev" d="M255,320 V402" stroke="#FF6A2C" style="animation-delay:0.0s"/>
+        <path class="aflow" d="M255,320 H290" stroke="#FF6A2C" style="animation-delay:0.15s"/>
+        <path class="aflow" d="M420,320 H498" stroke="#FF6A2C" style="animation-delay:0.1s"/>
+        <path class="aflow" d="M748,400 V360" stroke="#E63A37" style="animation-delay:0.2s"/>
+        <path class="aflow" d="M680,438 H355 V358" stroke="#FF6A2C" style="animation-delay:0.3s"/>
+        <path class="aflow" d="M820,438 H1000" stroke="#F19A38" style="animation-delay:0.15s"/>
+        <path class="aflow" d="M1075,400 V385" stroke="#F19A38" style="animation-delay:0.0s"/>
+        <path class="aflow" d="M1075,385 H990" stroke="#F19A38" style="animation-delay:0.0s"/>
+        <path class="aflow" d="M1075,385 H1160" stroke="#F19A38" style="animation-delay:0.0s"/>
+        <path class="aflow" d="M990,385 V360" stroke="#F19A38" style="animation-delay:0.25s"/>
+        <path class="aflow" d="M1160,385 V360" stroke="#F19A38" style="animation-delay:0.35s"/>
+        <path class="aflow" d="M630,560 V510 H705 V476" stroke="#E63A37" style="animation-delay:0.1s"/>
+        <path class="aflow" d="M864,560 V520 H795 V476" stroke="#E63A37" style="animation-delay:0.2s"/>
+        <path class="aflow" d="M960,560 V520 H1025 V476" stroke="#F19A38" style="animation-delay:0.3s"/>
+        <path class="aflow" d="M1190,556 V510 H1115 V476" stroke="#F19A38" style="animation-delay:0.4s"/>
+        <!-- ===== NODES ===== -->
+        <!-- Quantified Risk -->
+        <g class="node" data-id="quantified-risk" tabindex="0">
+          <rect class="ring" x="746" y="26" width="242" height="82" rx="14"/>
+          <rect class="nbox" x="750" y="30" width="234" height="74" rx="11" fill="var(--output)"/>
+          <text class="nlabel" x="867" y="74" text-anchor="middle" fill="#fff" font-size="20">Quantified Cyber Risk</text>
+        </g>
+
+        <!-- Likelihood / Loss Impact -->
+        <g class="node" data-id="likelihood" tabindex="0">
+          <rect class="ring" x="496" y="146" width="328" height="83" rx="12"/>
+          <rect class="nbox" x="500" y="150" width="320" height="75" rx="9" fill="#FF6A2C"/>
+          <text class="nlabel" x="660" y="194" text-anchor="middle" fill="#16161b" font-size="19">Likelihood</text>
+        </g>
+        <g class="node" data-id="loss-impact" tabindex="0">
+          <rect class="ring" x="911" y="146" width="328" height="83" rx="12"/>
+          <rect class="nbox" x="915" y="150" width="320" height="75" rx="9" fill="#F19A38"/>
+          <text class="nlabel" x="1075" y="194" text-anchor="middle" fill="#16161b" font-size="19">Loss Impact</text>
+        </g>
+
+        <!-- parameters -->
+        <g class="node" data-id="threat-frequency" tabindex="0">
+          <rect class="ring" x="498" y="276" width="154" height="88" rx="12"/>
+          <rect class="nbox" x="502" y="280" width="146" height="80" rx="9" fill="#FFC0A0"/>
+          <text class="nlabel" x="575" y="315" text-anchor="middle" fill="#16161b" font-size="15">Threat</text>
+          <text class="nlabel" x="575" y="335" text-anchor="middle" fill="#16161b" font-size="15">Frequency</text>
+        </g>
+        <g class="node" data-id="cyber-risk-exposure" tabindex="0">
+          <rect class="ring" x="668" y="276" width="154" height="88" rx="12"/>
+          <rect class="nbox" x="672" y="280" width="146" height="80" rx="9" fill="#FFC0A0"/>
+          <text class="nlabel" x="745" y="315" text-anchor="middle" fill="#16161b" font-size="15">Cyber Risk</text>
+          <text class="nlabel" x="745" y="335" text-anchor="middle" fill="#16161b" font-size="15">Exposure</text>
+        </g>
+        <g class="node" data-id="event-loss" tabindex="0">
+          <rect class="ring" x="913" y="276" width="154" height="88" rx="12"/>
+          <rect class="nbox" x="917" y="280" width="146" height="80" rx="9" fill="#F8D19B"/>
+          <text class="nlabel" x="990" y="315" text-anchor="middle" fill="#16161b" font-size="15">Event</text>
+          <text class="nlabel" x="990" y="335" text-anchor="middle" fill="#16161b" font-size="15">Loss</text>
+        </g>
+        <g class="node" data-id="post-event-loss" tabindex="0">
+          <rect class="ring" x="1083" y="276" width="154" height="88" rx="12"/>
+          <rect class="nbox" x="1087" y="280" width="146" height="80" rx="9" fill="#F8D19B"/>
+          <text class="nlabel" x="1160" y="315" text-anchor="middle" fill="#16161b" font-size="15">Post-Event</text>
+          <text class="nlabel" x="1160" y="335" text-anchor="middle" fill="#16161b" font-size="15">Loss</text>
+        </g>
+
+        <!-- assessments -->
+        <g class="node" data-id="attack-assessment" tabindex="0">
+          <rect class="ring" x="286" y="278" width="138" height="84" rx="13"/>
+          <rect class="nbox" x="290" y="282" width="130" height="76" rx="10" fill="var(--assess)" stroke="#FF6A2C" stroke-width="2"/>
+          <text class="nlabel" x="355" y="313" text-anchor="middle" fill="#fff" font-size="15">Attack</text>
+          <text class="nlabel" x="355" y="333" text-anchor="middle" fill="#fff" font-size="15">Assessment</text>
+        </g>
+        <g class="node" data-id="control-assessment" tabindex="0">
+          <rect class="ring" x="676" y="396" width="148" height="84" rx="13"/>
+          <rect class="nbox" x="680" y="400" width="140" height="76" rx="10" fill="var(--assess)" stroke="#E63A37" stroke-width="2"/>
+          <text class="nlabel" x="750" y="431" text-anchor="middle" fill="#fff" font-size="15">Control</text>
+          <text class="nlabel" x="750" y="451" text-anchor="middle" fill="#fff" font-size="15">Assessment</text>
+        </g>
+        <g class="node" data-id="impact-assessment" tabindex="0">
+          <rect class="ring" x="996" y="396" width="158" height="84" rx="13"/>
+          <rect class="nbox" x="1000" y="400" width="150" height="76" rx="10" fill="var(--assess)" stroke="#F19A38" stroke-width="2"/>
+          <text class="nlabel" x="1075" y="431" text-anchor="middle" fill="#fff" font-size="15">Impact</text>
+          <text class="nlabel" x="1075" y="451" text-anchor="middle" fill="#fff" font-size="15">Assessment</text>
+        </g>
+
+        <!-- left inputs -->
+        <g class="node" data-id="global-attack" tabindex="0">
+          <rect class="ring" x="46" y="196" width="172" height="84" rx="11"/>
+          <rect class="nbox" x="50" y="200" width="164" height="76" rx="8" fill="var(--in1)"/>
+          <text class="nlabel" x="132" y="231" text-anchor="middle" fill="#fff" font-size="15">Global</text>
+          <text class="nsub" x="132" y="249" text-anchor="middle" fill="#ececf0" font-size="10.5">Threat Intelligence</text>
+          <text class="nsub" x="132" y="263" text-anchor="middle" fill="#ececf0" font-size="10.5">for Attack</text>
+        </g>
+        <g class="node" data-id="peer-history" tabindex="0">
+          <rect class="ring" x="46" y="278" width="172" height="84" rx="11"/>
+          <rect class="nbox" x="50" y="282" width="164" height="76" rx="8" fill="var(--in2)"/>
+          <text class="nlabel" x="132" y="309" text-anchor="middle" fill="#fff" font-size="15">Peer / Region</text>
+          <text class="nsub" x="132" y="327" text-anchor="middle" fill="#ececf0" font-size="10.5">CREM Threat</text>
+          <text class="nsub" x="132" y="341" text-anchor="middle" fill="#ececf0" font-size="10.5">Detection History</text>
+        </g>
+        <g class="node" data-id="customer-history" tabindex="0">
+          <rect class="ring" x="46" y="360" width="172" height="84" rx="11"/>
+          <rect class="nbox" x="50" y="364" width="164" height="76" rx="8" fill="var(--in3)"/>
+          <text class="nlabel" x="132" y="391" text-anchor="middle" fill="#fff" font-size="15">Customer</text>
+          <text class="nsub" x="132" y="409" text-anchor="middle" fill="#ececf0" font-size="10.5">CREM Threat</text>
+          <text class="nsub" x="132" y="423" text-anchor="middle" fill="#ececf0" font-size="10.5">Detection History</text>
+        </g>
+
+        <!-- bottom inputs -->
+        <g class="node" data-id="exposure-history" tabindex="0">
+          <rect class="ring" x="553" y="556" width="154" height="86" rx="11"/>
+          <rect class="nbox" x="557" y="560" width="146" height="78" rx="8" fill="var(--in2)"/>
+          <text class="nlabel" x="630" y="592" text-anchor="middle" fill="#fff" font-size="15">CREM</text>
+          <text class="nsub" x="630" y="611" text-anchor="middle" fill="#ececf0" font-size="11">Exposure History</text>
+        </g>
+        <g class="node" data-id="scenario-inputs" tabindex="0">
+          <rect class="ring" x="814" y="556" width="196" height="86" rx="11"/>
+          <rect class="nbox" x="818" y="560" width="92" height="40" rx="7" fill="var(--in2)"/>
+          <text class="nlabel" x="864" y="584" text-anchor="middle" fill="#fff" font-size="11">Control Related</text>
+          <rect class="nbox" x="914" y="560" width="92" height="40" rx="7" fill="var(--in2)"/>
+          <text class="nlabel" x="960" y="584" text-anchor="middle" fill="#fff" font-size="11">Impact Related</text>
+          <rect class="nbox" x="818" y="603" width="188" height="35" rx="7" fill="var(--in3)"/>
+          <text class="nsub" x="912" y="625" text-anchor="middle" fill="#ececf0" font-size="11">Customer Inputs for Scenario</text>
+        </g>
+        <g class="node" data-id="global-impact" tabindex="0">
+          <rect class="ring" x="1113" y="556" width="154" height="86" rx="11"/>
+          <rect class="nbox" x="1117" y="560" width="146" height="78" rx="8" fill="var(--in1)"/>
+          <text class="nlabel" x="1190" y="586" text-anchor="middle" fill="#fff" font-size="15">Global</text>
+          <text class="nsub" x="1190" y="605" text-anchor="middle" fill="#ececf0" font-size="10.5">Threat Intelligence</text>
+          <text class="nsub" x="1190" y="619" text-anchor="middle" fill="#ececf0" font-size="10.5">for Impact</text>
+        </g>
+      </svg>
+
+      <div class="legend">
+        <span><i class="sw" style="background:#E63A37"></i>Quantified risk</span>
+        <span><i class="sw" style="background:#FF6A2C"></i>Likelihood side</span>
+        <span><i class="sw" style="background:#F19A38"></i>Loss impact side</span>
+        <span><i class="sw" style="background:var(--assess);border-color:#555"></i>Assessment engine</span>
+        <span><i class="sw" style="background:var(--in2)"></i>Data input</span>
+      </div>
+    </div>
+
+    <aside class="panel" id="panel">
+      <span class="tag" id="p-tag">Start here</span>
+      <h2 id="p-title">The assessment model</h2>
+      <div id="p-body">
+          <p>Quantified risk is the product of how likely a threat is and how much it could cost. The model splits that into two branches and resolves each with dedicated assessments, then runs the parameters through tens of thousands of Monte Carlo rounds to produce a financial range with a confidence interval.</p>
+          <p class="placeholder">Select any node in the diagram to dig in.</p>
+        </div>
+      <div class="feeds" id="p-feeds"><b>Tip:</b> the three black nodes are the engines. Everything light feeds or results from them.</div>
+    </aside>
+  </div>
+
+  <footer>
+    Parameters are expressed as three-point tuples (<b>min · most&nbsp;likely · max</b>) following a Beta-PERT distribution, giving the simulator a realistic range rather than a single guess. Likelihood and impact are then simulated jointly to generate the quantified result. This diagram is a generic, vendor-neutral rendering of a scenario-based CRQ methodology.
+  </footer>
+</div>
+
+<script>
+const DATA = {
+  "quantified-risk":{tag:"Output",title:"Quantified Cyber Risk",body:`
+    <p>The final result: a monetary range for a given risk scenario, expressed with a confidence interval. It is the product of the two branches below it.</p>
+    <p>The simulator feeds four parameters — threat frequency, cyber risk exposure, event loss, and post-event loss — through tens of thousands of Monte Carlo rounds to produce it.</p>`,
+    feeds:"Built from <b>Likelihood</b> × <b>Loss Impact</b>."},
+
+  "likelihood":{tag:"Risk Likelihood Component",title:"Likelihood",body:`
+    <p>The probability that threats successfully exploit weaknesses — CVEs or misconfigurations — given the environment's architecture and existing controls.</p>
+    <p>Assessed through two parameters:</p>
+    <ul><li>Threat frequency</li><li>Cyber risk exposure</li></ul>`,
+    feeds:"Resolved by the <b>Attack</b> and <b>Control</b> assessments."},
+
+  "loss-impact":{tag:"Risk Impact Component",title:"Loss Impact",body:`
+    <p>The extent of damage a risk event can cause, depending on which assets are hit and how the organization is structured.</p>
+    <p>Categorized into two parameters:</p>
+    <ul><li>Event loss — immediate damage</li><li>Post-event loss — long-term consequences</li></ul>`,
+    feeds:"Resolved by the <b>Impact</b> assessment."},
+
+  "threat-frequency":{tag:"Parameter",title:"Threat Frequency",body:`
+    <p>How often attacks of a given threat type could occur. Derived from the attack parameter by fitting a Poisson distribution.</p>
+    <div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div>
+    <p>The tuple captures the minimum, most likely, and maximum number of attacks for the designated threat type.</p>`,
+    feeds:"Output of the <b>Attack Assessment</b>; rolls up into Likelihood."},
+
+  "cyber-risk-exposure":{tag:"Parameter",title:"Cyber Risk Exposure",body:`
+    <p>The degree of exposure to a threat for the assets in scope, scored as a float between 0 and 1.</p>
+    <div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div>
+    <p>Mature prevention controls lower this value; disabled controls raise it.</p>`,
+    feeds:"Shaped by the <b>Control Assessment</b>; rolls up into Likelihood."},
+
+  "event-loss":{tag:"Parameter",title:"Event Loss",body:`
+    <p>Immediate damage from a scenario, summed across mapped loss categories such as:</p>
+    <ul><li>Business interruption</li><li>Incident response</li><li>Incident recovery</li><li>Lost productivity</li></ul>
+    <div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div>`,
+    feeds:"Output of the <b>Impact Assessment</b>; rolls up into Loss Impact."},
+
+  "post-event-loss":{tag:"Parameter",title:"Post-Event Loss",body:`
+    <p>Long-term consequences after the event, summed across categories such as:</p>
+    <ul><li>Company response &amp; customer liabilities</li><li>Regulatory penalties</li><li>Reputation &amp; market value loss</li><li>Customer attrition</li></ul>
+    <div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div>`,
+    feeds:"Output of the <b>Impact Assessment</b>; rolls up into Loss Impact."},
+
+  "attack-assessment":{tag:"Assessment · engine",title:"Attack Assessment",body:`
+    <p>Estimates the attack parameter and threat frequency. It combines three data inputs, then adjusts the raw result for control maturity — especially detection efficacy, since visible attacks are more likely to fail.</p>
+    <ul><li>Global threat intelligence</li><li>Self-detection history (analysed over rolling time windows)</li><li>Peer reference from similar, anonymized profiles</li></ul>`,
+    feeds:"Feeds <b>Threat Frequency</b> and <b>Cyber Risk Exposure</b>. Receives findings from <b>Control Assessment</b>."},
+
+  "control-assessment":{tag:"Assessment · engine",title:"Control Assessment",body:`
+    <p>Maps exposures and controls to NIST SP 800-53 items, then sorts every control into six categories and models how they interact.</p>
+    <ul>
+      <li><b>Detection</b> → Threat Frequency</li>
+      <li><b>Prevention</b> → Cyber Risk Exposure</li>
+      <li><b>Recovery</b> → Event Loss</li>
+      <li><b>Mitigation</b> → Post-Event Loss</li>
+      <li><b>Support</b> &amp; <b>Procedure</b> → indirectly strengthen the other four</li>
+    </ul>`,
+    feeds:"Its results flow into both the <b>Attack</b> and <b>Impact</b> assessments and set <b>Cyber Risk Exposure</b>."},
+
+  "impact-assessment":{tag:"Assessment · engine",title:"Impact Assessment",body:`
+    <p>Evaluates event and post-event loss. It maps loss categories to the scenario, adjusts them for mitigation and recovery controls, then sums them.</p>
+    <p>Many categories are non-security — finance, legal, PR — so business data is gathered through structured questions and validated inputs.</p>`,
+    feeds:"Produces <b>Event Loss</b> and <b>Post-Event Loss</b>. Uses <b>Control Assessment</b> findings and global impact intelligence."},
+
+  "global-attack":{tag:"Data input",title:"Global Threat Intelligence · Attack",body:`
+    <p>Real-world attack data extracted from public sources — for example, industry-wide attack rates from security reports — used to enhance the attack parameter.</p>`,
+    feeds:"Feeds the <b>Attack Assessment</b>."},
+
+  "peer-history":{tag:"Data input",title:"Peer / Region Detection History",body:`
+    <p>Anonymized detection results from peers with a similar industry, location, size, and revenue profile. Statistical methods blend them with your own history to benchmark attack likelihood.</p>`,
+    feeds:"Feeds the <b>Attack Assessment</b>."},
+
+  "customer-history":{tag:"Data input",title:"Customer Detection History",body:`
+    <p>Your own attack and threat detection history, analysed over a rolling <b>6-month period split into 14-day windows</b>. Each window tracks attack techniques correlated to the scenario threat type. Windows closer to the current assessment carry higher weight.</p>`,
+    feeds:"Feeds the <b>Attack Assessment</b>."},
+
+  "exposure-history":{tag:"Data input",title:"Exposure History",body:`
+    <p>The record of exposure and control status changes in the environment — including remediations — so improvements are reflected positively in the next assessment cycle.</p>`,
+    feeds:"Feeds the <b>Control Assessment</b>."},
+
+  "scenario-inputs":{tag:"Data input",title:"Scenario Inputs",body:`
+    <p>Control-related and impact-related inputs supplied by the customer when sensor visibility alone isn't enough.</p>
+    <ul><li><b>Control related</b> — which additional controls exist and how fully they're implemented</li><li><b>Impact related</b> — revenue, business lines, legal exposure, data volumes</li></ul>
+    <p>Gathered during scenario development via questionnaires and documents.</p>`,
+    feeds:"Feeds the <b>Control Assessment</b> (control-related) and <b>Impact Assessment</b> (impact-related)."},
+
+  "global-impact":{tag:"Data input",title:"Global Threat Intelligence · Impact",body:`
+    <p>Loss-related intelligence collated from public security reports and adversary disclosures, used to model the financial side of a scenario.</p>`,
+    feeds:"Feeds the <b>Impact Assessment</b>."}
+};
+
+const nodes = document.querySelectorAll(".node");
+const elTag = document.getElementById("p-tag");
+const elTitle = document.getElementById("p-title");
+const elBody = document.getElementById("p-body");
+const elFeeds = document.getElementById("p-feeds");
+
+function select(id){
+  const d = DATA[id];
+  if(!d) return;
+  nodes.forEach(n=>n.classList.toggle("active", n.dataset.id===id));
+  elTag.textContent = d.tag;
+  elTitle.textContent = d.title;
+  elBody.innerHTML = d.body;
+  elFeeds.innerHTML = d.feeds;
+}
+
+nodes.forEach(n=>{
+  n.addEventListener("click", ()=>select(n.dataset.id));
+  n.addEventListener("keydown", e=>{
+    if(e.key==="Enter"||e.key===" "){e.preventDefault();select(n.dataset.id);}
+  });
+});
+</script>
+</body>
+</html>
