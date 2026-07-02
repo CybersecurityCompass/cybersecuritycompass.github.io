@@ -198,6 +198,11 @@
   .std-rec b{color:#ffd9d6;font-weight:600;}
 
   .footnote{margin-top:28px;font-size:11.5px;color:var(--ink-faint);max-width:82ch;line-height:1.6;border-top:1px solid var(--line);padding-top:16px;}
+  .page-footer{max-width:1240px;margin:18px auto 30px;padding:0 24px;display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+  .pf-credit{font-family:var(--sans);font-size:11.5px;line-height:1.6;color:var(--ink-faint);text-align:left;}
+  .pf-cite{font-family:var(--sans);font-size:11.5px;line-height:1.6;color:var(--ink-faint);text-align:right;}
+  .pf-credit a,.pf-cite a{color:var(--ink-faint);text-decoration:none;border-bottom:none;transition:color .15s;}
+  .pf-credit a:hover,.pf-cite a:hover{color:var(--red);}
   .footnote b{color:var(--ink-dim);font-weight:600;}
   .footnote a{color:#d98a86;text-decoration:none;border-bottom:1px solid rgba(217,138,134,.35);transition:color .15s,border-color .15s;}
   .footnote a:hover{color:#ffd9d6;border-color:#ffd9d6;}
@@ -217,6 +222,7 @@
     body{background:#fff!important;color:#111!important;background-image:none!important;}
     /* hide the entire interactive app; show only the executive report */
     .wrap{display:none!important;}
+    .page-footer{display:none!important;}
     .report{display:block!important;font-family:var(--sans);color:#1a1a1a;}
     .rep-cover{border-bottom:3px solid #b00;padding-bottom:18px;margin-bottom:22px;}
     .rep-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#b00;margin-bottom:10px;}
@@ -228,6 +234,15 @@
     .rep-h{font-size:11px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#b00;margin:0 0 12px;padding-bottom:6px;border-bottom:1px solid #ddd;}
     .rep-verdict{font-size:18px;font-weight:700;color:#111;line-height:1.3;margin-bottom:10px;}
     .rep-summary{font-size:13px;line-height:1.65;color:#333;margin:0;}
+    .rep-tree{display:flex;justify-content:center;padding:8px 0 4px;overflow:visible;}
+    .rep-tree .node-wrap{display:flex;flex-direction:column;align-items:center;}
+    .rep-tree .node{font-size:10px;padding:7px 12px;}
+    .rep-tree .stem,.rep-tree .fn-rail{height:12px;}
+    .rep-tree .peer-bracket,.rep-tree .fn-cap,.rep-tree .dep-caphdr,.rep-tree .dep-owner{font-size:8px;}
+    .rep-tree .fn-grid{max-width:480px;}
+    .rep-tree .dep-wrap{margin-top:14px;padding-top:10px;}
+    .rep-tree .peer-row,.rep-tree .dep-grid,.rep-tree .fn-grid{gap:6px;}
+    .rep-tree .node,.rep-tree .stem,.rep-tree .fn-rail{animation:none!important;}
     .rep-scoregrid{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px;margin-bottom:14px;}
     .rep-scorecol-h{font-size:10px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:8px;}
     .rep-score{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
@@ -457,6 +472,11 @@
   <p class="footnote" id="footnote"></p>
 </div>
 
+<div class="page-footer">
+  <div class="pf-credit">Created and Designed by:<br><a href="https://www.linkedin.com/in/jpcastro/" target="_blank" rel="noopener">Juan Pablo Castro Vilaró</a></div>
+  <div class="pf-cite"><a href="https://www.researchgate.net/publication/408316374" target="_blank" rel="noopener">The CISO Reporting Structure Is the Starting Point of Cyber Resilience Failure</a><br>DOI:<a href="https://doi.org/10.13140/RG.2.2.14467.67362" target="_blank" rel="noopener">10.13140/RG.2.2.14467.67362</a></div>
+</div>
+
 <!-- Executive report: built on export, shown only in print -->
 <div id="report" class="report" aria-hidden="true">
   <div class="rep-cover">
@@ -467,6 +487,10 @@
   <div class="rep-section">
     <div class="rep-verdict" id="rep-verdict"></div>
     <p class="rep-summary" id="rep-summary"></p>
+  </div>
+  <div class="rep-section rep-avoid" id="rep-tree-wrap">
+    <h2 class="rep-h" id="rep-tree-h"></h2>
+    <div class="rep-tree" id="rep-tree"></div>
   </div>
   <div class="rep-section">
     <h2 class="rep-h" id="rep-scores-h"></h2>
@@ -573,6 +597,7 @@
       fmHead:"How this reporting line tends to fail",
       repEyebrow:"CISO Reporting Structure Stress Test",
       repMetaStruct:"Structure assessed",repMetaLine:"CISO reports to",repMetaDate:"Generated",
+      repTreeH:"The structure you mapped",
       repScoresH:"Headline scores",repLineH:"The line above (authority)",repFnH:"The function below (capability)",
       repFailH:"How this reporting line tends to fail",
       repOrphanH:"Unguarded capabilities",
@@ -651,6 +676,7 @@
       fmHead:"Cómo tiende a fallar esta línea de reporte",
       repEyebrow:"Evaluación de la Estructura de Reporte del CISO",
       repMetaStruct:"Estructura evaluada",repMetaLine:"El CISO reporta a",repMetaDate:"Generado",
+      repTreeH:"La estructura que mapeaste",
       repScoresH:"Puntajes principales",repLineH:"La línea de arriba (autoridad)",repFnH:"La función de abajo (capacidad)",
       repFailH:"Cómo tiende a fallar esta línea de reporte",
       repOrphanH:"Capacidades sin guardia",
@@ -729,6 +755,7 @@
       fmHead:"Como esta linha de reporte tende a falhar",
       repEyebrow:"Avaliação da Estrutura de Reporte do CISO",
       repMetaStruct:"Estrutura avaliada",repMetaLine:"O CISO reporta a",repMetaDate:"Gerado",
+      repTreeH:"A estrutura que você mapeou",
       repScoresH:"Pontuações principais",repLineH:"A linha acima (autoridade)",repFnH:"A função abaixo (capacidade)",
       repFailH:"Como esta linha de reporte tende a falhar",
       repOrphanH:"Capacidades sem guarda",
@@ -1547,6 +1574,12 @@
     // plain-English summary assembled from structure
     var summary=buildSummary(L,bn,lineStrong,fnStrong,gap,gapWord,orphanN);
     $('rep-summary').textContent=summary;
+    // structure tree: clone the live mapped structure into the report
+    $('rep-tree-h').textContent=t('repTreeH');
+    var rt=$('rep-tree');rt.innerHTML='';
+    var liveHolder=tree.querySelector('.dyn');
+    if(liveHolder){rt.appendChild(liveHolder.cloneNode(true));$('rep-tree-wrap').style.display='block';}
+    else{$('rep-tree-wrap').style.display='none';}
     // scores
     $('rep-scores-h').textContent=t('repScoresH');
     var sg=$('rep-scoregrid');sg.innerHTML='';
