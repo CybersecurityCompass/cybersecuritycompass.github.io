@@ -202,6 +202,7 @@
   <button type="button" role="tab" data-lang="en" class="active" aria-selected="true">EN</button>
   <button type="button" role="tab" data-lang="es" aria-selected="false">ES</button>
   <button type="button" role="tab" data-lang="pt" aria-selected="false">PT</button>
+  <button type="button" role="tab" data-lang="fr" aria-selected="false">FR</button>
 </div>
 
 <div class="diagram-wrap">
@@ -373,7 +374,7 @@
 </div>
 
 <script>
-  const T = {"en": {"t-title": "The Future of SOC is", "t-subtitle": "A LOOP THAT DOES NOT MOVE IS NOT A LOOP", "t-soc-sub": "SecOps", "t-soc-1": "PROTECTS", "t-soc-2": "TODAY", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTECTS", "t-croc-2": "TOMORROW", "t-crossover": "Intelligence moves at machine speed, or it is history.", "t-proc-left": "DETECT  ·  INVESTIGATE  ·  RESPOND", "t-proc-right": "IDENTIFY · PRIORITIZE · REDUCE · VERIFY · MONITOR", "t-flow-left": "incidents, detections, actionable insight", "t-flow-right": "exposures, risk scores, asset criticality", "t-bot-left": "what is happening right now?", "t-bot-right": "what is our exposure, and what do we do today?", "t-footer": "EVERY CYCLE POWERS THE NEXT", "t-credit": "Created and Designed by:", "t-pub-title": "The Future of SOC Is ∞"}, "es": {"t-title": "El Futuro del SOC es", "t-subtitle": "UN CICLO QUE NO SE MUEVE NO ES UN CICLO", "t-soc-sub": "SecOps", "t-soc-1": "PROTEGE", "t-soc-2": "EL HOY", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTEGE", "t-croc-2": "EL MAÑANA", "t-crossover": "La inteligencia se mueve a velocidad de máquina, o es historia.", "t-proc-left": "DETECTAR  ·  INVESTIGAR  ·  RESPONDER", "t-proc-right": "IDENTIFICAR · PRIORIZAR · REDUCIR · VERIFICAR · MONITOREAR", "t-flow-left": "incidentes, detecciones, insights accionables", "t-flow-right": "exposiciones, puntajes de riesgo, criticidad de activos", "t-bot-left": "¿qué está pasando en este momento?", "t-bot-right": "¿cuál es nuestra exposición, y qué hacemos hoy?", "t-footer": "CADA CICLO POTENCIA EL SIGUIENTE", "t-credit": "Creado y Diseñado por:", "t-pub-title": "El Futuro del SOC Es ∞"}, "pt": {"t-title": "O Futuro do SOC é", "t-subtitle": "UM CICLO QUE NÃO SE MOVE NÃO É UM CICLO", "t-soc-sub": "SecOps", "t-soc-1": "PROTEGE", "t-soc-2": "O HOJE", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTEGE", "t-croc-2": "O AMANHÃ", "t-crossover": "A inteligência se move em velocidade de máquina, ou é história.", "t-proc-left": "DETECTAR  ·  INVESTIGAR  ·  RESPONDER", "t-proc-right": "IDENTIFICAR · PRIORIZAR · REDUZIR · VERIFICAR · MONITORAR", "t-flow-left": "incidentes, detecções, insights acionáveis", "t-flow-right": "exposições, scores de risco, criticidade dos ativos", "t-bot-left": "o que está acontecendo agora?", "t-bot-right": "qual é a nossa exposição, e o que fazemos hoje?", "t-footer": "CADA CICLO POTENCIA O PRÓXIMO", "t-credit": "Criado e Projetado por:", "t-pub-title": "O Futuro do SOC É ∞"}};
+  const T = {"en": {"t-title": "The Future of SOC is", "t-subtitle": "A LOOP THAT DOES NOT MOVE IS NOT A LOOP", "t-soc-sub": "SecOps", "t-soc-1": "PROTECTS", "t-soc-2": "TODAY", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTECTS", "t-croc-2": "TOMORROW", "t-crossover": "Intelligence moves at machine speed, or it is history.", "t-proc-left": "DETECT  ·  INVESTIGATE  ·  RESPOND", "t-proc-right": "IDENTIFY · PRIORITIZE · REDUCE · VERIFY · MONITOR", "t-flow-left": "incidents, detections, actionable insight", "t-flow-right": "exposures, risk scores, asset criticality", "t-bot-left": "what is happening right now?", "t-bot-right": "what is our exposure, and what do we do today?", "t-footer": "EVERY CYCLE POWERS THE NEXT", "t-credit": "Created and Designed by:", "t-pub-title": "The Future of SOC Is ∞"}, "es": {"t-title": "El Futuro del SOC es", "t-subtitle": "UN CICLO QUE NO SE MUEVE NO ES UN CICLO", "t-soc-sub": "SecOps", "t-soc-1": "PROTEGE", "t-soc-2": "EL HOY", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTEGE", "t-croc-2": "EL MAÑANA", "t-crossover": "La inteligencia se mueve a velocidad de máquina, o es historia.", "t-proc-left": "DETECTAR  ·  INVESTIGAR  ·  RESPONDER", "t-proc-right": "IDENTIFICAR · PRIORIZAR · REDUCIR · VERIFICAR · MONITOREAR", "t-flow-left": "incidentes, detecciones, insights accionables", "t-flow-right": "exposiciones, puntajes de riesgo, criticidad de activos", "t-bot-left": "¿qué está pasando en este momento?", "t-bot-right": "¿cuál es nuestra exposición, y qué hacemos hoy?", "t-footer": "CADA CICLO POTENCIA EL SIGUIENTE", "t-credit": "Creado y Diseñado por:", "t-pub-title": "El Futuro del SOC Es ∞"}, "pt": {"t-title": "O Futuro do SOC é", "t-subtitle": "UM CICLO QUE NÃO SE MOVE NÃO É UM CICLO", "t-soc-sub": "SecOps", "t-soc-1": "PROTEGE", "t-soc-2": "O HOJE", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTEGE", "t-croc-2": "O AMANHÃ", "t-crossover": "A inteligência se move em velocidade de máquina, ou é história.", "t-proc-left": "DETECTAR  ·  INVESTIGAR  ·  RESPONDER", "t-proc-right": "IDENTIFICAR · PRIORIZAR · REDUZIR · VERIFICAR · MONITORAR", "t-flow-left": "incidentes, detecções, insights acionáveis", "t-flow-right": "exposições, scores de risco, criticidade dos ativos", "t-bot-left": "o que está acontecendo agora?", "t-bot-right": "qual é a nossa exposição, e o que fazemos hoje?", "t-footer": "CADA CICLO POTENCIA O PRÓXIMO", "t-credit": "Criado e Projetado por:", "t-pub-title": "O Futuro do SOC É ∞"}, "fr": {"t-title": "Le Futur du SOC est", "t-subtitle": "UNE BOUCLE QUI NE BOUGE PAS N'EST PAS UNE BOUCLE", "t-soc-sub": "SecOps", "t-soc-1": "PROTÈGE", "t-soc-2": "AUJOURD'HUI", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTÈGE", "t-croc-2": "DEMAIN", "t-crossover": "L'intelligence circule à la vitesse de la machine, ou c'est de l'histoire.", "t-proc-left": "DÉTECTER  ·  ENQUÊTER  ·  RÉPONDRE", "t-proc-right": "IDENTIFIER · PRIORISER · RÉDUIRE · VÉRIFIER · SURVEILLER", "t-flow-left": "incidents, détections, insights exploitables", "t-flow-right": "expositions, scores de risque, criticité des actifs", "t-bot-left": "qu'est-ce qui se passe en ce moment ?", "t-bot-right": "quelle est notre exposition, et que faisons-nous aujourd'hui ?", "t-footer": "CHAQUE CYCLE ALIMENTE LE SUIVANT", "t-credit": "Créé et Conçu par :", "t-pub-title": "Le Futur du SOC Est ∞"}};
   const buttons = document.querySelectorAll('.lang-bar button');
 
   function setLang(lang) {
@@ -395,7 +396,7 @@
 
   // Auto-detect browser language: use it if supported, otherwise default to English.
   (function () {
-    const supported = ['en', 'es', 'pt'];
+    const supported = ['en', 'es', 'pt', 'fr'];
     const raw = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
     const code = raw.split('-')[0];
     setLang(supported.indexOf(code) !== -1 ? code : 'en');
@@ -414,7 +415,8 @@
     const LABELS = {
       en: 'Click to Explore the Cybersecurity Compass →',
       es: 'Haz clic para Explorar la Brújula de Ciberseguridad →',
-      pt: 'Clique para Explorar a Bússola de Cibersegurança →'
+      pt: 'Clique para Explorar a Bússola de Cibersegurança →',
+      fr: 'Cliquez pour Explorer la Boussole de Cybersécurité →'
     };
     const labelForCurrentLang = () => {
       const lang = document.documentElement.getAttribute('lang') || 'en';
@@ -493,6 +495,13 @@
         croc: 'O CROC protege o amanhã. Não espera pelo alerta. Pergunta qual é a nossa exposição agora, como ela está mudando, e o que devemos fazer hoje para reduzi-la antes que se torne um incidente. Seu relógio é o ambiente em mudança.',
         socLink: 'Ler: The Future of SOC Is ∞ →',
         crocLink: 'Ler: CyberRiskOps, The Operating Model →'
+      },
+      fr: {
+        socLabel: 'SOC · SecOps', crocLabel: 'CROC · CyberRiskOps',
+        soc: "Le SOC protège aujourd'hui. Il regarde ce qui se passe en temps réel. Il détecte l'intrusion, analyse l'alerte et répond à l'incident. Son horloge est l'événement en direct.",
+        croc: "Le CROC protège demain. Il n'attend pas l'alerte. Il observe l'exposition actuelle, son évolution, et les actions à mener maintenant pour réduire le risque avant qu'il ne devienne un incident. Son horloge est l'environnement changeant.",
+        socLink: 'Lire : The Future of SOC Is ∞ →',
+        crocLink: 'Lire : CyberRiskOps, The Operating Model →'
       }
     };
     const copyForCurrentLang = () => {
@@ -681,9 +690,10 @@ html,body,#wrap,#stage{background:transparent !important;}
   </svg>
 
   <div id="lang-bar">
-    <button id="btn-en" onclick="setLang(&#39;en&#39;)" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">EN</button>
-    <button id="btn-es" onclick="setLang(&#39;es&#39;)" style="background: rgb(224, 28, 36); color: rgb(255, 255, 255);">ES</button>
-    <button id="btn-pt" onclick="setLang(&#39;pt&#39;)" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">PT</button>
+    <button id="btn-en" onclick="setLang('en')" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">EN</button>
+    <button id="btn-es" onclick="setLang('es')" style="background: rgb(224, 28, 36); color: rgb(255, 255, 255);">ES</button>
+    <button id="btn-pt" onclick="setLang('pt')" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">PT</button>
+    <button id="btn-fr" onclick="setLang('fr')" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">FR</button>
   </div>
 
   <div id="compass-title">La Brújula de Ciberseguridad</div>
@@ -724,6 +734,16 @@ const T={
     pubLine1:"A Bússola da Cibersegurança:",pubLine2:"Navegando Estrategicamente pelo Tempestuoso Oceano Digital",
     pubUrl:"https://www.researchgate.net/publication/389631493",
     pubDoi:"10.13140/RG.2.2.14022.79687",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.14022.79687"
+  },
+  fr:{
+    crm:"Gestion du Cyber Risque",pap:"Proactif et Prédictif",bab:"Avant une Brèche",
+    dar:"Détection et Réponse",rad:"Réactif et Défensif",dub:"Pendant une Brèche",
+    cr:"Cyber Résilience",rai:"Récupérer et Améliorer",aab:"Après une Brèche",
+    ppl:"Personnes",prc:"Processus",tch:"Technologie",
+    title:"La Boussole de Cybersécurité",credit:"Créé et Conçu par :",
+    pubLine1:"La Boussole de Cybersécurité :",pubLine2:"Naviguer Stratégiquement dans l'Océan Numérique Tumultueux",
+    pubUrl:"https://www.researchgate.net/publication/389628862",
+    pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
   }
 };
 
@@ -751,6 +771,14 @@ const TT={
      b:"Em cibersegurança, não é uma questão de se as tempestades vão chegar, mas de quando. A Detecção e Resposta é a sua tripulação no coração da tempestade: olhos em cada sinal, mãos em cada controle. Identifica as ameaças à medida que se desenvolvem, contém a brecha antes que se espalhe e responde com velocidade e precisão. Essencial, mas nunca suficiente sozinha. As organizações que só sabem enfrentar tempestades passarão toda a sua viagem esperando pela próxima. A bússola exige mais."},
     {h:"Ciber Resiliência",s:"Após uma Brecha · Recuperar e Melhorar · Um Resultado",
      b:"A Ciber Resiliência não é uma fase que você entra após um incidente. É o resultado de ter feito tudo o mais certo. Quando o seu norte está definido por uma gestão proativa de riscos e sua equipe responde com precisão durante a tempestade, a resiliência é o que você conquista. Significa restaurar operações mais rápido, aprender com o que falhou, fortalecer o que foi exposto e retroalimentar essa inteligência na sua bússola. As organizações que alcançam a verdadeira Ciber Resiliência não apenas sobrevivem às tempestades. Tornam-se mais difíceis de afundar a cada uma que enfrentam."}
+  ],
+  fr:[
+    {h:"Gestion du Cyber Risque",s:"Avant une Brèche · Proactif et Prédictif",
+     b:"Le nord véritable de votre boussole de cybersécurité. Sans lui, les organisations dérivent de crise en crise, réagissant, se rétablissant, sans jamais réellement réduire le risque. La Gestion du Cyber Risque est la discipline proactive et prédictive qui anticipe les menaces avant qu'elles ne se matérialisent, priorise ce qui compte vraiment, optimise les investissements en sécurité et donne aux dirigeants un langage clair pour prendre des décisions stratégiques. Les cybercriminels ne cherchent pas seulement des vulnérabilités techniques. Ils cherchent l'incertitude et l'indécision qui viennent de l'absence de nord. C'est cela qui comble cet écart."},
+    {h:"Détection et Réponse",s:"Pendant une Brèche · Réactif et Défensif",
+     b:"En cybersécurité, il ne s'agit pas de savoir si les tempêtes frapperont, mais quand. La Détection et Réponse est votre équipage au cœur de la tempête : les yeux sur chaque signal, les mains sur chaque commande. Elle identifie les menaces à mesure qu'elles se développent, contient la brèche avant qu'elle ne se propage, et répond avec rapidité et précision. Essentielle, mais jamais suffisante à elle seule. Les organisations qui ne savent que traverser les tempêtes passeront tout leur voyage à attendre la suivante. La boussole exige davantage."},
+    {h:"Cyber Résilience",s:"Après une Brèche · Récupérer et Améliorer · Un Résultat",
+     b:"La Cyber Résilience n'est pas une phase que l'on aborde après un incident. C'est le résultat d'avoir bien fait tout le reste. Lorsque votre nord est fixé par une gestion proactive du risque et que votre équipage répond avec précision pendant la tempête, la résilience est ce que vous gagnez. Cela signifie rétablir les opérations plus rapidement, apprendre de ce qui a échoué, renforcer ce qui a été exposé, et réinjecter cette intelligence dans votre boussole. Les organisations qui atteignent une véritable cyber résilience ne se contentent pas de survivre aux tempêtes. Elles deviennent plus difficiles à couler à chaque tempête qu'elles traversent."}
   ]
 };
 
@@ -778,6 +806,14 @@ const TTP={
      b:"O processo é a espinha dorsal operacional que conecta pessoas à tecnologia e estratégia à execução. Sem ele, até as melhores ferramentas geram ruído e o melhor talento opera em silos. No núcleo de uma camada de processo madura estão a disciplina CyberRiskOps e seu centro operacional, o Centro de Operações de Ciber Risco (CROC), onde a inteligência de risco é continuamente medida, priorizada e executada. Security Operations (SecOps) conecta essa inteligência de risco com ação em tempo real, enquanto o Centro de Operações de Segurança (SOC) executa detecção, investigação e resposta com velocidade. Juntos, transformam a cibersegurança de um conjunto de reações isoladas em uma operação contínua, mensurável e em melhoria constante. O processo é o que garante que a bússola continue em movimento."},
     {h:"Tecnologia",s:"O Multiplicador de Força",
      b:"A tecnologia é o multiplicador de força da sua estratégia de cibersegurança, mas apenas quando serve a um propósito claro. A Quantificação do Ciber Risco (CRQ) traduz o risco técnico em linguagem financeira que os executivos podem utilizar. A Gestão de Exposição ao Ciber Risco (CREM) mapeia e prioriza continuamente sua superfície de ataque antes que os adversários possam explorá-la. A Detecção e Resposta Estendida (XDR) unifica a visibilidade em endpoints, redes, nuvem e identidade em uma imagem única e correlacionada. A Inteligência de Ameaças alimenta sua bússola com contexto do adversário, transformando alertas reativos em decisões proativas. A automação elimina o atrito manual que atrasa a resposta e permite que suas equipes operem na velocidade das máquinas. Uma plataforma unificada integra tudo isso, substituindo soluções pontuais fragmentadas por inteligência integrada. A Inteligência Artificial amplia o que as equipes humanas podem fazer em cada camada. A tecnologia não define sua estratégia. Ela a executa."}
+  ],
+  fr:[
+    {h:"Personnes",s:"La Couche Humaine",
+     b:"La technologie ne défend pas les organisations. Les personnes, si. La dimension Personnes de la boussole représente la couche humaine qui donne un sens à chaque autre investissement : les analystes de sécurité qui interprètent les signaux, les dirigeants qui prennent les décisions de risque, les employés qui constituent soit la première ligne de défense, soit le premier point de défaillance. Et de l'autre côté de chaque attaque, il y a aussi une personne. Les cybercriminels ne sont pas des forces automatisées de la nature. Ce sont des individus avec leurs propres intentions, motivations et stratégies. Ils étudient leurs cibles, exploitent l'indécision et agissent avec un objectif précis. Se défendre contre eux exige les mêmes qualités humaines qu'ils possèdent : la vigilance, le jugement et la volonté d'agir avant eux. Une boussole sans personnes compétentes, vigilantes et responsabilisées est un instrument que personne ne sait lire. La culture, la formation, la responsabilisation et le leadership ne sont pas des facteurs secondaires. Ce sont les mains sur le gouvernail."},
+    {h:"Processus",s:"L'Épine Dorsale Opérationnelle",
+     b:"Le processus est l'épine dorsale opérationnelle qui relie les personnes à la technologie et la stratégie à l'exécution. Sans lui, même les meilleurs outils produisent du bruit, et même les meilleurs talents opèrent en silos. Au cœur d'une couche de processus mature se trouvent la discipline CyberRiskOps et son centre névralgique opérationnel, le Centre des Opérations de Cyber Risque (CROC), où l'intelligence du risque est mesurée, priorisée et exploitée en continu. Security Operations (SecOps) relie cette intelligence du risque à l'action en temps réel, tandis que le Security Operations Center (SOC) exécute la détection, l'investigation et la réponse avec rapidité. Ensemble, ils transforment la cybersécurité d'un ensemble de réactions isolées en une opération continue, mesurable et en amélioration constante. Le processus est ce qui garantit que la boussole continue d'avancer."},
+    {h:"Technologie",s:"Le Multiplicateur de Force",
+     b:"La technologie est le multiplicateur de force de votre stratégie de cybersécurité, mais seulement lorsqu'elle sert un objectif clair. La Quantification du Cyber Risque (CRQ) traduit le risque technique en un langage financier que les dirigeants peuvent exploiter. La Gestion de l'Exposition au Cyber Risque (CREM) cartographie et priorise en continu votre surface d'attaque avant que les adversaires ne puissent l'exploiter. La Détection et Réponse Étendues (XDR) unifie la visibilité sur les terminaux, les réseaux, le cloud et l'identité en une image unique et corrélée. Le Renseignement sur les Menaces alimente votre boussole avec le contexte de l'adversaire, transformant les alertes réactives en décisions proactives. L'automatisation élimine la friction manuelle qui ralentit la réponse et permet à vos équipes d'opérer à la vitesse de la machine sans s'épuiser. Une plateforme unifiée relie tout cela, remplaçant les solutions ponctuelles fragmentées par une intelligence intégrée. L'Intelligence Artificielle étend ce que les équipes humaines peuvent accomplir à chaque niveau. La technologie ne définit pas votre stratégie. Elle l'exécute."}
   ]
 };
 
@@ -803,7 +839,7 @@ function applyLang(l){
       '<span style="display:inline;white-space:nowrap;">'+t.pubLine2+'</span>'+
     '</a>'+
     '<a href="'+t.pubDoiUrl+'" target="_blank" style="color:rgba(255,255,255,.28);text-decoration:none;">DOI: '+t.pubDoi+'</a>';
-  ['en','es','pt'].forEach(c=>{
+  ['en','es','pt','fr'].forEach(c=>{
     const b=document.getElementById('btn-'+c);
     b.style.background=c===l?'#E01C24':'rgba(255,255,255,0.1)';
     b.style.color=c===l?'#fff':'#888';
