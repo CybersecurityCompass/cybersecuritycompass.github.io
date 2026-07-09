@@ -63,6 +63,11 @@ html,body{background:#000;height:100%;}
     <button id="btn-en" onclick="setLang('en')">EN</button>
     <button id="btn-es" onclick="setLang('es')">ES</button>
     <button id="btn-pt" onclick="setLang('pt')">PT</button>
+    <button id="btn-fr" onclick="setLang('fr')">FR</button>
+    <button id="btn-de" onclick="setLang('de')">DE</button>
+    <button id="btn-ja" onclick="setLang('ja')">JA</button>
+    <button id="btn-ar" onclick="setLang('ar')">AR</button>
+    <button id="btn-zh" onclick="setLang('zh')">ZH</button>
   </div>
 
   <div id="compass-title">The Cybersecurity Compass</div>
@@ -103,6 +108,56 @@ const T={
     pubLine1:"A Bússola da Cibersegurança:",pubLine2:"Navegando Estrategicamente pelo Tempestuoso Oceano Digital",
     pubUrl:"https://www.researchgate.net/publication/389631493",
     pubDoi:"10.13140/RG.2.2.14022.79687",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.14022.79687"
+  },
+  fr:{
+    crm:"Gestion du Cyber Risque",pap:"Proactif et Prédictif",bab:"Avant une Brèche",
+    dar:"Détection et Réponse",rad:"Réactif et Défensif",dub:"Pendant une Brèche",
+    cr:"Cyber Résilience",rai:"Récupérer et Améliorer",aab:"Après une Brèche",
+    ppl:"Personnes",prc:"Processus",tch:"Technologie",
+    title:"La Boussole de Cybersécurité",credit:"Créé et Conçu par :",
+    pubLine1:"La Boussole de Cybersécurité :",pubLine2:"Naviguer Stratégiquement dans l'Océan Numérique Tumultueux",
+    pubUrl:"https://www.researchgate.net/publication/389628862",
+    pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
+  },
+  de:{
+    crm:"Cyber-Risikomanagement",pap:"Proaktiv und Vorausschauend",bab:"Vor einem Sicherheitsvorfall",
+    dar:"Erkennung und Reaktion",rad:"Reaktiv und Defensiv",dub:"Während eines Sicherheitsvorfalls",
+    cr:"Cyber-Resilienz",rai:"Wiederherstellen und Verbessern",aab:"Nach einem Sicherheitsvorfall",
+    ppl:"Menschen",prc:"Prozess",tch:"Technologie",
+    title:"Der Cybersicherheits-Kompass",credit:"Erstellt und Gestaltet von:",
+    pubLine1:"Der Cybersicherheits-Kompass:",pubLine2:"Strategische Navigation durch den stürmischen digitalen Ozean",
+    pubUrl:"https://www.researchgate.net/publication/389628862",
+    pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
+  },
+  ja:{
+    crm:"サイバーリスクマネジメント",pap:"プロアクティブかつ予測的",bab:"侵害前",
+    dar:"検知と対応",rad:"リアクティブかつ防御的",dub:"侵害中",
+    cr:"サイバーレジリエンス",rai:"復旧と改善",aab:"侵害後",
+    ppl:"人材",prc:"プロセス",tch:"テクノロジー",
+    title:"サイバーセキュリティ・コンパス",credit:"企画・デザイン：",
+    pubLine1:"サイバーセキュリティ・コンパス：",pubLine2:"荒れ狂うデジタルの海を戦略的に航海する",
+    pubUrl:"https://www.researchgate.net/publication/389628862",
+    pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
+  },
+  ar:{
+    crm:"إدارة المخاطر السيبرانية",pap:"استباقي واستشرافي",bab:"قبل الاختراق",
+    dar:"الكشف والاستجابة",rad:"تفاعلي ودفاعي",dub:"خلال الاختراق",
+    cr:"المرونة السيبرانية",rai:"التعافي والتحسين",aab:"بعد الاختراق",
+    ppl:"العنصر البشري",prc:"العمليات",tch:"التقنية",
+    title:"بوصلة الأمن السيبراني",credit:"إعداد وتصميم:",
+    pubLine1:"بوصلة الأمن السيبراني:",pubLine2:"التنقل الاستراتيجي عبر المحيط الرقمي العاصف",
+    pubUrl:"https://www.researchgate.net/publication/389628862",
+    pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
+  },
+  zh:{
+    crm:"网络风险管理",pap:"主动预测",bab:"入侵前",
+    dar:"检测与响应",rad:"被动防御",dub:"入侵中",
+    cr:"网络韧性",rai:"恢复与改进",aab:"入侵后",
+    ppl:"人员",prc:"流程",tch:"技术",
+    title:"网络安全指南针",credit:"创作与设计：",
+    pubLine1:"网络安全指南针：",pubLine2:"在风暴笼罩的数字海洋中战略航行",
+    pubUrl:"https://www.researchgate.net/publication/389628862",
+    pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
   }
 };
 
@@ -130,6 +185,46 @@ const TT={
      b:"Em cibersegurança, não é uma questão de se as tempestades vão chegar, mas de quando. A Detecção e Resposta é a sua tripulação no coração da tempestade: olhos em cada sinal, mãos em cada controle. Identifica as ameaças à medida que se desenvolvem, contém a brecha antes que se espalhe e responde com velocidade e precisão. Essencial, mas nunca suficiente sozinha. As organizações que só sabem enfrentar tempestades passarão toda a sua viagem esperando pela próxima. A bússola exige mais."},
     {h:"Ciber Resiliência",s:"Após uma Brecha · Recuperar e Melhorar · Um Resultado",
      b:"A Ciber Resiliência não é uma fase que você entra após um incidente. É o resultado de ter feito tudo o mais certo. Quando o seu norte está definido por uma gestão proativa de riscos e sua equipe responde com precisão durante a tempestade, a resiliência é o que você conquista. Significa restaurar operações mais rápido, aprender com o que falhou, fortalecer o que foi exposto e retroalimentar essa inteligência na sua bússola. As organizações que alcançam a verdadeira Ciber Resiliência não apenas sobrevivem às tempestades. Tornam-se mais difíceis de afundar a cada uma que enfrentam."}
+  ],
+  fr:[
+    {h:"Gestion du Cyber Risque",s:"Avant une Brèche · Proactif et Prédictif",
+     b:"Le nord véritable de votre boussole de cybersécurité. Sans lui, les organisations dérivent de crise en crise, réagissant, se rétablissant, sans jamais réellement réduire le risque. La Gestion du Cyber Risque est la discipline proactive et prédictive qui anticipe les menaces avant qu'elles ne se matérialisent, priorise ce qui compte vraiment, optimise les investissements en sécurité et donne aux dirigeants un langage clair pour prendre des décisions stratégiques. Les cybercriminels ne cherchent pas seulement des vulnérabilités techniques. Ils cherchent l'incertitude et l'indécision qui viennent de l'absence de nord. C'est cela qui comble cet écart."},
+    {h:"Détection et Réponse",s:"Pendant une Brèche · Réactif et Défensif",
+     b:"En cybersécurité, il ne s'agit pas de savoir si les tempêtes frapperont, mais quand. La Détection et Réponse est votre équipage au cœur de la tempête : les yeux sur chaque signal, les mains sur chaque commande. Elle identifie les menaces à mesure qu'elles se développent, contient la brèche avant qu'elle ne se propage, et répond avec rapidité et précision. Essentielle, mais jamais suffisante à elle seule. Les organisations qui ne savent que traverser les tempêtes passeront tout leur voyage à attendre la suivante. La boussole exige davantage."},
+    {h:"Cyber Résilience",s:"Après une Brèche · Récupérer et Améliorer · Un Résultat",
+     b:"La Cyber Résilience n'est pas une phase que l'on aborde après un incident. C'est le résultat d'avoir bien fait tout le reste. Lorsque votre nord est fixé par une gestion proactive du risque et que votre équipage répond avec précision pendant la tempête, la résilience est ce que vous gagnez. Cela signifie rétablir les opérations plus rapidement, apprendre de ce qui a échoué, renforcer ce qui a été exposé, et réinjecter cette intelligence dans votre boussole. Les organisations qui atteignent une véritable cyber résilience ne se contentent pas de survivre aux tempêtes. Elles deviennent plus difficiles à couler à chaque tempête qu'elles traversent."}
+  ],
+  de:[
+    {h:"Cyber-Risikomanagement",s:"Vor einem Sicherheitsvorfall · Proaktiv und Vorausschauend",
+     b:"Der wahre Norden Ihres Cybersicherheits-Kompasses. Ohne ihn treiben Organisationen von Krise zu Krise, reagieren, erholen sich, ohne das Risiko jemals wirklich zu senken. Cyber-Risikomanagement ist die proaktive und vorausschauende Disziplin, die Bedrohungen erkennt, bevor sie eintreten, das Wichtigste priorisiert, Sicherheitsinvestitionen optimiert und Führungskräften eine klare Sprache für strategische Entscheidungen gibt. Cyberkriminelle suchen nicht nur nach technischen Schwachstellen. Sie suchen die Unsicherheit und Unentschlossenheit, die entsteht, wenn kein Norden vorhanden ist. Genau das schließt diese Lücke."},
+    {h:"Erkennung und Reaktion",s:"Während eines Sicherheitsvorfalls · Reaktiv und Defensiv",
+     b:"In der Cybersicherheit ist es keine Frage, ob Stürme aufziehen, sondern wann. Erkennung und Reaktion ist Ihre Mannschaft im Herzen des Sturms: Augen auf jedem Signal, Hände an jedem Steuer. Sie erkennt Bedrohungen, während sie sich entwickeln, dämmt den Vorfall ein, bevor er sich ausbreitet, und reagiert mit Geschwindigkeit und Präzision. Unerlässlich, aber allein niemals ausreichend. Organisationen, die nur wissen, wie man Stürme überlebt, verbringen ihre gesamte Reise damit, auf den nächsten zu warten. Der Kompass fordert mehr."},
+    {h:"Cyber-Resilienz",s:"Nach einem Sicherheitsvorfall · Wiederherstellen und Verbessern · Ein Ergebnis",
+     b:"Cyber-Resilienz ist keine Phase, in die man nach einem Vorfall eintritt. Sie ist das Ergebnis, alles andere richtig gemacht zu haben. Wenn Ihr Norden durch proaktives Risikomanagement festgelegt ist und Ihre Mannschaft im Sturm präzise reagiert, ist Resilienz das, was Sie sich verdienen. Das bedeutet, den Betrieb schneller wiederherzustellen, aus Fehlern zu lernen, das Exponierte zu härten und diese Erkenntnisse in Ihren Kompass zurückzuspeisen. Organisationen, die echte Cyber-Resilienz erreichen, überleben Stürme nicht nur. Sie werden mit jedem überstandenen Sturm schwerer zu versenken."}
+  ],
+  ja:[
+    {h:"サイバーリスクマネジメント",s:"侵害前・プロアクティブかつ予測的",
+     b:"サイバーセキュリティ・コンパスの真北。これがなければ、組織は危機から危機へと漂流し、対応と復旧を繰り返すだけで、リスクを本質的に減らすことは決してない。サイバーリスクマネジメントは、脅威が現実化する前に予測し、最も重要な事項を優先し、セキュリティ投資を最適化し、経営層が戦略的な意思決定を行うための明確な言語を提供する、プロアクティブかつ予測的な規律だ。サイバー犯罪者が狙っているのは技術的な脆弱性だけではない。真北を持たないことから生まれる不確実性と迷いこそが、彼らの標的だ。これを埋めるのがこの規律である。"},
+    {h:"検知と対応",s:"侵害中・リアクティブかつ防御的",
+     b:"サイバーセキュリティにおいて、問題は嵐が来るかどうかではなく、いつ来るかだ。検知と対応は、嵐の真っ只中にいるクルーそのものであり、すべての信号に目を配り、すべての制御に手をかける。脅威が展開する瞬間を捉え、侵害が広がる前に封じ込め、迅速かつ的確に対応する。不可欠だが、それだけでは決して十分ではない。嵐をやり過ごすことしか知らない組織は、航海のすべての時間を次の嵐を待つことに費やすだけだ。コンパスはそれ以上を要求する。"},
+    {h:"サイバーレジリエンス",s:"侵害後・復旧と改善・一つの成果",
+     b:"サイバーレジリエンスは、インシデントの後に入るフェーズではない。それは、他のすべてを正しく行った結果として得られる成果だ。プロアクティブなリスクマネジメントによって真北が定まり、クルーが嵐の中で的確に対応すれば、レジリエンスはその先に手に入る。運用をより速く復旧させ、失敗から学び、露出した部分を強化し、その知見をコンパスへ還元することを意味する。真のサイバーレジリエンスを実現した組織は、単に嵐を生き延びるだけではない。乗り越えた嵐の数だけ、沈みにくくなっていくのだ。"}
+  ],
+  ar:[
+    {h:"إدارة المخاطر السيبرانية",s:"قبل الاختراق · استباقي واستشرافي",
+     b:"الشمال الحقيقي لبوصلة الأمن السيبراني في مؤسستك. بدونها، تنجرف المؤسسات من أزمة إلى أزمة، فتتفاعل وتتعافى، دون أن تُخفّض المخاطر فعليًا في أي وقت. إدارة المخاطر السيبرانية هي المنهجية الاستباقية والاستشرافية التي تستشرف التهديدات قبل أن تتجسّد، وتُرتّب الأولويات بحسب الأهمية الحقيقية، وتُحسّن استثمارات الأمن، وتمنح القيادات التنفيذية لغة واضحة لاتخاذ القرارات الاستراتيجية. المجرمون السيبرانيون لا يبحثون فقط عن الثغرات التقنية. بل يبحثون عن حالة عدم اليقين والتردد الناتجة عن غياب هذا الشمال. وهذا بالضبط ما يُغلق تلك الفجوة."},
+    {h:"الكشف والاستجابة",s:"خلال الاختراق · تفاعلي ودفاعي",
+     b:"في الأمن السيبراني، لا يتعلق الأمر بما إذا كانت العاصفة ستضرب، بل بمتى ستضرب. الكشف والاستجابة هو طاقمك في قلب العاصفة: أعين مركّزة على كل إشارة، وأيدٍ على كل عنصر تحكم. فهو يحدد التهديدات لحظة ظهورها، ويحتوي الاختراق قبل أن ينتشر، ويستجيب بسرعة ودقة. أساسي، لكنه لا يكفي وحده أبدًا. المؤسسات التي لا تعرف سوى مواجهة العواصف ستقضي رحلتها كاملة في انتظار العاصفة التالية. البوصلة تتطلب أكثر من ذلك."},
+    {h:"المرونة السيبرانية",s:"بعد الاختراق · التعافي والتحسين · نتيجة واحدة",
+     b:"المرونة السيبرانية ليست مرحلة تدخلها المؤسسة بعد وقوع حادثة. بل هي النتيجة الطبيعية لفعل كل شيء آخر بالشكل الصحيح. فحين يتحدد شمالك من خلال إدارة استباقية للمخاطر، ويستجيب طاقمك بدقة خلال العاصفة، تكون المرونة هي ما تكسبه. وهذا يعني استعادة العمليات بشكل أسرع، والتعلّم من نقاط الفشل، وتحصين ما تعرّض للخطر، وإعادة تغذية تلك المعرفة إلى بوصلتك. المؤسسات التي تحقق مرونة سيبرانية حقيقية لا تنجو من العواصف فقط. بل تصبح أصعب على الغرق مع كل عاصفة تجتازها."}
+  ],
+  zh:[
+    {h:"网络风险管理",s:"入侵前 · 主动预测",
+     b:"这是你的网络安全指南针真正指向的方向。没有它，组织只能在一次次危机中挣扎，不断应对、不断恢复，却始终无法真正降低风险。网络风险管理是一种主动且预测性的方法论，它在威胁尚未成形之前就提前识别，把资源优先投向真正重要的地方，优化安全投入，并为管理层提供清晰的语言来做出战略决策。网络犯罪分子寻找的不仅是技术上的漏洞，他们更在寻找因缺乏方向而产生的不确定和犹豫。而这正是网络风险管理要填补的缺口。"},
+    {h:"检测与响应",s:"入侵中 · 被动防御",
+     b:"在网络安全领域，问题从来不是风暴会不会来，而是什么时候来。检测与响应就是你在风暴中心的团队：眼睛盯住每一个信号，双手随时准备操作每一个控制点。它能在威胁刚刚显现时就识别出来，在入侵扩散之前将其遏制，并以速度和精准做出响应。它至关重要，但从来不足以单独依靠。那些只懂得硬扛风暴的组织，会把整段航程都耗在等待下一场风暴上。指南针要求的，远不止于此。"},
+    {h:"网络韧性",s:"入侵后 · 恢复与改进 · 一种结果",
+     b:"网络韧性不是发生事件之后才进入的一个阶段，而是把其他所有环节都做对之后自然产生的结果。当你的方向由主动的风险管理确定，你的团队又能在风暴中精准应对，韧性就是你所获得的回报。它意味着更快恢复运营，从失败中学习，加固已经暴露的部分，并把这些经验重新反馈进你的指南针。真正实现网络韧性的组织，不只是在风暴中存活下来，而是每经历一次风暴，就变得更难被击沉。"}
   ]
 };
 
@@ -157,6 +252,46 @@ const TTP={
      b:"O processo é a espinha dorsal operacional que conecta pessoas à tecnologia e estratégia à execução. Sem ele, até as melhores ferramentas geram ruído e o melhor talento opera em silos. No núcleo de uma camada de processo madura estão a disciplina CyberRiskOps e seu centro operacional, o Centro de Operações de Ciber Risco (CROC), onde a inteligência de risco é continuamente medida, priorizada e executada. Security Operations (SecOps) conecta essa inteligência de risco com ação em tempo real, enquanto o Centro de Operações de Segurança (SOC) executa detecção, investigação e resposta com velocidade. Juntos, transformam a cibersegurança de um conjunto de reações isoladas em uma operação contínua, mensurável e em melhoria constante. O processo é o que garante que a bússola continue em movimento."},
     {h:"Tecnologia",s:"O Multiplicador de Força",
      b:"A tecnologia é o multiplicador de força da sua estratégia de cibersegurança, mas apenas quando serve a um propósito claro. A Quantificação do Ciber Risco (CRQ) traduz o risco técnico em linguagem financeira que os executivos podem utilizar. A Gestão de Exposição ao Ciber Risco (CREM) mapeia e prioriza continuamente sua superfície de ataque antes que os adversários possam explorá-la. A Detecção e Resposta Estendida (XDR) unifica a visibilidade em endpoints, redes, nuvem e identidade em uma imagem única e correlacionada. A Inteligência de Ameaças alimenta sua bússola com contexto do adversário, transformando alertas reativos em decisões proativas. A automação elimina o atrito manual que atrasa a resposta e permite que suas equipes operem na velocidade das máquinas. Uma plataforma unificada integra tudo isso, substituindo soluções pontuais fragmentadas por inteligência integrada. A Inteligência Artificial amplia o que as equipes humanas podem fazer em cada camada. A tecnologia não define sua estratégia. Ela a executa."}
+  ],
+  fr:[
+    {h:"Personnes",s:"La Couche Humaine",
+     b:"La technologie ne défend pas les organisations. Les personnes, si. La dimension Personnes de la boussole représente la couche humaine qui donne un sens à chaque autre investissement : les analystes de sécurité qui interprètent les signaux, les dirigeants qui prennent les décisions de risque, les employés qui constituent soit la première ligne de défense, soit le premier point de défaillance. Et de l'autre côté de chaque attaque, il y a aussi une personne. Les cybercriminels ne sont pas des forces automatisées de la nature. Ce sont des individus avec leurs propres intentions, motivations et stratégies. Ils étudient leurs cibles, exploitent l'indécision et agissent avec un objectif précis. Se défendre contre eux exige les mêmes qualités humaines qu'ils possèdent : la vigilance, le jugement et la volonté d'agir avant eux. Une boussole sans personnes compétentes, vigilantes et responsabilisées est un instrument que personne ne sait lire. La culture, la formation, la responsabilisation et le leadership ne sont pas des facteurs secondaires. Ce sont les mains sur le gouvernail."},
+    {h:"Processus",s:"L'Épine Dorsale Opérationnelle",
+     b:"Le processus est l'épine dorsale opérationnelle qui relie les personnes à la technologie et la stratégie à l'exécution. Sans lui, même les meilleurs outils produisent du bruit, et même les meilleurs talents opèrent en silos. Au cœur d'une couche de processus mature se trouvent la discipline CyberRiskOps et son centre névralgique opérationnel, le Centre des Opérations de Cyber Risque (CROC), où l'intelligence du risque est mesurée, priorisée et exploitée en continu. Security Operations (SecOps) relie cette intelligence du risque à l'action en temps réel, tandis que le Security Operations Center (SOC) exécute la détection, l'investigation et la réponse avec rapidité. Ensemble, ils transforment la cybersécurité d'un ensemble de réactions isolées en une opération continue, mesurable et en amélioration constante. Le processus est ce qui garantit que la boussole continue d'avancer."},
+    {h:"Technologie",s:"Le Multiplicateur de Force",
+     b:"La technologie est le multiplicateur de force de votre stratégie de cybersécurité, mais seulement lorsqu'elle sert un objectif clair. La Quantification du Cyber Risque (CRQ) traduit le risque technique en un langage financier que les dirigeants peuvent exploiter. La Gestion de l'Exposition au Cyber Risque (CREM) cartographie et priorise en continu votre surface d'attaque avant que les adversaires ne puissent l'exploiter. La Détection et Réponse Étendues (XDR) unifie la visibilité sur les terminaux, les réseaux, le cloud et l'identité en une image unique et corrélée. Le Renseignement sur les Menaces alimente votre boussole avec le contexte de l'adversaire, transformant les alertes réactives en décisions proactives. L'automatisation élimine la friction manuelle qui ralentit la réponse et permet à vos équipes d'opérer à la vitesse de la machine sans s'épuiser. Une plateforme unifiée relie tout cela, remplaçant les solutions ponctuelles fragmentées par une intelligence intégrée. L'Intelligence Artificielle étend ce que les équipes humaines peuvent accomplir à chaque niveau. La technologie ne définit pas votre stratégie. Elle l'exécute."}
+  ],
+  de:[
+    {h:"Menschen",s:"Die menschliche Ebene",
+     b:"Technologie verteidigt keine Organisationen. Menschen tun das. Die Dimension Menschen des Kompasses steht für die menschliche Ebene, die jede andere Investition sinnvoll macht: die Sicherheitsanalysten, die Signale interpretieren, die Führungskräfte, die Risikoentscheidungen treffen, die Mitarbeiter, die entweder die erste Verteidigungslinie oder der erste Schwachpunkt sind. Und auf der anderen Seite jedes Angriffs steht ebenfalls ein Mensch. Cyberkriminelle sind keine automatisierten Naturkräfte. Es sind Individuen mit eigenen Absichten, Motivationen und Strategien. Sie studieren ihre Ziele, nutzen Unentschlossenheit aus und handeln mit Zielstrebigkeit. Sich gegen sie zu verteidigen erfordert dieselben menschlichen Qualitäten, die sie besitzen: Wachsamkeit, Urteilsvermögen und den Willen, vor ihnen zu handeln. Ein Kompass ohne kompetente, wachsame und befähigte Menschen ist ein Instrument, das niemand zu lesen weiß. Kultur, Training, Verantwortlichkeit und Führung sind keine weichen Faktoren. Sie sind die Hände am Steuer."},
+    {h:"Prozess",s:"Das operative Rückgrat",
+     b:"Prozess ist das operative Rückgrat, das Menschen mit Technologie und Strategie mit Umsetzung verbindet. Ohne ihn erzeugen selbst die besten Werkzeuge nur Lärm, und selbst die besten Talente arbeiten in Silos. Im Kern einer ausgereiften Prozessebene stehen die CyberRiskOps-Disziplin und ihr operatives Nervenzentrum, das Cyber-Risiko-Operationszentrum (CROC), in dem Risikoerkenntnisse kontinuierlich gemessen, priorisiert und umgesetzt werden. Security Operations (SecOps) verbindet diese Risikoerkenntnisse mit Echtzeit-Handeln, während das Security Operations Center (SOC) Erkennung, Untersuchung und Reaktion mit Geschwindigkeit ausführt. Gemeinsam verwandeln sie Cybersicherheit von einer Reihe isolierter Reaktionen in einen kontinuierlichen, messbaren und sich stetig verbessernden Betrieb. Prozess ist das, was sicherstellt, dass der Kompass sich weiterbewegt."},
+    {h:"Technologie",s:"Der Kraftmultiplikator",
+     b:"Technologie ist der Kraftmultiplikator Ihrer Cybersicherheitsstrategie, aber nur, wenn sie einem klaren Zweck dient. Cyber-Risikoquantifizierung (CRQ) übersetzt technisches Risiko in eine finanzielle Sprache, mit der Führungskräfte handeln können. Cyber-Risiko-Expositionsmanagement (CREM) kartiert und priorisiert kontinuierlich Ihre Angriffsfläche, bevor Angreifer sie ausnutzen können. Erweiterte Erkennung und Reaktion (XDR) vereint die Sichtbarkeit über Endpunkte, Netzwerke, Cloud und Identität in einem einzigen, korrelierten Bild. Threat Intelligence versorgt Ihren Kompass mit Kontext über den Angreifer und verwandelt reaktive Warnungen in proaktive Entscheidungen. Automatisierung eliminiert die manuelle Reibung, die die Reaktion verlangsamt, und ermöglicht Ihren Teams, mit Maschinengeschwindigkeit zu arbeiten, ohne auszubrennen. Eine einheitliche Plattform verbindet all dies und ersetzt fragmentierte Einzellösungen durch integrierte Intelligenz. Künstliche Intelligenz erweitert, was menschliche Teams auf jeder Ebene leisten können. Technologie definiert nicht Ihre Strategie. Sie setzt sie um."}
+  ],
+  ja:[
+    {h:"人材",s:"ヒューマンレイヤー",
+     b:"テクノロジーは組織を守らない。守るのは人材だ。コンパスにおける人材の次元は、他のすべての投資を意味あるものにするヒューマンレイヤーを表す。信号を解釈するセキュリティアナリスト、リスクの意思決定を行う経営層、防御の最前線にも最初の破綻点にもなり得る従業員たちだ。そして、あらゆる攻撃の反対側にも、やはり人がいる。サイバー犯罪者は自動化された自然の力ではない。彼ら自身の意図、動機、戦略を持つ個人だ。彼らはターゲットを研究し、迷いを突き、目的を持って動く。彼らに対抗するには、彼らが持つのと同じ人間的な資質、すなわち警戒心、判断力、そして彼らより先に行動する意志が求められる。スキルと意識と権限を備えた人材のいないコンパスは、誰も読み方を知らない計器にすぎない。文化、トレーニング、アカウンタビリティ、そしてリーダーシップは、ソフトな要素ではない。それらは舵を握る手そのものだ。"},
+    {h:"プロセス",s:"運用のバックボーン",
+     b:"プロセスは、人材とテクノロジーをつなぎ、戦略と実行をつなぐ運用のバックボーンだ。これがなければ、最高のツールもノイズしか生まず、最高の人材もサイロの中で孤立して動くことになる。成熟したプロセスレイヤーの中核には、CyberRiskOpsという規律と、その運用上の神経中枢であるサイバーリスクオペレーションセンター(CROC)がある。ここでリスクインテリジェンスが継続的に測定され、優先順位付けされ、実行に移される。SecOpsはそのリスクインテリジェンスをリアルタイムのアクションへとつなぎ、SOC(セキュリティオペレーションセンター)は検知・調査・対応を高速に実行する。両者が連携することで、サイバーセキュリティは孤立した反応の集合体から、継続的で測定可能、そして常に改善され続ける運用へと変わる。プロセスこそが、コンパスを動かし続ける原動力だ。"},
+    {h:"テクノロジー",s:"フォースマルチプライヤー",
+     b:"テクノロジーは、サイバーセキュリティ戦略のフォースマルチプライヤーだ。ただし、明確な目的に応える場合に限る。CRQ(サイバーリスク定量化)は、技術的リスクを経営層が判断できる財務言語へと翻訳する。CREM(サイバーリスクエクスポージャーマネジメント)は、攻撃者に悪用される前に、攻撃対象領域を継続的にマッピングし、優先順位付けする。XDR(拡張検知・対応)は、エンドポイント、ネットワーク、クラウド、IDにわたる可視性を、単一の相関的なビューへと統合する。脅威インテリジェンスは、攻撃者のコンテキストをコンパスに供給し、リアクティブなアラートをプロアクティブな意思決定へと変える。オートメーションは対応を遅らせる手作業の摩擦を排除し、チームがバーンアウトすることなく、マシンスピードで動けるようにする。統合プラットフォームはこれらすべてをつなぎ、断片化したポイントソリューションを統合されたインテリジェンスへと置き換える。AI(人工知能)は、人間のチームができることを、あらゆる層で拡張する。テクノロジーは戦略を定義しない。それを実行するのだ。"}
+  ],
+  ar:[
+    {h:"العنصر البشري",s:"الطبقة البشرية",
+     b:"التقنية لا تحمي المؤسسات. الأفراد يفعلون ذلك. يمثّل بُعد العنصر البشري في البوصلة الطبقة البشرية التي تجعل كل استثمار آخر ذا معنى: محللو الأمن الذين يفسّرون الإشارات، والقيادات التنفيذية التي تتخذ قرارات المخاطر، والموظفون الذين يمثلون خط الدفاع الأول أو نقطة الفشل الأولى. وعلى الطرف الآخر من كل هجوم، يوجد أيضًا شخص. المجرمون السيبرانيون ليسوا قوى طبيعية آلية. بل هم أفراد يحملون نواياهم ودوافعهم واستراتيجياتهم الخاصة. يدرسون أهدافهم، ويستغلون التردد، ويتحركون بهدف واضح. والدفاع ضدهم يتطلب نفس الصفات البشرية التي يمتلكونها: الوعي، وسلامة الحكم، والإرادة على التحرك قبلهم. البوصلة بلا أفراد مؤهلين وواعين ومُخوَّلين هي أداة لا يعرف أحد كيف يقرأها. الثقافة والتدريب والمساءلة والقيادة ليست عوامل ثانوية. بل هي الأيدي التي تقبض على المقود."},
+    {h:"العمليات",s:"العمود الفقري التشغيلي",
+     b:"العمليات هي العمود الفقري التشغيلي الذي يربط الأفراد بالتقنية، والاستراتيجية بالتنفيذ. وبدونها، تُصدر حتى أفضل الأدوات ضجيجًا بلا فائدة، ويعمل أفضل الكفاءات في عزلة تامة. وفي جوهر طبقة العمليات الناضجة تقع منهجية CyberRiskOps ومركزها العصبي التشغيلي، وهو مركز عمليات المخاطر السيبرانية (CROC)، حيث تُقاس معلومات المخاطر وتُرتّب أولوياتها ويُتّخذ بشأنها إجراء بشكل مستمر. وتربط عمليات الأمن (SecOps) تلك المعلومات بالفعل اللحظي، بينما يُنفّذ مركز عمليات الأمن (SOC) الكشف والتحقيق والاستجابة بسرعة عالية. ومعًا، يُحوّلان الأمن السيبراني من مجموعة ردود فعل منعزلة إلى عملية مستمرة وقابلة للقياس وفي تحسّن دائم. العمليات هي ما يضمن استمرار حركة البوصلة."},
+    {h:"التقنية",s:"مُضاعِف القوة",
+     b:"التقنية هي مُضاعِف القوة لاستراتيجية الأمن السيبراني في مؤسستك، ولكن فقط حين تخدم غرضًا واضحًا. يُترجم التقييم الكمي للمخاطر السيبرانية (CRQ) المخاطر التقنية إلى لغة مالية يمكن للقيادات التنفيذية التصرف بناءً عليها. وتقوم إدارة التعرض للمخاطر السيبرانية (CREM) برسم سطح الهجوم وترتيب أولوياته باستمرار قبل أن يتمكن الخصوم من استغلاله. ويوحّد الكشف والاستجابة الموسّعة (XDR) الرؤية عبر نقاط النهاية والشبكات والسحابة والهوية في صورة واحدة مترابطة. وتُغذّي استخبارات التهديدات بوصلتك بسياق الخصم، فتحوّل التنبيهات التفاعلية إلى قرارات استباقية. وتُزيل الأتمتة الاحتكاك اليدوي الذي يُبطّئ الاستجابة، وتتيح لفرقك العمل بسرعة الآلة دون الاحتراق الوظيفي. وتربط منصة موحّدة كل ذلك معًا، فتستبدل الحلول المجزّأة بذكاء متكامل. ويُوسّع الذكاء الاصطناعي ما يمكن للفرق البشرية تحقيقه على كل مستوى. التقنية لا تُحدّد استراتيجيتك. بل تُنفّذها."}
+  ],
+  zh:[
+    {h:"人员",s:"人的层面",
+     b:"技术不会保护组织，人才会。指南针中的人员维度，代表着让其他一切投入都变得有意义的人的层面：解读信号的安全分析师、做出风险决策的管理层，以及那些既可能是第一道防线，也可能是第一个失败点的员工。而在每一次攻击的另一端，同样站着一个人。网络犯罪分子不是自动运行的自然力量，而是拥有自己的意图、动机和策略的个体。他们研究目标、利用犹豫、带着明确的目的行动。要对抗他们，需要具备他们所拥有的同样的人的素质：警觉性、判断力，以及先于对手行动的意志。一个没有具备能力、保持警觉、被充分赋权的人员的指南针，只是一件没人知道该怎么读的仪器。文化、培训、问责和领导力，都不是可有可无的软性因素，而是真正握住方向盘的那双手。"},
+    {h:"流程",s:"运营的支柱",
+     b:"流程是连接人员与技术、连接战略与执行的运营支柱。没有它，再好的工具也只会产生噪音，再优秀的人才也只能在各自的信息孤岛中运转。在成熟的流程体系核心，是CyberRiskOps这一方法论，以及它的运营神经中枢——网络风险运营中心（CROC），在这里，风险情报被持续测量、排序并转化为行动。SecOps将这些风险情报与实时行动连接起来，而安全运营中心（SOC）则以高速执行检测、调查和响应。二者协同，把网络安全从一系列孤立的反应，转变为一个持续、可衡量、并不断改进的运营体系。流程，正是让指南针持续运转的力量。"},
+    {h:"技术",s:"力量倍增器",
+     b:"技术是你网络安全战略的力量倍增器，但前提是它要服务于一个明确的目标。网络风险量化（CRQ）把技术性风险，转化为管理层能够据此行动的财务语言。网络风险暴露面管理（CREM）持续绘制并排序你的攻击面，抢在对手利用它之前采取行动。扩展检测与响应（XDR）把终端、网络、云和身份的可见性，统一成一个单一、关联的视图。威胁情报为你的指南针提供对手的上下文，把被动的警报，转化为主动的决策。自动化消除了拖慢响应速度的人工摩擦，让团队能够以机器的速度运转，而不至于精力耗尽。统一平台把这一切连接在一起，用集成的情报取代碎片化的单点解决方案。人工智能则在每一个层面，放大人类团队所能做到的一切。技术不定义你的战略，它执行你的战略。"}
   ]
 };
 
@@ -182,10 +317,21 @@ function applyLang(l){
       '<span style="display:inline;white-space:nowrap;">'+t.pubLine2+'</span>'+
     '</a>'+
     '<a href="'+t.pubDoiUrl+'" target="_blank" style="color:rgba(255,255,255,.28);text-decoration:none;">DOI: '+t.pubDoi+'</a>';
-  ['en','es','pt'].forEach(c=>{
+  ['en','es','pt','fr','de','ja','ar','zh'].forEach(c=>{
     const b=document.getElementById('btn-'+c);
     b.style.background=c===l?'#E01C24':'rgba(255,255,255,0.1)';
     b.style.color=c===l?'#fff':'#888';
+  });
+  // Arabic is RTL. Flip direction and alignment on the text containers
+  // only (not the whole layout) and drop letter-spacing, which breaks
+  // Arabic's cursive letter-joining if left on.
+  const isRTL = (l === 'ar');
+  ['tt-h','tt-s','tt-b','compass-title','credit','pub-link'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.dir = isRTL ? 'rtl' : 'ltr';
+    el.style.textAlign = isRTL ? 'right' : '';
+    el.style.letterSpacing = isRTL ? 'normal' : '';
   });
 }
 
