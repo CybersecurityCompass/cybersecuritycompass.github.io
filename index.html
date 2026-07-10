@@ -801,6 +801,14 @@ function refreshCompassTexture() {
   clone.setAttribute('width', '1080');
   clone.setAttribute('height', '1080');
   clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  // WebKit (Safari and every iOS browser, since Apple requires them all to use
+  // WebKit) has a known bug where curved <textPath> text duplicates or
+  // mispositions itself when an SVG is serialized and rasterized into an
+  // <img> - which is exactly what this capture pipeline does. The reflection
+  // is small, distant, and distorted by the water anyway, so it doesn't need
+  // legible text; stripping all text out of the clone avoids running WebKit's
+  // buggy code path at all, rather than fighting its rendering directly.
+  clone.querySelectorAll('text').forEach(el => el.remove());
   const svgStr = new XMLSerializer().serializeToString(clone);
   const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(svgBlob);
