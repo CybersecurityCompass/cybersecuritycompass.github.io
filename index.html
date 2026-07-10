@@ -636,20 +636,71 @@ camera.position.set(0, 8, 60);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.18;
+renderer.toneMappingExposure = 0.12;
 oceanContainer.appendChild(renderer.domElement);
 
 const sun = new THREE.Vector3();
 const sky = new Sky();
 sky.scale.setScalar(10000);
 scene.add(sky);
-const skyUniforms = sky.material.uniforms;
-skyUniforms['turbidity'].value = 9;
-skyUniforms['rayleigh'].value = 0;
-skyUniforms['mieCoefficient'].value = 0.01;
-skyUniforms['mieDirectionalG'].value = 0.8;
 
-const sunParams = { elevation: -8, azimuth: 180 };
+// ---- Procedurally generated cloud layer (canvas texture on an inward-facing dome) ----
+function generateCloudTexture(size) {
+  const canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, size, size);
+  let seed = 42;
+  function rand() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+  // Layer soft, irregular blob clusters - a handful of overlapping radial-gradient
+  // puffs per cluster reads as a cloud silhouette far more convincingly than one
+  // perfect circle would.
+  function puffCluster(cx, cy, scale) {
+    const puffs = 5 + Math.floor(rand() * 5);
+    for (let i = 0; i < puffs; i++) {
+      const ox = cx + (rand() - 0.5) * scale * 1.4;
+      const oy = cy + (rand() - 0.5) * scale * 0.55;
+      const r = scale * (0.35 + rand() * 0.5);
+      const alpha = 0.10 + rand() * 0.16;
+      const g = ctx.createRadialGradient(ox, oy, 0, ox, oy, r);
+      g.addColorStop(0, `rgba(210,214,220,${alpha})`);
+      g.addColorStop(1, 'rgba(210,214,220,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(ox, oy, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  const clusterCount = 14;
+  for (let i = 0; i < clusterCount; i++) {
+    const cx = rand() * size;
+    const cy = size * (0.08 + rand() * 0.55); // keep clouds toward the upper part of the dome
+    const scale = size * (0.05 + rand() * 0.09);
+    puffCluster(cx, cy, scale);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  return texture;
+}
+
+const cloudGeometry = new THREE.SphereGeometry(4500, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.55);
+const cloudMaterial = new THREE.MeshBasicMaterial({
+  map: generateCloudTexture(1024),
+  transparent: true,
+  side: THREE.BackSide,
+  depthWrite: false,
+  fog: false
+});
+const clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+scene.add(clouds);
+const skyUniforms = sky.material.uniforms;
+skyUniforms['turbidity'].value = 6;
+skyUniforms['rayleigh'].value = 0;
+skyUniforms['mieCoefficient'].value = 0.008;
+skyUniforms['mieDirectionalG'].value = 0.85;
+
+const sunParams = { elevation: -10, azimuth: 180 };
 const pmremGenerator = new THREE.PMREMGenerator(renderer);
 let envRenderTarget;
 
@@ -744,6 +795,7 @@ const compassFadeDuration = 900;
 function animate() {
   requestAnimationFrame(animate);
   water.material.uniforms['time'].value += 0.35 / 60.0;
+  clouds.rotation.y += 0.00006; // slow drift so the sky doesn't feel static
 
   const now = performance.now();
   if (!compassFadeTriggered) {
