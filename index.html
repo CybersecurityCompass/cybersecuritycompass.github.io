@@ -29,7 +29,8 @@ html,body{background:#000;height:100%;}
 #lang-menu.open{display:flex;}
 #lang-menu button{padding:5px 9px;border-radius:5px;border:none;cursor:pointer;font-weight:600;font-size:10px;font-family:Inter,system-ui,sans-serif;letter-spacing:.04em;text-align:left;background:rgba(255,255,255,.06);color:#888;transition:all .15s;}
 #lang-menu button:hover{background:rgba(255,255,255,.14);color:#ddd;}
-#compass-title{position:absolute;top:12px;left:14px;z-index:100;font-family:Inter,Arial,sans-serif;font-size:clamp(16px,3.2vmin,35px);font-weight:600;color:#fff;letter-spacing:.2px;pointer-events:none;}
+#compass-title{position:absolute;top:14px;left:16px;z-index:100;font-family:Inter,Arial,Helvetica,sans-serif;font-size:clamp(16px,3vmin,32px);font-weight:400;color:#a8a8a8;letter-spacing:.2px;line-height:1.2;pointer-events:none;text-shadow:0 1px 8px rgba(0,0,0,.55),0 1px 2px rgba(0,0,0,.5);}
+#compass-title-badge{position:absolute;top:calc(14px + clamp(16px,3vmin,32px)*1.2 + 10px);left:16px;z-index:100;font-family:Inter,Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;letter-spacing:.18em;color:#8a2226;border:1px solid rgba(138,34,38,.75);border-radius:3px;padding:4px 10px;pointer-events:none;background:rgba(0,0,0,.5);}
 #credit{position:absolute;bottom:10px;left:12px;z-index:100;font-family:Inter,Arial,sans-serif;font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.04em;line-height:1.6;pointer-events:auto;}
 #pub-link{position:absolute;bottom:10px;right:12px;z-index:100;font-family:Inter,Arial,sans-serif;font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.03em;line-height:1.6;text-align:right;max-width:52%;pointer-events:auto;}
 /* Tooltip */
@@ -90,6 +91,7 @@ html,body{background:#000;height:100%;}
   </div>
 
   <div id="compass-title">The Cybersecurity Compass</div>
+  <div id="compass-title-badge">REFERENCE MODEL</div>
   <div id="credit"></div>
   <div id="pub-link"></div>
   <div id="tt"><div id="tt-h"></div><div id="tt-s"></div><div id="tt-b"></div></div>
@@ -103,7 +105,7 @@ const T={
     dar:"Detection and Response",rad:"Reactive and Defensive",dub:"During a Breach",
     cr:"Cyber Resilience",rai:"Recover and Improve",aab:"After a Breach",
     ppl:"People",prc:"Process",tch:"Technology",
-    title:"The Cybersecurity Compass",credit:"Created and Designed by:",
+    title:"The Cybersecurity Compass",badge:"REFERENCE MODEL",credit:"Created and Designed by:",
     pubLine1:"The Cybersecurity Compass:",pubLine2:"Strategically Navigating the Stormy Digital Ocean",
     pubUrl:"https://www.researchgate.net/publication/389628862",
     pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
@@ -113,7 +115,7 @@ const T={
     dar:"Detección y Respuesta",rad:"Reactivo y Defensivo",dub:"Durante una Brecha",
     cr:"Ciber Resiliencia",rai:"Recuperar y Mejorar",aab:"Después de una Brecha",
     ppl:"Personas",prc:"Procesos",tch:"Tecnología",
-    title:"La Brújula de Ciberseguridad",credit:"Creado y Diseñado por:",
+    title:"La Brújula de Ciberseguridad",badge:"MODELO DE REFERENCIA",credit:"Creado y Diseñado por:",
     pubLine1:"La Brújula de la Ciberseguridad:",pubLine2:"Navegando Estratégicamente el Tormentoso Océano Digital",
     pubUrl:"https://www.researchgate.net/publication/389631500",
     pubDoi:"10.13140/RG.2.2.20733.68322",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.20733.68322"
@@ -123,7 +125,7 @@ const T={
     dar:"Detecção e Resposta",rad:"Reativo e Defensivo",dub:"Durante uma Brecha",
     cr:"Ciber Resiliência",rai:"Recuperar e Melhorar",aab:"Após uma Brecha",
     ppl:"Pessoas",prc:"Processos",tch:"Tecnologia",
-    title:"A Bússola da Cibersegurança",credit:"Criado e Projetado por:",
+    title:"A Bússola da Cibersegurança",badge:"MODELO DE REFERÊNCIA",credit:"Criado e Projetado por:",
     pubLine1:"A Bússola da Cibersegurança:",pubLine2:"Navegando Estrategicamente pelo Tempestuoso Oceano Digital",
     pubUrl:"https://www.researchgate.net/publication/389631493",
     pubDoi:"10.13140/RG.2.2.14022.79687",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.14022.79687"
@@ -133,7 +135,7 @@ const T={
     dar:"Détection et Réponse",rad:"Réactif et Défensif",dub:"Pendant une Brèche",
     cr:"Cyber Résilience",rai:"Récupérer et Améliorer",aab:"Après une Brèche",
     ppl:"Personnes",prc:"Processus",tch:"Technologie",
-    title:"La Boussole de Cybersécurité",credit:"Créé et Conçu par :",
+    title:"La Boussole de Cybersécurité",badge:"MODÈLE DE RÉFÉRENCE",credit:"Créé et Conçu par :",
     pubLine1:"La Boussole de Cybersécurité :",pubLine2:"Naviguer Stratégiquement dans l'Océan Numérique Tumultueux",
     pubUrl:"https://www.researchgate.net/publication/389628862",
     pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
@@ -143,7 +145,7 @@ const T={
     dar:"Erkennung und Reaktion",rad:"Reaktiv und Defensiv",dub:"Während eines Sicherheitsvorfalls",
     cr:"Cyber-Resilienz",rai:"Wiederherstellen und Verbessern",aab:"Nach einem Sicherheitsvorfall",
     ppl:"Menschen",prc:"Prozess",tch:"Technologie",
-    title:"Der Cybersicherheits-Kompass",credit:"Erstellt und Gestaltet von:",
+    title:"Der Cybersicherheits-Kompass",badge:"REFERENZMODELL",credit:"Erstellt und Gestaltet von:",
     pubLine1:"Der Cybersicherheits-Kompass:",pubLine2:"Strategische Navigation durch den stürmischen digitalen Ozean",
     pubUrl:"https://www.researchgate.net/publication/389628862",
     pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
@@ -153,7 +155,7 @@ const T={
     dar:"検知と対応",rad:"リアクティブかつ防御的",dub:"侵害中",
     cr:"サイバーレジリエンス",rai:"復旧と改善",aab:"侵害後",
     ppl:"人材",prc:"プロセス",tch:"テクノロジー",
-    title:"サイバーセキュリティ・コンパス",credit:"企画・デザイン：",
+    title:"サイバーセキュリティ・コンパス",badge:"参照モデル",credit:"企画・デザイン：",
     pubLine1:"サイバーセキュリティ・コンパス：",pubLine2:"荒れ狂うデジタルの海を戦略的に航海する",
     pubUrl:"https://www.researchgate.net/publication/389628862",
     pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
@@ -163,7 +165,7 @@ const T={
     dar:"الكشف والاستجابة",rad:"تفاعلي ودفاعي",dub:"خلال الاختراق",
     cr:"المرونة السيبرانية",rai:"التعافي والتحسين",aab:"بعد الاختراق",
     ppl:"العنصر البشري",prc:"العمليات",tch:"التقنية",
-    title:"بوصلة الأمن السيبراني",credit:"إعداد وتصميم:",
+    title:"بوصلة الأمن السيبراني",badge:"نموذج مرجعي",credit:"إعداد وتصميم:",
     pubLine1:"بوصلة الأمن السيبراني:",pubLine2:"التنقل الاستراتيجي عبر المحيط الرقمي العاصف",
     pubUrl:"https://www.researchgate.net/publication/389628862",
     pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
@@ -173,7 +175,7 @@ const T={
     dar:"检测与响应",rad:"被动防御",dub:"入侵中",
     cr:"网络韧性",rai:"恢复与改进",aab:"入侵后",
     ppl:"人员",prc:"流程",tch:"技术",
-    title:"网络安全指南针",credit:"创作与设计：",
+    title:"网络安全指南针",badge:"参考模型",credit:"创作与设计：",
     pubLine1:"网络安全指南针：",pubLine2:"在风暴笼罩的数字海洋中战略航行",
     pubUrl:"https://www.researchgate.net/publication/389628862",
     pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
@@ -183,7 +185,7 @@ const T={
     dar:"탐지 및 대응",rad:"반응적이고 방어적인",dub:"침해 도중",
     cr:"사이버 레질리언스",rai:"복구와 개선",aab:"침해 이후",
     ppl:"인력",prc:"프로세스",tch:"기술",
-    title:"사이버보안 나침반",credit:"기획 및 디자인:",
+    title:"사이버보안 나침반",badge:"참조 모델",credit:"기획 및 디자인:",
     pubLine1:"사이버보안 나침반:",pubLine2:"폭풍 속 디지털 바다를 전략적으로 항해하다",
     pubUrl:"https://www.researchgate.net/publication/389628862",
     pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
@@ -193,7 +195,7 @@ const T={
     dar:"पहचान और प्रतिक्रिया",rad:"प्रतिक्रियात्मक और सुरक्षात्मक",dub:"उल्लंघन के दौरान",
     cr:"साइबर रेज़िलिएंस",rai:"रिकवरी और सुधार",aab:"उल्लंघन के बाद",
     ppl:"मानव तत्व",prc:"प्रक्रिया",tch:"टेक्नोलॉजी",
-    title:"साइबर सुरक्षा कम्पास",credit:"निर्माण और डिज़ाइन:",
+    title:"साइबर सुरक्षा कम्पास",badge:"संदर्भ मॉडल",credit:"निर्माण और डिज़ाइन:",
     pubLine1:"साइबर सुरक्षा कम्पास:",pubLine2:"तूफ़ानी डिजिटल महासागर में रणनीतिक रूप से नेविगेट करना",
     pubUrl:"https://www.researchgate.net/publication/389628862",
     pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
@@ -203,7 +205,7 @@ const T={
     dar:"Rilevamento e Risposta",rad:"Reattivo e Difensivo",dub:"Durante una Violazione",
     cr:"Cyber Resilienza",rai:"Recupero e Miglioramento",aab:"Dopo una Violazione",
     ppl:"Persone",prc:"Processo",tch:"Tecnologia",
-    title:"La Bussola della Cybersicurezza",credit:"Creato e Progettato da:",
+    title:"La Bussola della Cybersicurezza",badge:"MODELLO DI RIFERIMENTO",credit:"Creato e Progettato da:",
     pubLine1:"La Bussola della Cybersicurezza:",pubLine2:"Navigare Strategicamente nell'Oceano Digitale in Tempesta",
     pubUrl:"https://www.researchgate.net/publication/389628862",
     pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
@@ -213,7 +215,7 @@ const T={
     dar:"Detectie en Respons",rad:"Reactief en Defensief",dub:"Tijdens een Inbreuk",
     cr:"Cyberweerbaarheid",rai:"Herstellen en Verbeteren",aab:"Na een Inbreuk",
     ppl:"Mensen",prc:"Proces",tch:"Technologie",
-    title:"Het Cyberveiligheidskompas",credit:"Gemaakt en Ontworpen door:",
+    title:"Het Cyberveiligheidskompas",badge:"REFERENTIEMODEL",credit:"Gemaakt en Ontworpen door:",
     pubLine1:"Het Cyberveiligheidskompas:",pubLine2:"Strategisch Navigeren door de Stormachtige Digitale Oceaan",
     pubUrl:"https://www.researchgate.net/publication/389628862",
     pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
@@ -431,6 +433,7 @@ function applyLang(l){
     else console.warn('Missing element:',id);
   });
   document.getElementById('compass-title').textContent=t.title;
+  document.getElementById('compass-title-badge').textContent=t.badge;
   document.getElementById('credit').innerHTML=t.credit+'<br><a href="https://www.linkedin.com/in/jpcastro/" target="_blank" style="color:rgba(255,255,255,.5);text-decoration:none;">Juan Pablo Castro Vilaró</a>';
   // Line1 stays on its own line; line2 follows on same line if space allows,
   // otherwise breaks cleanly below line1 (never mid-word)
@@ -451,7 +454,7 @@ function applyLang(l){
   // only (not the whole layout) and drop letter-spacing, which breaks
   // Arabic's cursive letter-joining if left on.
   const isRTL = (l === 'ar');
-  ['tt-h','tt-s','tt-b','compass-title','credit','pub-link'].forEach(id=>{
+  ['tt-h','tt-s','tt-b','compass-title','compass-title-badge','credit','pub-link'].forEach(id=>{
     const el=document.getElementById(id);
     if(!el) return;
     el.dir = isRTL ? 'rtl' : 'ltr';
@@ -636,7 +639,7 @@ camera.position.set(0, 8, 60);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.12;
+renderer.toneMappingExposure = 0.15;
 oceanContainer.appendChild(renderer.domElement);
 
 const sun = new THREE.Vector3();
@@ -645,55 +648,102 @@ sky.scale.setScalar(10000);
 scene.add(sky);
 
 // ---- Procedurally generated cloud layer (canvas texture on an inward-facing dome) ----
+const fogParams = { top: 0.76, bottom: 0.83, peakOpacity: 0.185, gray: 44 };
+
 function generateCloudTexture(size) {
+  // Deliberately the simplest possible approach: one smooth gradient, no
+  // individual shapes, no randomness, no blur pass. Every previous version
+  // (discrete puffs, elongated streaks, fade masks) kept surfacing some new
+  // visible artifact - circles, banding, moire, scalloped edges - because it
+  // all traced back to compositing many separate shapes together. A single
+  // gradient can't produce any of those; it's just a smooth function, so
+  // there's nothing for the grazing viewing angle to alias against.
   const canvas = document.createElement('canvas');
   canvas.width = size; canvas.height = size;
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, size, size);
-  let seed = 42;
-  function rand() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
-  // Layer soft, irregular blob clusters - a handful of overlapping radial-gradient
-  // puffs per cluster reads as a cloud silhouette far more convincingly than one
-  // perfect circle would.
-  function puffCluster(cx, cy, scale) {
-    const puffs = 5 + Math.floor(rand() * 5);
-    for (let i = 0; i < puffs; i++) {
-      const ox = cx + (rand() - 0.5) * scale * 1.4;
-      const oy = cy + (rand() - 0.5) * scale * 0.55;
-      const r = scale * (0.35 + rand() * 0.5);
-      const alpha = 0.10 + rand() * 0.16;
-      const g = ctx.createRadialGradient(ox, oy, 0, ox, oy, r);
-      g.addColorStop(0, `rgba(210,214,220,${alpha})`);
-      g.addColorStop(1, 'rgba(210,214,220,0)');
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(ox, oy, r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-  const clusterCount = 14;
-  for (let i = 0; i < clusterCount; i++) {
-    const cx = rand() * size;
-    const cy = size * (0.08 + rand() * 0.55); // keep clouds toward the upper part of the dome
-    const scale = size * (0.05 + rand() * 0.09);
-    puffCluster(cx, cy, scale);
-  }
+  const c = fogParams.gray;
+  const g = ctx.createLinearGradient(0, size * fogParams.top, 0, size * fogParams.bottom);
+  g.addColorStop(0, `rgba(${c},${c+2},${c+6},0)`);
+  g.addColorStop(0.45, `rgba(${c},${c+2},${c+6},${fogParams.peakOpacity})`);
+  g.addColorStop(0.7, `rgba(${c},${c+2},${c+6},${fogParams.peakOpacity})`);
+  g.addColorStop(1, `rgba(${c},${c+2},${c+6},0)`);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
   return texture;
 }
 
-const cloudGeometry = new THREE.SphereGeometry(4500, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.55);
+const cloudGeometry = new THREE.SphereGeometry(4500, 128, 64, 0, Math.PI * 2, 0, Math.PI * 0.62);
 const cloudMaterial = new THREE.MeshBasicMaterial({
   map: generateCloudTexture(1024),
   transparent: true,
   side: THREE.BackSide,
   depthWrite: false,
+  toneMapped: false,
   fog: false
 });
 const clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
 scene.add(clouds);
+
+// ---- Two additional thin fog bands, drifting in opposite directions ----
+// Smooth sine-wave horizontal variation only (no discrete random shapes) - a
+// sine wave is continuous and exactly tileable over one period, so animating
+// its horizontal offset with RepeatWrapping scrolls seamlessly with none of
+// the circle/band/moire artifacts the earlier puff-based versions kept hitting.
+function generateWispyBandTexture(size, waveCount) {
+  const canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(size, size);
+  const c = fogParams.gray;
+  for (let y = 0; y < size; y++) {
+    const v = y / size;
+    // Vertical envelope: soft hump centered in the band, zero at top/bottom.
+    const vertical = Math.max(0, Math.sin(Math.PI * v));
+    for (let x = 0; x < size; x++) {
+      const u = x / size;
+      // Horizontal variation: a couple of overlapping sine waves at different
+      // frequencies, each an exact integer number of cycles so it tiles
+      // perfectly - reads as an uneven, organic wisp density rather than a
+      // uniform strip, without introducing any random/discrete geometry.
+      const wave = 0.5 + 0.5 * Math.sin(u * Math.PI * 2 * waveCount)
+                 * (0.6 + 0.4 * Math.sin(u * Math.PI * 2 * (waveCount * 2.3) + 1.7));
+      const alpha = vertical * wave * fogParams.peakOpacity * 0.8;
+      const idx = (y * size + x) * 4;
+      img.data[idx] = c;
+      img.data[idx + 1] = c + 2;
+      img.data[idx + 2] = c + 6;
+      img.data[idx + 3] = Math.round(alpha * 255);
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  return texture;
+}
+
+function makeWispyBand(thetaStart, thetaLength, waveCount) {
+  const geo = new THREE.SphereGeometry(4500, 128, 32, 0, Math.PI * 2, thetaStart, thetaLength);
+  const mat = new THREE.MeshBasicMaterial({
+    map: generateWispyBandTexture(512, waveCount),
+    transparent: true,
+    side: THREE.BackSide,
+    depthWrite: false,
+    toneMapped: false,
+    fog: false
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  scene.add(mesh);
+  return mesh;
+}
+
+// Positioned just above the main fog band, each a thin horizontal strip.
+const topBand1 = makeWispyBand(Math.PI * 0.40, Math.PI * 0.14, 3);
+const topBand2 = makeWispyBand(Math.PI * 0.50, Math.PI * 0.14, 4);
+
 const skyUniforms = sky.material.uniforms;
 skyUniforms['turbidity'].value = 6;
 skyUniforms['rayleigh'].value = 0;
@@ -790,24 +840,85 @@ scene.add(compassStand);
 const compassRootEl = document.getElementById('compassRoot');
 let compassFadeStart = null;
 let compassFadeTriggered = false;
+let opacitySettledSince = null;
 const compassFadeDuration = 900;
+
+// ---- Lightning: randomly-timed flashes with a quick multi-pulse flicker and a
+// fast decay, rather than a static baked brightness gradient. Drives two things
+// each flash: the cloud material's own color multiplier (so the clouds themselves
+// light up brightest, since they're "closest" to the strike) and a brief boost to
+// the overall scene exposure (so it reads as the whole sky flashing, not just the
+// clouds turning white).
+const baseExposure = renderer.toneMappingExposure;
+let nextLightningAt = performance.now() + 3000 + Math.random() * 6000;
+let lightningPulses = []; // { start, duration, peak }[]
+
+function scheduleLightning(now) {
+  const pulseCount = 1 + Math.floor(Math.random() * 3); // 1-3 quick flickers per strike
+  let t = now;
+  lightningPulses = [];
+  for (let i = 0; i < pulseCount; i++) {
+    t += 30 + Math.random() * 90;
+    lightningPulses.push({ start: t, duration: 70 + Math.random() * 90, peak: 0.55 + Math.random() * 0.45 });
+  }
+  nextLightningAt = now + 4000 + Math.random() * 9000;
+}
+
+function lightningIntensity(now) {
+  let v = 0;
+  for (const p of lightningPulses) {
+    const dt = now - p.start;
+    if (dt < 0) continue;
+    if (dt > p.duration) continue;
+    // Fast rise, faster exponential-feeling decay within the pulse window.
+    const t = dt / p.duration;
+    const envelope = t < 0.12 ? (t / 0.12) : Math.pow(1 - (t - 0.12) / 0.88, 2);
+    v = Math.max(v, p.peak * envelope);
+  }
+  return v;
+}
 
 function animate() {
   requestAnimationFrame(animate);
   water.material.uniforms['time'].value += 0.35 / 60.0;
   clouds.rotation.y += 0.00006; // slow drift so the sky doesn't feel static
+  topBand1.material.map.offset.x += 0.00012;  // drifts one way
+  topBand2.material.map.offset.x -= 0.00009;  // drifts the other way, at a different speed
 
   const now = performance.now();
-  if (!compassFadeTriggered) {
-    // "Settled" = the intro's own opacity ramp has essentially finished (root
-    // opacity attribute reaches ~1) - i.e. the real DOM compass is fully opaque
-    // and can reliably hide the standee behind it again.
-    const rootOpacity = compassRootEl ? parseFloat(compassRootEl.getAttribute('opacity')) || 0 : 1;
-    if (rootOpacity >= 0.995) {
-      refreshCompassTexture();
-      compassFadeTriggered = true;
-      compassFadeStart = now;
+  if (now >= nextLightningAt) scheduleLightning(now);
+  const flash = lightningIntensity(now);
+  const flashBoost = 1 + flash * 11; // how much brighter the clouds themselves get
+  cloudMaterial.color.setScalar(flashBoost);
+  renderer.toneMappingExposure = baseExposure + flash * 0.9; // brief whole-scene brightening
+  // The compass's own animation timer wraps every ~31.8s, and its intro-rotation
+  // logic doesn't distinguish "first ever playback" from "wrapped back around to
+  // a low value" - so the whole rotate-in intro silently REPLAYS every ~32
+  // seconds, indefinitely. A one-shot guard (fade in once, never again) only
+  // protected the very first playback; every later replay went unguarded, with
+  // the standee sitting at full opacity while the real compass rotated through
+  // its intro again - exactly the rotated-duplicate ghosting reported. So this
+  // now runs continuously every frame: whenever the compass is mid-intro
+  // (opacity not yet settled), actively fade the standee back OUT; once it's
+  // been settled for a buffer period, fade back IN. Works uniformly whether
+  // it's the first playback or the hundredth.
+  const rootOpacity = compassRootEl ? parseFloat(compassRootEl.getAttribute('opacity')) || 0 : 1;
+  if (rootOpacity >= 0.995) {
+    if (opacitySettledSince === null) opacitySettledSince = now;
+  } else {
+    opacitySettledSince = null;
+    if (compassFadeTriggered) {
+      // Compass has started re-playing its intro after already having settled
+      // once before - snap the standee back out immediately rather than
+      // waiting for a fade, since the mismatch is visible right away.
+      compassFadeTriggered = false;
+      compassStandMat.opacity = 0;
     }
+  }
+  if (!compassFadeTriggered && opacitySettledSince !== null && now - opacitySettledSince >= 900) {
+    refreshCompassTexture();
+    compassFadeTriggered = true;
+    compassFadeStart = now;
   }
   if (compassFadeTriggered) {
     const t = Math.min(1, (now - compassFadeStart) / compassFadeDuration);
