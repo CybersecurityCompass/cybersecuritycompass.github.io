@@ -828,12 +828,28 @@ setInterval(refreshCompassTexture, 200); // keep it in sync with the needle/glow
 const compassPlaneZ = 20;
 const compassDist = camera.position.z - compassPlaneZ;
 const vFOV = camera.fov * Math.PI / 180;
-const compassSize = 2 * Math.tan(vFOV / 2) * compassDist; // matches full-height screen footprint at that depth
-const compassStandGeo = new THREE.PlaneGeometry(compassSize, compassSize);
+// The real DOM compass is a square SVG (viewBox 1080x1080) that CSS letterboxes
+// to fit the viewport via "meet" - on a landscape/square screen that means it's
+// sized to the full HEIGHT, but on a PORTRAIT screen (most phones) it's sized to
+// the full WIDTH instead, with empty space above/below. The previous version
+// always assumed the height case, so on any portrait screen (which is exactly
+// what phones are, iOS or otherwise) this plane rendered larger than the real
+// compass - not actually a WebKit bug, just an aspect-ratio blind spot that
+// happened to only show up on phones.
+function computeCompassStandSize() {
+  const verticalSize = 2 * Math.tan(vFOV / 2) * compassDist; // full-height footprint
+  return verticalSize * Math.min(1, camera.aspect); // matches CSS "meet" letterboxing
+}
+const compassStandGeo = new THREE.PlaneGeometry(1, 1); // unit size - scaled dynamically below
 const compassStandMat = new THREE.MeshBasicMaterial({ map: compassTexture, transparent: true, side: THREE.DoubleSide, depthWrite: false, depthTest: false, opacity: 0 });
 const compassStand = new THREE.Mesh(compassStandGeo, compassStandMat);
 compassStand.renderOrder = -1; // draw before/behind everything else in the direct view
 compassStand.position.set(0, camera.position.y, compassPlaneZ); // dead-center on the camera's view axis, same height as camera
+function updateCompassStandSize() {
+  const s = computeCompassStandSize();
+  compassStand.scale.set(s, s, 1);
+}
+updateCompassStandSize();
 scene.add(compassStand);
 // The compass plays a ~1.8s rotate+fade-in entrance animation. During that window the
 // real DOM compass is semi-transparent, so it can't fully hide this standee behind it,
@@ -941,6 +957,7 @@ window.addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  updateCompassStandSize();
 });
 </script>
 </body>
