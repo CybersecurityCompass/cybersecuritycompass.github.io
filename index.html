@@ -641,6 +641,7 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.15;
 oceanContainer.appendChild(renderer.domElement);
+let lastKnownWidth = innerWidth, lastKnownHeight = innerHeight;
 
 const sun = new THREE.Vector3();
 const sky = new Sky();
@@ -900,6 +901,23 @@ function animate() {
   clouds.rotation.y += 0.00006; // slow drift so the sky doesn't feel static
   topBand1.material.map.offset.x += 0.00012;  // drifts one way
   topBand2.material.map.offset.x -= 0.00009;  // drifts the other way, at a different speed
+
+  // Defensive fallback for mobile Safari: innerWidth/innerHeight can be stale
+  // right after load (while the browser's own UI chrome/toolbar is still
+  // settling), and a 'resize' event isn't always reliably fired afterward to
+  // correct it. Since camera.aspect drives the WHOLE scene's projection, a
+  // stale value there skews everything - our precisely-centered reflection
+  // plane is just what makes that skew visible, but it isn't the actual bug.
+  // Checking every frame (cheap - just two number comparisons) means it
+  // self-corrects regardless of whether a resize event ever fires.
+  if (innerWidth !== lastKnownWidth || innerHeight !== lastKnownHeight) {
+    lastKnownWidth = innerWidth;
+    lastKnownHeight = innerHeight;
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+    updateCompassStandSize();
+  }
 
   const now = performance.now();
   if (now >= nextLightningAt) scheduleLightning(now);
