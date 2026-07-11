@@ -203,6 +203,7 @@
   <button type="button" role="tab" data-lang="es" aria-selected="false">ES</button>
   <button type="button" role="tab" data-lang="pt" aria-selected="false">PT</button>
   <button type="button" role="tab" data-lang="fr" aria-selected="false">FR</button>
+  <button type="button" role="tab" data-lang="ja" aria-selected="false">JA</button>
 </div>
 
 <div class="diagram-wrap">
@@ -303,16 +304,16 @@
   <circle cx="560" cy="470" r="92" fill="url(#socNode)" filter="url(#glow)"/>
   <circle cx="560" cy="470" r="92" fill="none" stroke="#aab2ff" stroke-width="1.5" opacity="0.5"/>
 
-  <!-- Power pulse: fires every 1.5s in sync with a dot arriving at SOC -->
+  <!-- Power pulse: 1.5s initial delay, then the pulse, then 1.5s wait before it repeats -->
   <circle cx="560" cy="470" r="92" fill="#ffffff" opacity="0">
-    <animate attributeName="opacity" values="0;0.4;0" keyTimes="0;0.12;1" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.4;0;0" keyTimes="0;0.0873;0.7273;1" begin="1.5s" dur="5.5s" repeatCount="indefinite"/>
   </circle>
   <circle cx="560" cy="470" r="92" fill="none" stroke="#dfe2ff" stroke-width="3" opacity="0">
-    <animate attributeName="r" values="88;88;115" keyTimes="0;0.1;1" calcMode="spline"
-      keySplines="0.2 0.8 0.2 1;0.2 0.8 0.2 1" dur="4s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.9;0" keyTimes="0;0.1;1" calcMode="spline"
-      keySplines="0.2 0.8 0.2 1;0.3 0 0.6 1" dur="4s" repeatCount="indefinite"/>
-    <animate attributeName="stroke-width" values="4;3;0.5" keyTimes="0;0.1;1" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="88;88;115;115" keyTimes="0;0.0727;0.7273;1" calcMode="spline"
+      keySplines="0.2 0.8 0.2 1;0.2 0.8 0.2 1;0 0 1 1" begin="1.5s" dur="5.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.9;0;0" keyTimes="0;0.0727;0.7273;1" calcMode="spline"
+      keySplines="0.2 0.8 0.2 1;0.3 0 0.6 1;0 0 1 1" begin="1.5s" dur="5.5s" repeatCount="indefinite"/>
+    <animate attributeName="stroke-width" values="4;3;0.5;0.5" keyTimes="0;0.0727;0.7273;1" begin="1.5s" dur="5.5s" repeatCount="indefinite"/>
   </circle>
 
   <text x="560" y="452" text-anchor="middle" fill="#ffffff" font-size="46" font-weight="800" letter-spacing="2">SOC</text>
@@ -324,16 +325,16 @@
   <circle cx="1040" cy="470" r="92" fill="url(#crocNode)" filter="url(#glow)"/>
   <circle cx="1040" cy="470" r="92" fill="none" stroke="#ff9d8a" stroke-width="1.5" opacity="0.5"/>
 
-  <!-- Power pulse: fires every 1.5s in sync with a dot arriving at CROC -->
+  <!-- Power pulse: 1.5s initial delay, then the pulse, then 1.5s wait before it repeats -->
   <circle cx="1040" cy="470" r="92" fill="#ffffff" opacity="0">
-    <animate attributeName="opacity" values="0;0.4;0" keyTimes="0;0.12;1" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.4;0;0" keyTimes="0;0.0873;0.7273;1" begin="1.5s" dur="5.5s" repeatCount="indefinite"/>
   </circle>
   <circle cx="1040" cy="470" r="92" fill="none" stroke="#ffb8a8" stroke-width="3" opacity="0">
-    <animate attributeName="r" values="88;88;115" keyTimes="0;0.1;1" calcMode="spline"
-      keySplines="0.2 0.8 0.2 1;0.2 0.8 0.2 1" dur="4s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.9;0" keyTimes="0;0.1;1" calcMode="spline"
-      keySplines="0.2 0.8 0.2 1;0.3 0 0.6 1" dur="4s" repeatCount="indefinite"/>
-    <animate attributeName="stroke-width" values="4;3;0.5" keyTimes="0;0.1;1" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="88;88;115;115" keyTimes="0;0.0727;0.7273;1" calcMode="spline"
+      keySplines="0.2 0.8 0.2 1;0.2 0.8 0.2 1;0 0 1 1" begin="1.5s" dur="5.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.9;0;0" keyTimes="0;0.0727;0.7273;1" calcMode="spline"
+      keySplines="0.2 0.8 0.2 1;0.3 0 0.6 1;0 0 1 1" begin="1.5s" dur="5.5s" repeatCount="indefinite"/>
+    <animate attributeName="stroke-width" values="4;3;0.5;0.5" keyTimes="0;0.0727;0.7273;1" begin="1.5s" dur="5.5s" repeatCount="indefinite"/>
   </circle>
 
   <text x="1040" y="452" text-anchor="middle" fill="#ffffff" font-size="44" font-weight="800" letter-spacing="2">CROC</text>
@@ -400,7 +401,7 @@
 </div>
 
 <script>
-  const T = {"en": {"t-title": "The Future of SOC is", "t-subtitle": "A LOOP THAT DOES NOT MOVE IS NOT A LOOP", "t-soc-sub": "SecOps", "t-soc-1": "PROTECTS", "t-soc-2": "TODAY", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTECTS", "t-croc-2": "TOMORROW", "t-crossover": "Intelligence moves at machine speed, or it is history.", "t-proc-left": "DETECT  ·  INVESTIGATE  ·  RESPOND", "t-proc-right": "IDENTIFY · PRIORITIZE · REDUCE · VERIFY · MONITOR", "t-flow-left": "incidents, detections, actionable insight", "t-flow-right": "exposures, risk scores, asset criticality", "t-bot-left": "what is happening right now?", "t-bot-right": "what is our exposure, and what do we do today?", "t-footer": "EVERY CYCLE POWERS THE NEXT", "t-credit": "Created and Designed by:", "t-pub-title": "The Future of SOC Is ∞"}, "es": {"t-title": "El Futuro del SOC es", "t-subtitle": "UN CICLO QUE NO SE MUEVE NO ES UN CICLO", "t-soc-sub": "SecOps", "t-soc-1": "PROTEGE", "t-soc-2": "EL HOY", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTEGE", "t-croc-2": "EL MAÑANA", "t-crossover": "La inteligencia se mueve a velocidad de máquina, o es historia.", "t-proc-left": "DETECTAR  ·  INVESTIGAR  ·  RESPONDER", "t-proc-right": "IDENTIFICAR · PRIORIZAR · REDUCIR · VERIFICAR · MONITOREAR", "t-flow-left": "incidentes, detecciones, insights accionables", "t-flow-right": "exposiciones, puntajes de riesgo, criticidad de activos", "t-bot-left": "¿qué está pasando en este momento?", "t-bot-right": "¿cuál es nuestra exposición, y qué hacemos hoy?", "t-footer": "CADA CICLO POTENCIA EL SIGUIENTE", "t-credit": "Creado y Diseñado por:", "t-pub-title": "El Futuro del SOC Es ∞"}, "pt": {"t-title": "O Futuro do SOC é", "t-subtitle": "UM CICLO QUE NÃO SE MOVE NÃO É UM CICLO", "t-soc-sub": "SecOps", "t-soc-1": "PROTEGE", "t-soc-2": "O HOJE", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTEGE", "t-croc-2": "O AMANHÃ", "t-crossover": "A inteligência se move em velocidade de máquina, ou é história.", "t-proc-left": "DETECTAR  ·  INVESTIGAR  ·  RESPONDER", "t-proc-right": "IDENTIFICAR · PRIORIZAR · REDUZIR · VERIFICAR · MONITORAR", "t-flow-left": "incidentes, detecções, insights acionáveis", "t-flow-right": "exposições, scores de risco, criticidade dos ativos", "t-bot-left": "o que está acontecendo agora?", "t-bot-right": "qual é a nossa exposição, e o que fazemos hoje?", "t-footer": "CADA CICLO POTENCIA O PRÓXIMO", "t-credit": "Criado e Projetado por:", "t-pub-title": "O Futuro do SOC É ∞"}, "fr": {"t-title": "Le Futur du SOC est", "t-subtitle": "UNE BOUCLE QUI NE BOUGE PAS N'EST PAS UNE BOUCLE", "t-soc-sub": "SecOps", "t-soc-1": "PROTÈGE", "t-soc-2": "AUJOURD'HUI", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTÈGE", "t-croc-2": "DEMAIN", "t-crossover": "L'intelligence circule à la vitesse de la machine, ou c'est de l'histoire.", "t-proc-left": "DÉTECTER  ·  ENQUÊTER  ·  RÉPONDRE", "t-proc-right": "IDENTIFIER · PRIORISER · RÉDUIRE · VÉRIFIER · SURVEILLER", "t-flow-left": "incidents, détections, insights exploitables", "t-flow-right": "expositions, scores de risque, criticité des actifs", "t-bot-left": "qu'est-ce qui se passe en ce moment ?", "t-bot-right": "quelle est notre exposition, et que faisons-nous aujourd'hui ?", "t-footer": "CHAQUE CYCLE ALIMENTE LE SUIVANT", "t-credit": "Créé et Conçu par :", "t-pub-title": "Le Futur du SOC Est ∞"}};
+  const T = {"en": {"t-title": "The Future of SOC is", "t-subtitle": "A LOOP THAT DOES NOT MOVE IS NOT A LOOP", "t-soc-sub": "SecOps", "t-soc-1": "PROTECTS", "t-soc-2": "TODAY", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTECTS", "t-croc-2": "TOMORROW", "t-crossover": "Intelligence moves at machine speed, or it is history.", "t-proc-left": "DETECT  ·  INVESTIGATE  ·  RESPOND", "t-proc-right": "IDENTIFY · PRIORITIZE · REDUCE · VERIFY · MONITOR", "t-flow-left": "incidents, detections, actionable insight", "t-flow-right": "exposures, risk scores, asset criticality", "t-bot-left": "what is happening right now?", "t-bot-right": "what is our exposure, and what do we do today?", "t-footer": "EVERY CYCLE POWERS THE NEXT", "t-credit": "Created and Designed by:", "t-pub-title": "The Future of SOC Is ∞"}, "es": {"t-title": "El Futuro del SOC es", "t-subtitle": "UN CICLO QUE NO SE MUEVE NO ES UN CICLO", "t-soc-sub": "SecOps", "t-soc-1": "PROTEGE", "t-soc-2": "EL HOY", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTEGE", "t-croc-2": "EL MAÑANA", "t-crossover": "La inteligencia se mueve a velocidad de máquina, o es historia.", "t-proc-left": "DETECTAR  ·  INVESTIGAR  ·  RESPONDER", "t-proc-right": "IDENTIFICAR · PRIORIZAR · REDUCIR · VERIFICAR · MONITOREAR", "t-flow-left": "incidentes, detecciones, insights accionables", "t-flow-right": "exposiciones, puntajes de riesgo, criticidad de activos", "t-bot-left": "¿qué está pasando en este momento?", "t-bot-right": "¿cuál es nuestra exposición, y qué hacemos hoy?", "t-footer": "CADA CICLO POTENCIA EL SIGUIENTE", "t-credit": "Creado y Diseñado por:", "t-pub-title": "El Futuro del SOC Es ∞"}, "pt": {"t-title": "O Futuro do SOC é", "t-subtitle": "UM CICLO QUE NÃO SE MOVE NÃO É UM CICLO", "t-soc-sub": "SecOps", "t-soc-1": "PROTEGE", "t-soc-2": "O HOJE", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTEGE", "t-croc-2": "O AMANHÃ", "t-crossover": "A inteligência se move em velocidade de máquina, ou é história.", "t-proc-left": "DETECTAR  ·  INVESTIGAR  ·  RESPONDER", "t-proc-right": "IDENTIFICAR · PRIORIZAR · REDUZIR · VERIFICAR · MONITORAR", "t-flow-left": "incidentes, detecções, insights acionáveis", "t-flow-right": "exposições, scores de risco, criticidade dos ativos", "t-bot-left": "o que está acontecendo agora?", "t-bot-right": "qual é a nossa exposição, e o que fazemos hoje?", "t-footer": "CADA CICLO POTENCIA O PRÓXIMO", "t-credit": "Criado e Projetado por:", "t-pub-title": "O Futuro do SOC É ∞"}, "fr": {"t-title": "Le Futur du SOC est", "t-subtitle": "UNE BOUCLE QUI NE BOUGE PAS N'EST PAS UNE BOUCLE", "t-soc-sub": "SecOps", "t-soc-1": "PROTÈGE", "t-soc-2": "AUJOURD'HUI", "t-croc-sub": "CyberRiskOps", "t-croc-1": "PROTÈGE", "t-croc-2": "DEMAIN", "t-crossover": "L'intelligence circule à la vitesse de la machine, ou c'est de l'histoire.", "t-proc-left": "DÉTECTER  ·  ENQUÊTER  ·  RÉPONDRE", "t-proc-right": "IDENTIFIER · PRIORISER · RÉDUIRE · VÉRIFIER · SURVEILLER", "t-flow-left": "incidents, détections, insights exploitables", "t-flow-right": "expositions, scores de risque, criticité des actifs", "t-bot-left": "qu'est-ce qui se passe en ce moment ?", "t-bot-right": "quelle est notre exposition, et que faisons-nous aujourd'hui ?", "t-footer": "CHAQUE CYCLE ALIMENTE LE SUIVANT", "t-credit": "Créé et Conçu par :", "t-pub-title": "Le Futur du SOC Est ∞"}, "ja": {"t-title": "SOCの未来は", "t-subtitle": "動かないループはループではない", "t-soc-sub": "SecOps", "t-soc-1": "守るのは", "t-soc-2": "今日", "t-croc-sub": "CyberRiskOps", "t-croc-1": "守るのは", "t-croc-2": "明日", "t-crossover": "インテリジェンスは機械の速度で動く。さもなければ、それは過去の遺物だ。", "t-proc-left": "検知  ·  調査  ·  対応", "t-proc-right": "特定 · 優先順位付け · 低減 · 検証 · 監視", "t-flow-left": "インシデント、検知、実用的なインサイト", "t-flow-right": "エクスポージャー、リスクスコア、資産の重要度", "t-bot-left": "今、何が起きているのか?", "t-bot-right": "我々のエクスポージャーは何か、そして今日何をすべきか?", "t-footer": "すべてのサイクルが次のサイクルを強化する", "t-credit": "作成・デザイン:", "t-pub-title": "The Future of SOC Is ∞"}};
   const buttons = document.querySelectorAll('.lang-bar button');
 
   function setLang(lang) {
@@ -422,7 +423,7 @@
 
   // Auto-detect browser language: use it if supported, otherwise default to English.
   (function () {
-    const supported = ['en', 'es', 'pt', 'fr'];
+    const supported = ['en', 'es', 'pt', 'fr', 'ja'];
     const raw = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
     const code = raw.split('-')[0];
     setLang(supported.indexOf(code) !== -1 ? code : 'en');
@@ -442,7 +443,8 @@
       en: 'Click to Explore the Cybersecurity Compass →',
       es: 'Haz clic para Explorar la Brújula de Ciberseguridad →',
       pt: 'Clique para Explorar a Bússola de Cibersegurança →',
-      fr: 'Cliquez pour Explorer la Boussole de Cybersécurité →'
+      fr: 'Cliquez pour Explorer la Boussole de Cybersécurité →',
+      ja: 'クリックしてサイバーセキュリティ・コンパスを探索 →'
     };
     const labelForCurrentLang = () => {
       const lang = document.documentElement.getAttribute('lang') || 'en';
@@ -528,6 +530,13 @@
         croc: "Le CROC protège demain. Il n'attend pas l'alerte. Il observe l'exposition actuelle, son évolution, et les actions à mener maintenant pour réduire le risque avant qu'il ne devienne un incident. Son horloge est l'environnement changeant.",
         socLink: 'Lire : The Future of SOC Is ∞ →',
         crocLink: 'Lire : CyberRiskOps, The Operating Model →'
+      },
+      ja: {
+        socLabel: 'SOC · SecOps', crocLabel: 'CROC · CyberRiskOps',
+        soc: 'SOCが守るのは今日だ。今、この瞬間に何が起きているかを監視する。侵入を検知し、アラートを調査し、目の前のインシデントに対応する。その時計が刻むのは、今まさに起きているイベントだ。',
+        croc: 'CROCが守るのは明日だ。アラートを待つことはない。今この瞬間のエクスポージャーは何か、それはどう変化しているか、そしてインシデントになる前に今日何をすべきかを問い続ける。その時計が刻むのは、変化し続ける環境そのものだ。',
+        socLink: '読む: The Future of SOC Is ∞ →',
+        crocLink: '読む: CyberRiskOps, The Operating Model →'
       }
     };
     const copyForCurrentLang = () => {
@@ -720,6 +729,7 @@ html,body,#wrap,#stage{background:transparent !important;}
     <button id="btn-es" onclick="setLang('es')" style="background: rgb(224, 28, 36); color: rgb(255, 255, 255);">ES</button>
     <button id="btn-pt" onclick="setLang('pt')" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">PT</button>
     <button id="btn-fr" onclick="setLang('fr')" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">FR</button>
+    <button id="btn-ja" onclick="setLang('ja')" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">JA</button>
   </div>
 
   <div id="compass-title">La Brújula de Ciberseguridad</div>
@@ -770,6 +780,16 @@ const T={
     pubLine1:"La Boussole de Cybersécurité :",pubLine2:"Naviguer Stratégiquement dans l'Océan Numérique Tumultueux",
     pubUrl:"https://www.researchgate.net/publication/389628862",
     pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
+  },
+  ja:{
+    crm:"サイバーリスクマネジメント",pap:"プロアクティブかつ予測的",bab:"侵害前",
+    dar:"検知と対応",rad:"リアクティブかつ防御的",dub:"侵害中",
+    cr:"サイバーレジリエンス",rai:"復旧と改善",aab:"侵害後",
+    ppl:"人材",prc:"プロセス",tch:"テクノロジー",
+    title:"サイバーセキュリティ・コンパス",credit:"作成・デザイン:",
+    pubLine1:"サイバーセキュリティ・コンパス:",pubLine2:"荒れ狂うデジタルの海を戦略的に航海する",
+    pubUrl:"https://www.researchgate.net/publication/389628862",
+    pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
   }
 };
 
@@ -805,6 +825,14 @@ const TT={
      b:"En cybersécurité, il ne s'agit pas de savoir si les tempêtes frapperont, mais quand. La Détection et Réponse est votre équipage au cœur de la tempête : les yeux sur chaque signal, les mains sur chaque commande. Elle identifie les menaces à mesure qu'elles se développent, contient la brèche avant qu'elle ne se propage, et répond avec rapidité et précision. Essentielle, mais jamais suffisante à elle seule. Les organisations qui ne savent que traverser les tempêtes passeront tout leur voyage à attendre la suivante. La boussole exige davantage."},
     {h:"Cyber Résilience",s:"Après une Brèche · Récupérer et Améliorer · Un Résultat",
      b:"La Cyber Résilience n'est pas une phase que l'on aborde après un incident. C'est le résultat d'avoir bien fait tout le reste. Lorsque votre nord est fixé par une gestion proactive du risque et que votre équipage répond avec précision pendant la tempête, la résilience est ce que vous gagnez. Cela signifie rétablir les opérations plus rapidement, apprendre de ce qui a échoué, renforcer ce qui a été exposé, et réinjecter cette intelligence dans votre boussole. Les organisations qui atteignent une véritable cyber résilience ne se contentent pas de survivre aux tempêtes. Elles deviennent plus difficiles à couler à chaque tempête qu'elles traversent."}
+  ],
+  ja:[
+    {h:"サイバーリスクマネジメント",s:"侵害前 · プロアクティブ&予測的",
+     b:"あなたのサイバーセキュリティ・コンパスの真北。それがなければ、組織は危機から危機へと漂流し、反応し、復旧するだけで、リスクを真に低減することは決してない。サイバーリスクマネジメントは、脅威が顕在化する前に予測し、最も重要なものを優先し、セキュリティ投資を最適化し、経営層が戦略的な意思決定を行うための明確な言語を与える、プロアクティブかつ予測的な規律である。サイバー犯罪者が狙っているのは技術的な脆弱性だけではない。北を持たないことから生まれる不確実性と優柔不断こそを狙っている。これがそのギャップを埋めるものだ。"},
+    {h:"検知と対応",s:"侵害中 · リアクティブ&防御的",
+     b:"サイバーセキュリティにおいて、嵐が来るかどうかではなく、いつ来るかが問題だ。検知と対応は、嵐の真っただ中にいるあなたの乗組員であり、あらゆる兆候に目を配り、あらゆる制御に手をかける。展開する脅威を特定し、拡大する前に侵害を封じ込め、迅速かつ的確に対応する。不可欠だが、それだけでは決して十分ではない。嵐をしのぐことしか知らない組織は、航海の全てを次の嵐を待つことに費やすことになる。コンパスはそれ以上のものを求めている。"},
+    {h:"サイバーレジリエンス",s:"侵害後 · 復旧と改善 · 成果",
+     b:"サイバーレジリエンスは、インシデントの後に入る段階ではない。それは他のすべてを正しく行った結果として得られる成果である。プロアクティブなリスクマネジメントによって北が定まり、乗組員が嵐の中で的確に対応するとき、レジリエンスは自ずと手に入る。それは、より速く業務を復旧させ、失敗から学び、露呈した弱点を強化し、そのインテリジェンスをコンパスへとフィードバックすることを意味する。真のサイバーレジリエンスを実現した組織は、嵐を生き延びるだけではない。乗り越えるたびに、沈みにくい組織へと変わっていく。"}
   ]
 };
 
