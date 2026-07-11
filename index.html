@@ -7,12 +7,12 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{background:#000;height:100%;}
-#ocean-bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;}
+#ocean-bg{position:fixed;inset:0;width:calc(var(--vw, 1vw) * 100);height:calc(var(--vh, 1vh) * 100);z-index:0;}
 #ocean-bg canvas{display:block;}
 @keyframes waveDrift{from{background-position:0 0,0 0;}to{background-position:1200px 0,-900px 0;}}
 @keyframes hazeFloat{0%{transform:translate3d(-2%,0,0) scale(1.05);}50%{transform:translate3d(2%,-1%,0) scale(1.09);}100%{transform:translate3d(-2%,0,0) scale(1.05);}}
-#wrap{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;background:transparent;}
-#stage{position:fixed;inset:0;width:100vw;height:100vh;overflow:hidden;background:transparent;border-radius:0;box-shadow:none;}
+#wrap{position:relative;z-index:1;min-height:calc(var(--vh, 1vh) * 100);display:flex;align-items:center;justify-content:center;background:transparent;}
+#stage{position:fixed;inset:0;width:calc(var(--vw, 1vw) * 100);height:calc(var(--vh, 1vh) * 100);overflow:hidden;background:transparent;border-radius:0;box-shadow:none;}
 .bg1{display:none;}
 .bg2{display:none;}
 .bg3{display:none;}
@@ -642,6 +642,11 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.15;
 oceanContainer.appendChild(renderer.domElement);
 let lastKnownWidth = innerWidth, lastKnownHeight = innerHeight;
+function syncViewportUnits() {
+  document.documentElement.style.setProperty('--vw', (innerWidth / 100) + 'px');
+  document.documentElement.style.setProperty('--vh', (innerHeight / 100) + 'px');
+}
+syncViewportUnits();
 
 const sun = new THREE.Vector3();
 const sky = new Sky();
@@ -917,6 +922,7 @@ function animate() {
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
     updateCompassStandSize();
+    syncViewportUnits();
   }
 
   const now = performance.now();
@@ -968,6 +974,7 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
   updateCompassStandSize();
+  syncViewportUnits();
 });
 </script>
 </body>
