@@ -291,9 +291,9 @@
   }
   .group-green .group-header{background:rgba(58,140,58,0.08);}
   .group-green .group-label{color:#2f7a2f;}
-  [data-theme="dark"] .group-gray{ background:rgba(140,148,160,0.14); border-color:rgba(140,148,160,0.4); }
-  [data-theme="dark"] .group-gray .group-header{ background:rgba(140,148,160,0.20); }
-  [data-theme="dark"] .group-gray .group-label{ color:#b8bcc4; }
+  [data-theme="dark"] .group-gray{ background:rgba(61,98,145,0.20); border-color:rgba(61,98,145,0.5); }
+  [data-theme="dark"] .group-gray .group-header{ background:rgba(61,98,145,0.28); }
+  [data-theme="dark"] .group-gray .group-label{ color:#9dc3fb; }
   [data-theme="dark"] .group-red{ background:rgba(210,90,84,0.16); border-color:rgba(210,90,84,0.45); }
   [data-theme="dark"] .group-red .group-header{ background:rgba(210,90,84,0.22); }
   [data-theme="dark"] .group-red .group-label{ color:#e08b85; }
@@ -2047,11 +2047,13 @@ function drawEndTotalBar(col, pureVal, finalVal){
   const plainLine = fmtAbs(pureVal);
   const pctVsStart = (v)=>{ const p=(v-start)/start*100; return `${p>=0?'+':''}${p.toFixed(1)}%`; };
   const baseLine = `(${plainLine}) (${pctVsStart(pureVal)})`;
+  const upColor = isDarkModeActive() ? '#9dc3fb' : '#2f6fd6';
+  const downColor = isDarkModeActive() ? '#f0a9a2' : '#c4322b';
   let html;
   if(finalVal > pureVal + 1e-6){
-    html = `<span style="color:#2f6fd6;">${fmtAbs(finalVal)} (${pctVsStart(finalVal)})</span><br>${baseLine}`;
+    html = `<span style="color:${upColor};">${fmtAbs(finalVal)} (${pctVsStart(finalVal)})</span><br>${baseLine}`;
   } else if(finalVal < pureVal - 1e-6){
-    html = `${baseLine}<br><span style="color:#c4322b;">${fmtAbs(finalVal)} (${pctVsStart(finalVal)})</span>`;
+    html = `${baseLine}<br><span style="color:${downColor};">${fmtAbs(finalVal)} (${pctVsStart(finalVal)})</span>`;
   } else {
     html = `${plainLine} (${pctVsStart(pureVal)})`;
   }
