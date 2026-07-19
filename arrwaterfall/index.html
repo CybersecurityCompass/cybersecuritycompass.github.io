@@ -19,12 +19,46 @@
     --likely:#c77dd2;
     --likely-fill:rgba(199,125,210,0.18);
     --card-bg:#ffffff;
+    --page-bg:#f4f5f7;
+    --card-border:#e3e5e8;
+    --input-bg:#ffffff;
+    --input-border:#c7cad0;
+    --input-text:#1a1a1a;
+    --plot-border:#e3e5e8;
+    --plot-bottom-border:#d5d7da;
+    --divider:#eceef0;
+    --btn-bg:#ffffff;
+  }
+  [data-theme="dark"]{
+    --ink:#e6edf3;
+    --muted:#8b949e;
+    --grid:#21262d;
+    --gray-bar:#28405f;
+    --gray-bar-border:#3d6291;
+    --red:#6e3a3f;
+    --red-border:#a34a52;
+    --green:#2f5641;
+    --green-border:#4a8562;
+    --committed:#6ea3f7;
+    --committed-fill:rgba(110,163,247,0.20);
+    --likely:#d9a6f0;
+    --likely-fill:rgba(217,166,240,0.18);
+    --card-bg:#161b22;
+    --page-bg:#0a0d12;
+    --card-border:#30363d;
+    --input-bg:#0d1117;
+    --input-border:#30363d;
+    --input-text:#e6edf3;
+    --plot-border:#30363d;
+    --plot-bottom-border:#30363d;
+    --divider:#21262d;
+    --btn-bg:#21262d;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
     font-family:'Segoe UI', Arial, Helvetica, sans-serif;
-    background:#f4f5f7;
+    background:var(--page-bg);
     color:var(--ink);
     padding:24px;
   }
@@ -32,7 +66,7 @@
     max-width:1500px;
     margin:0 auto;
     background:var(--card-bg);
-    border:1px solid #e3e5e8;
+    border:1px solid var(--card-border);
     border-radius:6px;
     padding:20px 28px 28px;
   }
@@ -55,14 +89,55 @@
     gap:4px;
     flex-shrink:0;
   }
+  .theme-switch{
+    border:none;
+    background:none;
+    padding:0;
+    margin-left:6px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .theme-switch-track{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    width:44px;
+    height:22px;
+    border-radius:11px;
+    background:#dfe2e6;
+    border:1px solid #c7cad0;
+    padding:0 5px;
+    box-sizing:border-box;
+    transition:background 0.2s ease, border-color 0.2s ease;
+  }
+  [data-theme="dark"] .theme-switch-track{
+    background:#21262d;
+    border-color:#30363d;
+  }
+  .theme-icon-sun{ color:#c9820c; position:relative; z-index:1; }
+  .theme-icon-moon{ color:#8b949e; position:relative; z-index:1; }
+  .theme-switch-thumb{
+    position:absolute;
+    top:1px; left:1px;
+    width:18px; height:18px;
+    border-radius:50%;
+    background:#ffffff;
+    box-shadow:0 1px 3px rgba(0,0,0,0.25);
+    transition:transform 0.2s ease, background 0.2s ease;
+  }
+  [data-theme="dark"] .theme-switch-thumb{
+    transform:translateX(21px);
+    background:#3a3f47;
+  }
   .lang-btn{
     font-size:10.5px;
     padding:3px 9px;
-    border:1px solid #d7d9dc;
+    border:1px solid var(--input-border);
     border-radius:4px;
-    background:#fff;
+    background:var(--btn-bg);
     cursor:pointer;
-    color:#5b6472;
+    color:var(--muted);
     font-weight:600;
   }
   .lang-btn.active{
@@ -70,7 +145,12 @@
     color:#fff;
     border-color:#1a1a1a;
   }
-  .divider{border-bottom:1px solid #eceef0;margin-bottom:18px;}
+  [data-theme="dark"] .lang-btn.active{
+    background:#e8e8ea;
+    color:#111318;
+    border-color:#e8e8ea;
+  }
+  .divider{border-bottom:1px solid var(--divider);margin-bottom:18px;}
   .subtitle{
     text-align:center;
     font-size:15px;
@@ -110,7 +190,7 @@
     align-items:center;
     gap:3px;
     padding:6px 14px;
-    border:1px solid #eceef0;
+    border:1px solid var(--divider);
     border-radius:6px;
   }
   .target-strip .group.group-grey{
@@ -143,8 +223,8 @@
     position:relative;
     flex:1;
     height:520px;
-    border-left:1px solid #e3e5e8;
-    border-bottom:1px solid #d5d7da;
+    border-left:1px solid var(--plot-border);
+    border-bottom:1px solid var(--plot-bottom-border);
   }
   .gridline{
     position:absolute;
@@ -211,6 +291,15 @@
   }
   .group-green .group-header{background:rgba(58,140,58,0.08);}
   .group-green .group-label{color:#2f7a2f;}
+  [data-theme="dark"] .group-gray{ background:rgba(140,148,160,0.14); border-color:rgba(140,148,160,0.4); }
+  [data-theme="dark"] .group-gray .group-header{ background:rgba(140,148,160,0.20); }
+  [data-theme="dark"] .group-gray .group-label{ color:#b8bcc4; }
+  [data-theme="dark"] .group-red{ background:rgba(210,90,84,0.16); border-color:rgba(210,90,84,0.45); }
+  [data-theme="dark"] .group-red .group-header{ background:rgba(210,90,84,0.22); }
+  [data-theme="dark"] .group-red .group-label{ color:#e08b85; }
+  [data-theme="dark"] .group-green{ background:rgba(90,170,90,0.16); border-color:rgba(90,170,90,0.45); }
+  [data-theme="dark"] .group-green .group-header{ background:rgba(90,170,90,0.22); }
+  [data-theme="dark"] .group-green .group-label{ color:#8fce8f; }
   .columns{
     position:absolute;
     top:0;left:0;right:0;bottom:0;
@@ -246,7 +335,7 @@
     width:80%;
     background:var(--gray-bar);
     border:1px solid var(--gray-bar-border);
-    color:#2a2a2a;
+    color:var(--ink);
     font-weight:600;
     font-size:13px;
     z-index:2;
@@ -254,6 +343,8 @@
   }
   .bar.red{background:var(--red);border:1px solid var(--red-border);color:#5c2b28;}
   .bar.green{background:var(--green);border:1px solid var(--green-border);color:#274d24;}
+  [data-theme="dark"] .bar.red{ color:#f5d5d2; }
+  [data-theme="dark"] .bar.green{ color:#d2f0d0; }
 
   .bar.extra{
     width:66%;
@@ -284,6 +375,22 @@
     background:repeating-linear-gradient(135deg, rgba(31,158,142,0.24) 0 6px, rgba(31,158,142,0.1) 6px 12px);
     border:2px dashed #1f9e8e;
     color:#125f55;
+  }
+  [data-theme="dark"] .bar.extra-committed-red{
+    background:repeating-linear-gradient(135deg, rgba(210,90,84,0.30) 0 6px, rgba(210,90,84,0.16) 6px 12px);
+    color:#f0b8b4;
+  }
+  [data-theme="dark"] .bar.extra-likely-red{
+    background:repeating-linear-gradient(135deg, rgba(190,120,210,0.30) 0 6px, rgba(190,120,210,0.16) 6px 12px);
+    color:#e8c8ee;
+  }
+  [data-theme="dark"] .bar.extra-committed-green{
+    background:repeating-linear-gradient(135deg, rgba(90,170,110,0.30) 0 6px, rgba(90,170,110,0.16) 6px 12px);
+    color:#c0ecc8;
+  }
+  [data-theme="dark"] .bar.extra-likely-green{
+    background:repeating-linear-gradient(135deg, rgba(70,190,175,0.30) 0 6px, rgba(70,190,175,0.16) 6px 12px);
+    color:#bdeee6;
   }
   .bar.phantom-target{
     width:80%;
@@ -324,6 +431,25 @@
     font-weight:700;
     z-index:3;
   }
+  [data-theme="dark"] .bar.phantom-target{
+    background:repeating-linear-gradient(135deg, rgba(220,170,60,0.26) 0 6px, rgba(220,170,60,0.12) 6px 12px);
+    color:#f0d896;
+  }
+  [data-theme="dark"] .bar.phantom-scenario{
+    background:repeating-linear-gradient(135deg, rgba(140,130,230,0.26) 0 6px, rgba(140,130,230,0.12) 6px 12px);
+    color:#d6d2f5;
+  }
+  [data-theme="dark"] .bar.phantom-scenario > div{
+    background:rgba(20,22,28,0.85);
+  }
+  [data-theme="dark"] .bar.phantom-scenario-risk{
+    background:repeating-linear-gradient(135deg, rgba(210,90,84,0.26) 0 6px, rgba(210,90,84,0.12) 6px 12px);
+    color:#f0c0bc;
+  }
+  [data-theme="dark"] .bar.phantom-reported{
+    background:repeating-linear-gradient(135deg, rgba(70,180,196,0.26) 0 6px, rgba(70,180,196,0.12) 6px 12px);
+    color:#b8ecf2;
+  }
   .connector{
     position:absolute;
     height:0;
@@ -342,6 +468,10 @@
     transform:translate(-50%, -100%);
     z-index:5;
   }
+  [data-theme="dark"] .target-line-label{
+    background:rgba(20,22,28,0.85);
+    color:#e0c26a;
+  }
   .target-line-label.below{
     transform:translate(-50%, 0);
   }
@@ -354,7 +484,7 @@
     text-align:center;
     padding-top:10px;
     font-size:12.5px;
-    color:#2a2a2a;
+    color:var(--ink);
   }
   .xcol > div:first-child{
     font-weight:700;
@@ -377,15 +507,37 @@
     user-select:none;
   }
   .controls input[type=checkbox]{
-    accent-color:var(--ink);
+    appearance:none;
+    -webkit-appearance:none;
+    width:14px;height:14px;
+    border:1.5px solid var(--input-border);
+    border-radius:3px;
+    background:var(--input-bg);
     cursor:pointer;
-    width:13px;height:13px;
+    position:relative;
+    margin:0;
+    flex-shrink:0;
+  }
+  .controls input[type=checkbox]:checked{
+    background:#2f6fd6;
+    border-color:#2f6fd6;
+  }
+  .controls input[type=checkbox]:checked::after{
+    content:'';
+    position:absolute;
+    left:4px; top:1px;
+    width:3px; height:7px;
+    border:solid #fff;
+    border-width:0 2px 2px 0;
+    transform:rotate(45deg);
   }
   .pct-input{
     width:46px;
     font-size:11px;
     padding:1px 3px;
-    border:1px solid #d7d9dc;
+    border:1px solid var(--input-border);
+    background:var(--input-bg);
+    color:var(--input-text);
     border-radius:3px;
     text-align:right;
     -moz-appearance:textfield;
@@ -397,7 +549,9 @@
     width:78px;
     font-size:11px;
     padding:2px 4px;
-    border:1px solid #c7cad0;
+    border:1px solid var(--input-border);
+    background:var(--input-bg);
+    color:var(--input-text);
     border-radius:3px;
     text-align:center;
     font-weight:600;
@@ -423,6 +577,9 @@
   .category-card.red{ border-color:#c4322b; background:rgba(196,50,43,0.03); }
   .category-card.green{ border-color:#4a934a; background:rgba(74,147,74,0.03); }
   .category-card.gray{ border-color:#9aa0a6; background:rgba(120,128,140,0.04); }
+  [data-theme="dark"] .category-card.red{ border-color:#c4322b; background:rgba(196,50,43,0.12); }
+  [data-theme="dark"] .category-card.green{ border-color:#4a934a; background:rgba(74,147,74,0.12); }
+  [data-theme="dark"] .category-card.gray{ border-color:#3d6291; background:rgba(61,98,145,0.16); }
   .controls .scenario-block{
     display:flex;
     flex-direction:column;
@@ -478,7 +635,8 @@
   }
   .modal-overlay.open{display:flex;}
   .modal-box{
-    background:#fff;
+    background:var(--card-bg);
+    color:var(--ink);
     border-radius:8px;
     max-width:720px;
     width:100%;
@@ -496,35 +654,39 @@
     font-size:22px;
     line-height:1;
     cursor:pointer;
-    color:#6b7280;
+    color:var(--muted);
     padding:4px 8px;
   }
+  [data-theme="dark"] .modal-close{ color:#c5c8d0; }
+  [data-theme="dark"] .modal-close:hover{ color:#ffffff; }
   .modal-close:hover{color:#1a1a1a;}
-  #howToBody h2{font-size:17px;margin:22px 0 8px;color:#1a1a1a;}
+  #howToBody h2{font-size:17px;margin:22px 0 8px;color:var(--ink);}
   #howToBody h2:first-child{margin-top:0;}
   #howToBody h3{font-size:14px;margin:16px 0 4px;color:#c4322b;}
-  #howToBody p{font-size:13.5px;line-height:1.6;color:#333;margin:0 0 10px;}
+  #howToBody p{font-size:13.5px;line-height:1.6;color:var(--ink);margin:0 0 10px;}
   #howToBody ol{padding-left:20px;margin:0 0 10px;}
-  #howToBody li{font-size:13.5px;line-height:1.6;color:#333;margin-bottom:4px;}
+  #howToBody li{font-size:13.5px;line-height:1.6;color:var(--ink);margin-bottom:4px;}
 
   .acct-modal-box{
     max-width:520px;
-    background:#fff;
-    color:#1a1a1a;
+    background:var(--card-bg);
+    color:var(--ink);
   }
   .acct-modal-box.red{ background:#fdf4f3; }
   .acct-modal-box.green{ background:#f4faf4; }
+  [data-theme="dark"] .acct-modal-box.red{ background:#2a1e1e; }
+  [data-theme="dark"] .acct-modal-box.green{ background:#1e2a1f; }
   .acct-modal-header{
     font-size:14px;
     font-weight:700;
     margin:0 30px 16px 0;
-    color:#1a1a1a;
+    color:var(--ink);
   }
   .acct-modal-header .sub{
     display:block;
     font-size:11.5px;
     font-weight:500;
-    color:#6b7280;
+    color:var(--muted);
     margin-top:3px;
   }
   .acct-visual-bar{
@@ -573,8 +735,8 @@
     flex-shrink:0;
     box-sizing:border-box;
   }
-  .acct-visual-legend-name{ flex:1; color:#3a3a3a; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .acct-visual-legend-value{ color:#6b7280; font-weight:600; flex-shrink:0; }
+  .acct-visual-legend-name{ flex:1; color:var(--ink); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .acct-visual-legend-value{ color:var(--muted); font-weight:600; flex-shrink:0; }
   .acct-row{
     display:flex;
     align-items:center;
@@ -583,19 +745,19 @@
   }
   .acct-row input.acct-name{
     flex:1;
-    background:#fafafb;
-    border:1px solid #d7d9dc;
+    background:var(--input-bg);
+    border:1px solid var(--input-border);
     border-radius:6px;
-    color:#1a1a1a;
+    color:var(--input-text);
     font-size:14px;
     padding:9px 12px;
   }
   .acct-row input.acct-amount{
     width:100px;
-    background:#fafafb;
-    border:1px solid #d7d9dc;
+    background:var(--input-bg);
+    border:1px solid var(--input-border);
     border-radius:6px;
-    color:#1a1a1a;
+    color:var(--input-text);
     font-size:14px;
     padding:9px 10px;
     text-align:right;
@@ -616,10 +778,10 @@
     width:36px;
     height:36px;
     flex-shrink:0;
-    background:#fafafb;
-    border:1px solid #d7d9dc;
+    background:var(--input-bg);
+    border:1px solid var(--input-border);
     border-radius:6px;
-    color:#6b7280;
+    color:var(--muted);
     cursor:pointer;
     font-size:16px;
   }
@@ -631,9 +793,9 @@
   .acct-add-btn{
     width:100%;
     background:transparent;
-    border:1.5px dashed #c7cad0;
+    border:1.5px dashed var(--input-border);
     border-radius:6px;
-    color:#5b6472;
+    color:var(--muted);
     font-size:13.5px;
     font-weight:600;
     padding:10px;
@@ -641,8 +803,21 @@
     margin-top:4px;
   }
   .acct-add-btn:hover{ border-color:#c4322b; color:#c4322b; }
-  .acct-modal-box .modal-close{ color:#6b7280; }
-  .acct-modal-box .modal-close:hover{ color:#1a1a1a; }
+  .acct-modal-box .modal-close{ color:var(--muted); }
+  [data-theme="dark"] .acct-modal-box .modal-close{ color:#c5c8d0; }
+  [data-theme="dark"] .acct-modal-box .modal-close:hover{ color:#ffffff; }
+  [data-theme="dark"] #howToBtn,
+  [data-theme="dark"] #exportBtn,
+  [data-theme="dark"] #importBtn{
+    background:var(--btn-bg) !important;
+  }
+  [data-theme="dark"] #toggleGroupsBtn,
+  [data-theme="dark"] #toggleTargetBtn{
+    background:var(--btn-bg) !important;
+    color:var(--ink) !important;
+    border-color:var(--input-border) !important;
+  }
+  .acct-modal-box .modal-close:hover{ color:var(--ink); }
   .acct-footer-btns{
     display:flex;
     gap:10px;
@@ -657,11 +832,11 @@
     cursor:pointer;
   }
   .acct-cancel-btn{
-    background:#fff;
-    border:1px solid #d7d9dc;
-    color:#5b6472;
+    background:var(--btn-bg);
+    border:1px solid var(--input-border);
+    color:var(--muted);
   }
-  .acct-cancel-btn:hover{ border-color:#9aa0a6; color:#1a1a1a; }
+  .acct-cancel-btn:hover{ border-color:#9aa0a6; color:var(--ink); }
   .acct-confirm-btn{
     background:#2f6fd6;
     border:1px solid #2f6fd6;
@@ -679,6 +854,13 @@
       <button type="button" class="lang-btn" id="langEsBtn">ES</button>
       <button type="button" class="lang-btn" id="langPtBtn">PT</button>
       <button type="button" class="lang-btn" id="langJaBtn">日本語</button>
+      <button type="button" class="theme-switch" id="themeToggleBtn" aria-label="Toggle dark mode">
+        <span class="theme-switch-track">
+          <svg class="theme-icon-sun" viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="12" r="5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/></g></svg>
+          <svg class="theme-icon-moon" viewBox="0 0 24 24" width="11" height="11"><path fill="currentColor" d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+          <span class="theme-switch-thumb"></span>
+        </span>
+      </button>
     </div>
   </div>
   <div class="divider"></div>
@@ -753,7 +935,7 @@ const I18N = {
     showSquadImpact: 'Show Squad Impact',
     hideTarget: 'Hide Target',
     showTarget: 'Show Target',
-    footnote: 'Check Confirmed/At risk (Churn, Erosion) or Committed/Most likely (Expansion, New Logo) to stack an extra segment onto that bar — the whole chart (every later bar and the final total) recalculates automatically.',
+    footnote: 'Check Confirmed/At risk (Churn, Erosion) or Committed/Most likely (Expansion, New Logo) to stack an extra segment onto that bar, the whole chart (every later bar and the final total) recalculates automatically. If you want to add account details, click on a segment that supports it to open its account breakdown.',
     churn: 'Churn',
     erosion: 'Erosion',
     expansion: 'Expansion',
@@ -795,6 +977,8 @@ const I18N = {
     unassigned: 'Unassigned',
     accountsLabel: 'Accounts',
     accountsLabelSingular: 'Account',
+    darkModeBtn: 'Dark',
+    lightModeBtn: 'Light',
     clickToAddAccounts: 'Click to add account details',
     addAccount: '+ Add account',
     confirmBtn: 'Confirm',
@@ -811,6 +995,7 @@ const I18N = {
         <li><strong>See the real gap to target.</strong> With everything loaded, the squad sees the real "Gap to Target," in dollars and in percentage. It's no longer a guess or a number each person calculates differently, it's one concrete number everyone is looking at at the same time.</li>
         <li><strong>Design the plan to close that gap, with an agreed buffer.</strong> With the gap visible, the squad decides together what to do to close it: which opportunities to accelerate, where CSTA can help get a contact, where AM/SE need to move something from "most likely" pipeline to "committed." The key point: since not every "committed" or "most likely" opportunity is actually going to close, the plan needs a buffer, it can't assume 100% pipeline conversion. The squad should explicitly agree on what conversion rate they're assuming for committed and most likely pipeline, so the buffer is a decision they made together, not a silent assumption buried in someone's spreadsheet.</li>
         <li><strong>If the plan still doesn't close the gap, decide together how to handle it.</strong> Not every gap can be closed with the pipeline on hand. If the plan built in step 5 still falls short of target, the squad should decide as a group whether to escalate for support, revisit the target itself, or consciously accept the shortfall and explain why. The point is that this decision is made together and out loud, not left unresolved after the meeting ends.</li>
+        <li><strong>Add account details when it's useful.</strong> For any Confirmed, At risk, Committed, or Most likely segment, you can click directly on that bar to open an account breakdown, adding the specific accounts (with names and amounts) that make up that number. This lets the squad see exactly which deals or churn risks sit behind each figure, not just the aggregate total, and keeps that detail attached to the scenario for the next time you look at it.</li>
       </ol>
 
       <h2>Keeping it current</h2>
@@ -835,7 +1020,7 @@ const I18N = {
     showSquadImpact: 'Mostrar impacto del squad',
     hideTarget: 'Ocultar objetivo',
     showTarget: 'Mostrar objetivo',
-    footnote: 'Marca Confirmado/En riesgo (Churn, Erosión) o Comprometido/Más probable (Expansión, Nuevos clientes) para apilar un segmento adicional en esa barra — todo el gráfico (cada barra posterior y el total final) se recalcula automáticamente.',
+    footnote: 'Marca Confirmado/En riesgo (Churn, Erosión) o Comprometido/Más probable (Expansión, Nuevos clientes) para apilar un segmento adicional en esa barra, todo el gráfico (cada barra posterior y el total final) se recalcula automáticamente. Si quieres agregar detalles de cuentas, haz clic en un segmento compatible para abrir su desglose de cuentas.',
     churn: 'Churn',
     erosion: 'Erosión',
     expansion: 'Expansión',
@@ -877,6 +1062,8 @@ const I18N = {
     unassigned: 'No Asignado',
     accountsLabel: 'Cuentas',
     accountsLabelSingular: 'Cuenta',
+    darkModeBtn: 'Oscuro',
+    lightModeBtn: 'Claro',
     clickToAddAccounts: 'Clic para agregar detalles de cuentas',
     addAccount: '+ Agregar cuenta',
     confirmBtn: 'Confirmar',
@@ -893,6 +1080,7 @@ const I18N = {
         <li><strong>Ver la brecha real al objetivo.</strong> Con todo cargado, el squad ve la "Brecha al Objetivo" real, en dólares y en porcentaje. Ya no es una suposición ni un número que cada persona calcula distinto, es un número concreto que todos están viendo al mismo tiempo.</li>
         <li><strong>Diseñar el plan para cerrar esa brecha, con un buffer acordado.</strong> Con la brecha visible, el squad decide juntos qué hacer para cerrarla: qué oportunidades acelerar, dónde CSTA puede ayudar a conseguir un contacto, dónde AM/SE necesitan mover algo del pipeline de "más probable" a "comprometido". Lo clave: como no toda oportunidad "comprometida" o "más probable" va a cerrar en la realidad, el plan necesita un buffer, no puede asumir 100% de conversión de pipeline. El squad debe acordar explícitamente qué tasa de conversión están asumiendo para el pipeline comprometido y más probable, de modo que el buffer sea una decisión que tomaron juntos, no un supuesto silencioso enterrado en la hoja de cálculo de alguien.</li>
         <li><strong>Si el plan aún no cierra la brecha, decidir juntos cómo manejarlo.</strong> No toda brecha se puede cerrar con el pipeline disponible. Si el plan construido en el paso 5 sigue por debajo del objetivo, el squad debe decidir como grupo si escalar para pedir apoyo, revisar el objetivo mismo, o aceptar conscientemente el déficit y explicar por qué. El punto es que esta decisión se toma juntos y en voz alta, no queda sin resolver después de que termina la reunión.</li>
+        <li><strong>Agregar detalles de cuentas cuando sea útil.</strong> En cualquier segmento de Confirmado, En riesgo, Comprometido o Más probable, puedes hacer clic directamente sobre esa barra para abrir un desglose de cuentas, agregando las cuentas específicas (con nombre y monto) que componen ese número. Esto le permite al squad ver exactamente qué cuentas o riesgos de churn están detrás de cada cifra, no solo el total agregado, y mantiene ese detalle guardado en el escenario para la próxima vez que lo revisen.</li>
       </ol>
 
       <h2>Mantenerlo actualizado</h2>
@@ -917,7 +1105,7 @@ const I18N = {
     showSquadImpact: 'スクワッド影響を表示',
     hideTarget: '目標を非表示',
     showTarget: '目標を表示',
-    footnote: 'チャーン・コントラクションの「確定/リスクあり」、またはエクスパンション・新規獲得の「コミット済み/有力見込み」にチェックを入れると、そのバーに追加セグメントが積み上がります。チャート全体（以降のすべてのバーと最終合計）は自動的に再計算されます。',
+    footnote: 'チャーン・コントラクションの「確定/リスクあり」、またはエクスパンション・新規獲得の「コミット済み/有力見込み」にチェックを入れると、そのバーに追加セグメントが積み上がります。チャート全体（以降のすべてのバーと最終合計）は自動的に再計算されます。アカウントの詳細を追加したい場合は、対応するセグメントをクリックしてアカウント内訳を開いてください。',
     churn: 'チャーン',
     erosion: 'コントラクション',
     expansion: 'エクスパンション',
@@ -959,6 +1147,8 @@ const I18N = {
     unassigned: '未割り当て',
     accountsLabel: 'アカウント',
     accountsLabelSingular: 'アカウント',
+    darkModeBtn: 'ダーク',
+    lightModeBtn: 'ライト',
     clickToAddAccounts: 'クリックしてアカウントの詳細を追加',
     addAccount: '+ アカウントを追加',
     confirmBtn: '確定',
@@ -975,6 +1165,7 @@ const I18N = {
         <li><strong>目標との実際のギャップを確認する。</strong>すべてを入力した後、SQUADは実際の「目標とのギャップ」を金額とパーセンテージの両方で確認します。もはや推測でも、人によって計算方法が異なる数字でもありません。全員が同時に見ている具体的な一つの数字です。</li>
         <li><strong>バッファーを含めてギャップを埋める計画を立てる。</strong>ギャップが見えたら、SQUADは全員でそれを埋めるためにどうするかを決めます。どの商談を加速させるか、CSTAがどこでコンタクトの獲得を支援できるか、AM/SEが「有力見込み」から「コミット済み」へ動かすべきパイプラインはどこか。重要なのは、「コミット済み」や「有力見込み」の商談すべてが実際に成約するわけではないため、計画にはバッファーが必要だということです。パイプラインの100%成約を前提にすることはできません。SQUADは、コミット済みと有力見込みのパイプラインにどの成約率を想定するかを明確に合意すべきです。そうすることで、バッファーは誰かのスプレッドシートに埋め込まれた暗黙の前提ではなく、全員で決めた意思決定になります。</li>
         <li><strong>それでもギャップが埋まらない場合、どう対応するか全員で決める。</strong>すべてのギャップが、手元のパイプラインだけで埋まるとは限りません。ステップ5で立てた計画でも目標に届かない場合、SQUADはグループとして、支援をエスカレーションするか、目標自体を見直すか、あるいは未達を意識的に受け入れてその理由を説明するかを決めるべきです。重要なのは、この判断が会議の後に未解決のまま残るのではなく、全員で、明確に行われることです。</li>
+        <li><strong>必要に応じてアカウントの詳細を追加する。</strong>確定・リスクあり・コミット済み・有力見込みのいずれのセグメントでも、そのバーを直接クリックすることでアカウントの内訳を開くことができます。その数値を構成する具体的なアカウント（名前と金額）を追加できます。これにより、SQUADは合計値だけでなく、各数値の背後にある具体的な商談やチャーンリスクを正確に把握でき、その詳細は次回確認するときのためにシナリオに保存されます。</li>
       </ol>
 
       <h2>数値を最新に保つ</h2>
@@ -999,7 +1190,7 @@ const I18N = {
     showSquadImpact: 'Mostrar impacto do squad',
     hideTarget: 'Ocultar meta',
     showTarget: 'Mostrar meta',
-    footnote: 'Marque Confirmado/Em risco (Churn, Erosão) ou Comprometido/Mais provável (Expansão, Novos clientes) para empilhar um segmento adicional nessa barra — todo o gráfico (cada barra posterior e o total final) é recalculado automaticamente.',
+    footnote: 'Marque Confirmado/Em risco (Churn, Erosão) ou Comprometido/Mais provável (Expansão, Novos clientes) para empilhar um segmento adicional nessa barra, todo o gráfico (cada barra posterior e o total final) é recalculado automaticamente. Se quiser adicionar detalhes de contas, clique em um segmento compatível para abrir o detalhamento de contas.',
     churn: 'Churn',
     erosion: 'Erosão',
     expansion: 'Expansão',
@@ -1041,6 +1232,8 @@ const I18N = {
     unassigned: 'Não Atribuído',
     accountsLabel: 'Contas',
     accountsLabelSingular: 'Conta',
+    darkModeBtn: 'Escuro',
+    lightModeBtn: 'Claro',
     clickToAddAccounts: 'Clique para adicionar detalhes de contas',
     addAccount: '+ Adicionar conta',
     confirmBtn: 'Confirmar',
@@ -1057,6 +1250,7 @@ const I18N = {
         <li><strong>Ver o gap real para a meta.</strong> Com tudo carregado, o squad vê o "Gap para a Meta" real, em dólares e em porcentagem. Não é mais um palpite nem um número que cada pessoa calcula de forma diferente, é um número concreto que todos estão vendo ao mesmo tempo.</li>
         <li><strong>Desenhar o plano para fechar esse gap, com uma margem de segurança acordada.</strong> Com o gap visível, o squad decide juntos o que fazer para fechá-lo: quais oportunidades acelerar, onde o CSTA pode ajudar a conseguir um contato, onde AM/SE precisam mover algo do pipeline de "mais provável" para "comprometido". O ponto principal: como nem toda oportunidade "comprometida" ou "mais provável" vai realmente fechar, o plano precisa de uma margem de segurança, não pode assumir 100% de conversão do pipeline. O squad deve concordar explicitamente sobre qual taxa de conversão estão assumindo para o pipeline comprometido e mais provável, para que a margem de segurança seja uma decisão tomada em conjunto, não uma suposição silenciosa escondida na planilha de alguém.</li>
         <li><strong>Se o plano ainda não fechar o gap, decidir juntos como lidar com isso.</strong> Nem todo gap pode ser fechado com o pipeline disponível. Se o plano construído no passo 5 ainda ficar abaixo da meta, o squad deve decidir em grupo se vai escalar para pedir apoio, revisar a própria meta, ou aceitar conscientemente o déficit e explicar o motivo. O ponto é que essa decisão é tomada juntos e em voz alta, não fica sem resolução depois que a reunião termina.</li>
+        <li><strong>Adicionar detalhes de contas quando for útil.</strong> Em qualquer segmento de Confirmado, Em risco, Comprometido ou Mais provável, você pode clicar diretamente nessa barra para abrir um detalhamento de contas, adicionando as contas específicas (com nome e valor) que compõem esse número. Isso permite que o squad veja exatamente quais negócios ou riscos de churn estão por trás de cada número, não apenas o total agregado, e mantém esse detalhe salvo no cenário para a próxima vez que for consultado.</li>
       </ol>
 
       <h2>Mantendo atualizado</h2>
@@ -2006,6 +2200,16 @@ const langEnBtn = document.getElementById('langEnBtn');
 const langEsBtn = document.getElementById('langEsBtn');
 const langPtBtn = document.getElementById('langPtBtn');
 const langJaBtn = document.getElementById('langJaBtn');
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+let isDarkMode = false;
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  themeToggleBtn.setAttribute('aria-label', isDarkMode ? t('lightModeBtn') : t('darkModeBtn'));
+}
+themeToggleBtn.addEventListener('click', ()=>{
+  isDarkMode = !isDarkMode;
+  applyTheme();
+});
 const howToBtn = document.getElementById('howToBtn');
 const howToOverlay = document.getElementById('howToOverlay');
 const howToCloseBtn = document.getElementById('howToCloseBtn');
@@ -2371,16 +2575,22 @@ function buildUnassignedRow(isNegative, unassignedMagnitudeK){
 // the waterfall chart itself (see .bar.extra-* CSS), so the modal's mini
 // visual looks like a slice of the same box.
 const SEG_TEXTURE = {
-  'committed-red': { rgb:[178,58,58], border:'#b23a3a', text:'#7a2727' },
-  'likely-red':    { rgb:[142,68,173], border:'#8e44ad', text:'#5e3370' },
-  'committed-green': { rgb:[47,122,79], border:'#2f7a4f', text:'#1f5233' },
-  'likely-green':  { rgb:[31,158,142], border:'#1f9e8e', text:'#125f55' }
+  'committed-red': { rgb:[178,58,58], border:'#b23a3a', text:'#7a2727', textDark:'#f5cac8' },
+  'likely-red':    { rgb:[142,68,173], border:'#8e44ad', text:'#5e3370', textDark:'#eeccf3' },
+  'committed-green': { rgb:[47,122,79], border:'#2f7a4f', text:'#1f5233', textDark:'#c8f0cd' },
+  'likely-green':  { rgb:[31,158,142], border:'#1f9e8e', text:'#125f55', textDark:'#c2f2ec' }
 };
-const UNASSIGNED_TEXTURE = { rgb:[184,134,11], border:'#b8860b', text:'#5a4200' };
+const UNASSIGNED_TEXTURE = { rgb:[184,134,11], border:'#b8860b', text:'#5a4200', textDark:'#f5dfa0' };
+function isDarkModeActive(){
+  return document.documentElement.getAttribute('data-theme')==='dark';
+}
 
 function hatchBackground(rgb, shadeMult){
   const m = shadeMult===undefined ? 1 : shadeMult;
-  return `repeating-linear-gradient(135deg, rgba(${rgb[0]},${rgb[1]},${rgb[2]},${(0.32*m).toFixed(2)}) 0 6px, rgba(${rgb[0]},${rgb[1]},${rgb[2]},${(0.14*m).toFixed(2)}) 6px 12px)`;
+  const boost = isDarkModeActive() ? 1.4 : 1;
+  const a1 = Math.min(0.85, 0.32*m*boost);
+  const a2 = Math.min(0.5, 0.14*m*boost);
+  return `repeating-linear-gradient(135deg, rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a1.toFixed(2)}) 0 6px, rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a2.toFixed(2)}) 6px 12px)`;
 }
 
 // Proportional VERTICAL stacked bar showing each account's share of the
@@ -2481,7 +2691,7 @@ function renderAcctVisualBar(){
     seg.className = 'acct-visual-seg';
     seg.style.height = heights[i]+'px';
     seg.style.background = hatchBackground(sl.tex.rgb, sl.shade);
-    seg.style.color = sl.tex.text;
+    seg.style.color = isDarkModeActive() ? sl.tex.textDark : sl.tex.text;
     seg.textContent = `${sl.name} ${displayAmount.toFixed(1)}K (${pct.toFixed(0)}%)`;
     seg.title = `${sl.name}: ${displayAmount.toFixed(1)}K (${pct.toFixed(1)}%)`;
     barEl.appendChild(seg);
@@ -2634,6 +2844,7 @@ function setLang(newLang){
   langPtBtn.classList.toggle('active', lang==='pt');
   langJaBtn.classList.toggle('active', lang==='ja');
   applyStaticI18n();
+  applyTheme();
   if(howToOverlay.classList.contains('open')) howToBody.innerHTML = t('howToContent');
   render();
 }
