@@ -1336,9 +1336,16 @@ function splitUnit(value){
   return { num: value, unit:'M' };
 }
 function formatNum(num, unit){
-  let str = num.toFixed(2);
-  if(unit==='K' && str.endsWith('.00')) str = str.slice(0, -3);
+  const decimals = unit==='K' ? 1 : 2;
+  let str = num.toFixed(decimals);
+  if(/\.0+$/.test(str)) str = str.slice(0, str.indexOf('.'));
   return str+unit;
+}
+// Trims a fixed-decimal string down to a whole number whenever every
+// digit after the decimal point is zero (e.g. "40.0" -> "40", "40.3"
+// stays "40.3") — used anywhere numbers are formatted outside fmt/fmtAbs.
+function trimZeroDecimal(str){
+  return /\.0+$/.test(str) ? str.slice(0, str.indexOf('.')) : str;
 }
 function fmt(v){ const {num,unit}=splitUnit(v); return (num>=0?'+':'')+formatNum(num,unit); }
 function fmtAbs(v){ const {num,unit}=splitUnit(Math.abs(v)); return formatNum(num,unit); }
@@ -1367,7 +1374,7 @@ function tipWithAccounts(baseTip, segKey, totalValueM){
     const pct = totalMagnitudeK ? (magnitude/totalMagnitudeK*100) : 0;
     const name = r.name && r.name.trim() ? r.name : t('unassigned');
     const displayAmount = isNegative ? -magnitude : magnitude;
-    return `${escapeHtml(name)}: ${displayAmount.toFixed(1)}K (${pct.toFixed(1)}%)`;
+    return `${escapeHtml(name)}: ${trimZeroDecimal(displayAmount.toFixed(1))}K (${trimZeroDecimal(pct.toFixed(1))}%)`;
   });
   // Show the remaining Unassigned portion in its own color whenever the
   // segment isn't fully allocated — based on the actual current numbers,
@@ -1376,7 +1383,7 @@ function tipWithAccounts(baseTip, segKey, totalValueM){
   if(remainderK > 1e-6){
     const pct = totalMagnitudeK ? (remainderK/totalMagnitudeK*100) : 0;
     const displayRemainder = isNegative ? -remainderK : remainderK;
-    lines.push(`<span style="color:#e0a94a;">${escapeHtml(t('unassigned'))}: ${displayRemainder.toFixed(1)}K (${pct.toFixed(1)}%)</span>`);
+    lines.push(`<span style="color:#e0a94a;">${escapeHtml(t('unassigned'))}: ${trimZeroDecimal(displayRemainder.toFixed(1))}K (${trimZeroDecimal(pct.toFixed(1))}%)</span>`);
   }
   return `${escapeHtml(baseTip)} - ${rows.length} ${escapeHtml(accountsCountLabel(rows.length))}<br>` + lines.join('<br>');
 }
@@ -2700,8 +2707,8 @@ function renderAcctVisualBar(){
     seg.style.height = heights[i]+'px';
     seg.style.background = hatchBackground(sl.tex.rgb, sl.shade);
     seg.style.color = isDarkModeActive() ? sl.tex.textDark : sl.tex.text;
-    seg.textContent = `${sl.name} ${displayAmount.toFixed(1)}K (${pct.toFixed(0)}%)`;
-    seg.title = `${sl.name}: ${displayAmount.toFixed(1)}K (${pct.toFixed(1)}%)`;
+    seg.textContent = `${sl.name} ${trimZeroDecimal(displayAmount.toFixed(1))}K (${trimZeroDecimal(pct.toFixed(0))}%)`;
+    seg.title = `${sl.name}: ${trimZeroDecimal(displayAmount.toFixed(1))}K (${trimZeroDecimal(pct.toFixed(1))}%)`;
     barEl.appendChild(seg);
 
     const legendRow = document.createElement('div');
@@ -2715,7 +2722,7 @@ function renderAcctVisualBar(){
     nameEl.textContent = sl.name;
     const valueEl = document.createElement('div');
     valueEl.className = 'acct-visual-legend-value';
-    valueEl.textContent = `${displayAmount.toFixed(1)}K (${pct.toFixed(1)}%)`;
+    valueEl.textContent = `${trimZeroDecimal(displayAmount.toFixed(1))}K (${trimZeroDecimal(pct.toFixed(1))}%)`;
     legendRow.appendChild(swatch);
     legendRow.appendChild(nameEl);
     legendRow.appendChild(valueEl);
