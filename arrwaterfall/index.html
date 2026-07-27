@@ -1306,7 +1306,7 @@ steps.forEach(s=>{ s.custSign = s.color==='red' ? -1 : 1; });
 
 // Checkbox + live percentage state per category
 const state = {};
-steps.forEach(s=> state[s.key] = { committed:false, committedPct:s.committedPct, likely:false, likelyPct:s.likelyPct });
+steps.forEach(s=> state[s.key] = { committed:false, committedPct:s.committedPct, likely:false, likelyPct:s.likelyPct, committedAbs:0, likelyAbs:0 });
 
 // References to the Committed/Most-likely $ input boxes, so render() can
 // keep their displayed values in sync when Actual or Start ARR changes.
@@ -1572,8 +1572,14 @@ function buildXAxis(){
       }
       if(correctedK !== typedK) dollarC.value = correctedK;
       const dollarValM = kToM(correctedK);
-      state[s.key].committedPct = s.actualDelta ? (dollarValM/s.actualDelta*100) : 0;
-      pctC.value = Math.round(state[s.key].committedPct*10)/10;
+      if(Math.abs(s.actualDelta) < 1e-9){
+        // Actual is 0 — a percentage of zero can never be nonzero, so
+        // store this as a direct absolute value instead of a fraction.
+        state[s.key].committedAbs = dollarValM;
+      } else {
+        state[s.key].committedPct = (dollarValM/s.actualDelta*100);
+        pctC.value = Math.round(state[s.key].committedPct*10)/10;
+      }
       render();
     });
     rowC.appendChild(dollarC);
@@ -1641,8 +1647,12 @@ function buildXAxis(){
       }
       if(correctedK !== typedK) dollarL.value = correctedK;
       const dollarValM = kToM(correctedK);
-      state[s.key].likelyPct = s.actualDelta ? (dollarValM/s.actualDelta*100) : 0;
-      pctL.value = Math.round(state[s.key].likelyPct*10)/10;
+      if(Math.abs(s.actualDelta) < 1e-9){
+        state[s.key].likelyAbs = dollarValM;
+      } else {
+        state[s.key].likelyPct = (dollarValM/s.actualDelta*100);
+        pctL.value = Math.round(state[s.key].likelyPct*10)/10;
+      }
       render();
     });
     rowL.appendChild(dollarL);
@@ -1766,8 +1776,9 @@ function render(){
 
     const committedFrac = (state[s.key].committedPct||0) / 100;
     const likelyFrac = (state[s.key].likelyPct||0) / 100;
-    s.committedExtra = s.actualDelta * committedFrac;
-    s.likelyExtra = s.actualDelta * likelyFrac;
+    const actualIsZero = Math.abs(s.actualDelta) < 1e-9;
+    s.committedExtra = actualIsZero ? (state[s.key].committedAbs||0) : s.actualDelta * committedFrac;
+    s.likelyExtra = actualIsZero ? (state[s.key].likelyAbs||0) : s.actualDelta * likelyFrac;
     s.committedCustExtra = Math.round(s.actualCustNum * committedFrac);
     s.likelyCustExtra = Math.round(s.actualCustNum * likelyFrac);
 
@@ -2516,18 +2527,28 @@ function applyAccountTotalToEngine(segKey, assignedMagnitudeK){
     s.actualDelta = signedM;
     if(si) si.actualInput.value = mToK(s.actualDelta);
   } else if(segType==='committed'){
-    const rawPct = s.actualDelta ? (signedM/s.actualDelta*100) : 0;
-    state[catKey].committedPct = rawPct; // full precision — no drift when read back
-    if(si){
-      si.pctC.value = Math.round(rawPct*10)/10; // rounded for display only
-      si.dollarC.value = mToK(signedM).toFixed(1); // exact assigned total, not recomputed from a rounded %
+    if(Math.abs(s.actualDelta) < 1e-9){
+      state[catKey].committedAbs = signedM;
+      if(si) si.dollarC.value = mToK(signedM).toFixed(1);
+    } else {
+      const rawPct = signedM/s.actualDelta*100;
+      state[catKey].committedPct = rawPct; // full precision — no drift when read back
+      if(si){
+        si.pctC.value = Math.round(rawPct*10)/10; // rounded for display only
+        si.dollarC.value = mToK(signedM).toFixed(1); // exact assigned total, not recomputed from a rounded %
+      }
     }
   } else if(segType==='likely'){
-    const rawPct = s.actualDelta ? (signedM/s.actualDelta*100) : 0;
-    state[catKey].likelyPct = rawPct; // full precision — no drift when read back
-    if(si){
-      si.pctL.value = Math.round(rawPct*10)/10; // rounded for display only
-      si.dollarL.value = mToK(signedM).toFixed(1); // exact assigned total, not recomputed from a rounded %
+    if(Math.abs(s.actualDelta) < 1e-9){
+      state[catKey].likelyAbs = signedM;
+      if(si) si.dollarL.value = mToK(signedM).toFixed(1);
+    } else {
+      const rawPct = signedM/s.actualDelta*100;
+      state[catKey].likelyPct = rawPct; // full precision — no drift when read back
+      if(si){
+        si.pctL.value = Math.round(rawPct*10)/10; // rounded for display only
+        si.dollarL.value = mToK(signedM).toFixed(1); // exact assigned total, not recomputed from a rounded %
+      }
     }
   }
   render();
