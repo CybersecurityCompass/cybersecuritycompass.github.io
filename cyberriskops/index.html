@@ -24,6 +24,43 @@
   body{display:flex;align-items:center;justify-content:center;font-family:var(--face);color:#D8D8D8}
   .stage{position:relative;width:100%;max-width:1600px}
   svg{display:block;width:100%;height:auto}
+
+  /* ---- Japanese: a system CJK stack, its own type scale, and no glyph squeezing.
+     CJK glyphs sit on a fixed full-width em, so compressing them wrecks the stroke
+     balance; where a label will not fit, the size comes down instead. ---- */
+  :root{
+    --face-jp:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",YuGothic,
+              "Noto Sans JP","Noto Sans CJK JP",Meiryo,sans-serif;
+    /* the latin faces only, with no generic terminator: a generic family would
+       claim the kanji before the CJK stack was ever reached */
+    --face-ja:"Saira Extra Condensed","Barlow Condensed","Fira Sans Extra Condensed",
+              "Arial Narrow","Helvetica Neue Condensed",var(--face-jp);
+    --ui-ja:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,var(--face-jp);
+  }
+  /* Latin first, CJK second. A font is only used for the glyphs it actually has,
+     so the acronyms keep the original condensed face while the kana and kanji fall
+     through to the system CJK stack. One rule covers CROC, CREM and the hinge. */
+  svg.ja .t{font-family:var(--face-ja);letter-spacing:0}
+  svg.ja .t-ring{font-size:16px}
+  svg.ja .t-flow{font-size:24px}
+  svg.ja .t-gear{font-size:22px}
+  svg.ja .t-arc{font-size:26px}
+  body.ja{font-family:var(--ui-ja)}
+  body.ja .eyebrow{letter-spacing:.08em}
+  body.ja .acronym{letter-spacing:.14em}
+  body.ja .page-title .main{line-height:1.3;letter-spacing:0}
+  body.ja #tip b{letter-spacing:.04em}
+  body.ja #tip span{line-height:1.75}
+  body.ja .read{letter-spacing:.02em}
+  .lang-selector{position:fixed;top:22px;right:28px;z-index:20;display:flex;gap:0;align-items:center;
+                 font-family:var(--ui);font-size:10.5px;font-weight:600;letter-spacing:.12em;user-select:none}
+  .lang-selector button{background:none;border:none;color:#888;padding:4px 10px;cursor:pointer;
+                        font-family:inherit;font-size:inherit;font-weight:inherit;letter-spacing:inherit;
+                        transition:color .15s ease}
+  .lang-selector button:hover{color:#FFFFFF}
+  .lang-selector button.active{color:var(--accent)}
+  .lang-selector .sep{color:#444;font-weight:400}
+
   /* ---- page title, credit and citation: taken from the CRML page's own CSS ---- */
   .page-title{position:fixed;top:30px;left:36px;z-index:10;user-select:none;max-width:480px;pointer-events:none}
   .page-title .eyebrow{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.24em;
@@ -94,10 +131,10 @@
   svg.st8 .wipe{transform:scaleX(1)}
   /* the arc lettering sweeps along its own curve, identification then mitigation */
   #sIdf,#sMit{transition:transform .9s cubic-bezier(.3,0,.2,1)}
-  #sIdf{transform-origin:510px 450px;transform:rotate(-222.7deg)}
-  #sMit{transform-origin:1090px 450px;transform:rotate(-36.0deg);transition-delay:.45s}
-  svg.st6 #sIdf{transform:rotate(-137.3deg)}
-  svg.st6 #sMit{transform:rotate(36.0deg)}
+  #sIdf{transform-origin:510px 450px;transform:rotate(var(--from,-222.7deg))}
+  #sMit{transform-origin:1090px 450px;transform:rotate(var(--from,-36deg));transition-delay:.45s}
+  svg.st6 #sIdf{transform:rotate(var(--to,-137.3deg))}
+  svg.st6 #sMit{transform:rotate(var(--to,36deg))}
 
   /* one after another, in the order the loop runs */
   #wCtx .wipe{transition-delay:0s}
@@ -113,6 +150,16 @@
   .zL{transform-origin:580px 450px}
   .zR{transform-origin:1020px 450px}
   .zC{transform-origin:800px 450px}
+
+  /* ---- Step 3 rearranges the lettering. Any line that survives the rephrasing
+     travels to its new place, and the fade happens while it moves, so it reads as
+     one line sliding rather than two crossing. --dy is set per line at run time by
+     matching the two phrasings against each other. ---- */
+  .blk-short text,.blk-full text{transition:transform var(--grow) var(--ease)}
+  .blk-full text{transform:translateY(var(--dy,0px))}
+  svg.st3 .blk-full text{transform:none}
+  .blk-short text{transform:none}
+  svg.st3 .blk-short text{transform:translateY(var(--dy,0px))}
 
   /* ---- Three size states. The teeth sit at the silhouette radius from the
          start, hidden flush inside the body, so the morph at step 4 is the body
@@ -136,10 +183,6 @@
      a valley that spans 51 to 62. So they shrink and stay meshed rather than parting.
      They hold that position through steps 5 and 6, and open out at step 7. */
   svg.st46{--dx:58px}
-
-  /* ---- before CONTINUOUS lands, the two remaining lines centre themselves ---- */
-  .lbl2{transition:transform var(--grow) var(--ease)}
-  svg.two .lbl2{transform:translateY(-16.2px)}
 
   /* ---- stage 5 and 6: each loop sits concentric with its gear, then slides
          out to become the end arc of the stadium ---- */
@@ -196,6 +239,13 @@
 </style>
 </head>
 <body>
+<div class="lang-selector" role="group" aria-label="Language">
+  <button type="button" data-lang="en" class="active">EN</button><span class="sep">&middot;</span>
+  <button type="button" data-lang="es">ES</button><span class="sep">&middot;</span>
+  <button type="button" data-lang="pt">PT</button><span class="sep">&middot;</span>
+  <button type="button" data-lang="ja">JA</button>
+</div>
+
 <div class="page-title">
   <div class="eyebrow"><a class="compass-link" href="https://cybersecuritycompass.github.io/" target="_blank" rel="noopener">Cybersecurity Compass</a> &middot; Before a Breach</div>
   <div class="main">The <em>Operationalization</em> of Cyber Risk</div>
@@ -285,22 +335,22 @@
     <path fill="var(--croc)" fill-rule="evenodd"
           d="M510 190 H1090 A260 260 0 0 1 1090 710 H510 A260 260 0 0 1 510 190 Z
              M510 215 H1090 A235 235 0 0 1 1090 685 H510 A235 235 0 0 1 510 215 Z"/>
-    <text class="t t-ring" x="800" y="209" text-anchor="middle" textLength="240" lengthAdjust="spacingAndGlyphs">CYBER RISK OPERATIONS CENTER (CROC)</text>
-    <text class="t t-ring" x="800" y="706" text-anchor="middle" textLength="240" lengthAdjust="spacingAndGlyphs">CYBER RISK OPERATIONS CENTER (CROC)</text>
+    <text class="t t-ring" data-i18n="croc" data-slot="560" x="800" y="209" text-anchor="middle" textLength="240" lengthAdjust="spacingAndGlyphs">CYBER RISK OPERATIONS CENTER (CROC)</text>
+    <text class="t t-ring" data-i18n="croc" data-slot="560" x="800" y="706" text-anchor="middle" textLength="240" lengthAdjust="spacingAndGlyphs">CYBER RISK OPERATIONS CENTER (CROC)</text>
   </g>
   <g class="ringIn" data-from="10">
     <path fill="var(--crem)" fill-rule="evenodd"
           d="M510 213 H1090 A237 237 0 0 1 1090 687 H510 A237 237 0 0 1 510 213 Z
              M510 245 H1090 A205 205 0 0 1 1090 655 H510 A205 205 0 0 1 510 245 Z"/>
-    <text class="t t-ring" x="800" y="235" text-anchor="middle" textLength="268" lengthAdjust="spacingAndGlyphs">CYBER RISK EXPOSURE MANAGEMENT (CREM)</text>
-    <text class="t t-ring" x="800" y="680" text-anchor="middle" textLength="268" lengthAdjust="spacingAndGlyphs">CYBER RISK EXPOSURE MANAGEMENT (CREM)</text>
+    <text class="t t-ring" data-i18n="crem" data-slot="560" x="800" y="235" text-anchor="middle" textLength="268" lengthAdjust="spacingAndGlyphs">CYBER RISK EXPOSURE MANAGEMENT (CREM)</text>
+    <text class="t t-ring" data-i18n="crem" data-slot="560" x="800" y="680" text-anchor="middle" textLength="268" lengthAdjust="spacingAndGlyphs">CYBER RISK EXPOSURE MANAGEMENT (CREM)</text>
   </g>
   <g class="ringIn" data-from="9">
     <path fill="var(--steel)" fill-rule="evenodd"
           d="M510 243 H1090 A207 207 0 0 1 1090 657 H510 A207 207 0 0 1 510 243 Z
              M510 276 H1090 A174 174 0 0 1 1090 624 H510 A174 174 0 0 1 510 276 Z"/>
-    <text class="t t-ring" x="800" y="266" text-anchor="middle" textLength="319" lengthAdjust="spacingAndGlyphs">CONTINUOUS CYBER RISK SCORING &amp; QUANTIFICATION</text>
-    <text class="t t-ring" x="800" y="649" text-anchor="middle" textLength="319" lengthAdjust="spacingAndGlyphs">CONTINUOUS CYBER RISK SCORING &amp; QUANTIFICATION</text>
+    <text class="t t-ring" data-i18n="score" data-slot="560" x="800" y="266" text-anchor="middle" textLength="319" lengthAdjust="spacingAndGlyphs">CONTINUOUS CYBER RISK SCORING &amp; QUANTIFICATION</text>
+    <text class="t t-ring" data-i18n="score" data-slot="560" x="800" y="649" text-anchor="middle" textLength="319" lengthAdjust="spacingAndGlyphs">CONTINUOUS CYBER RISK SCORING &amp; QUANTIFICATION</text>
   </g>
 
   <g id="loopL" class="tuckL">
@@ -350,8 +400,8 @@
   </g>
 
   <!-- arc lettering rides the same slide as its loop, but paints after the band -->
-  <g class="tuckL"><text class="t t-arc" clip-path="url(#wIdf)"><textPath href="#arcL" xlink:href="#arcL" startOffset="113.2" textLength="204" lengthAdjust="spacingAndGlyphs">CYBER RISK IDENTIFICATION</textPath></text></g>
-  <g class="tuckR"><text class="t t-arc" clip-path="url(#wMit)"><textPath href="#arcR" xlink:href="#arcR" startOffset="129.2" textLength="172" lengthAdjust="spacingAndGlyphs">CYBER RISK MITIGATION</textPath></text></g>
+  <g class="tuckL"><text class="t t-arc" clip-path="url(#wIdf)"><textPath href="#arcL" xlink:href="#arcL" startOffset="113.2" textLength="204" lengthAdjust="spacingAndGlyphs" data-i18n="idf" data-arc="arcL" data-slot="400">CYBER RISK IDENTIFICATION</textPath></text></g>
+  <g class="tuckR"><text class="t t-arc" clip-path="url(#wMit)"><textPath href="#arcR" xlink:href="#arcR" startOffset="129.2" textLength="172" lengthAdjust="spacingAndGlyphs" data-i18n="mit" data-arc="arcR" data-slot="400">CYBER RISK MITIGATION</textPath></text></g>
 
   <!-- ===== 1,2,4 : bodies, then teeth ===== -->
   <g class="zL" data-from="1"><g id="spin-assess" class="spin">
@@ -369,30 +419,34 @@
 
   <!-- ===== lettering on the gears ===== -->
   <g class="zL" data-from="1"><g id="lblL">
-    <text class="t t-gear" data-from="3" x="580" y="433" text-anchor="middle" textLength="110" lengthAdjust="spacingAndGlyphs">CONTINUOUS</text>
-    <g class="lbl2" data-from="1">
-      <text class="t t-gear" x="580" y="462" text-anchor="middle" textLength="100" lengthAdjust="spacingAndGlyphs">CYBER RISK</text>
-      <text class="t t-gear" x="580" y="491" text-anchor="middle" textLength="109" lengthAdjust="spacingAndGlyphs">ASSESSMENT</text>
-    </g>
+    <!-- Two phrasings, not one phrase plus a line. Before CONTINUOUS lands the
+         wording itself differs, and it differs per language: CYBER RISK ASSESSMENT
+         becomes CONTINUOUS CYBER RISK ASSESSMENT, but EVALUACION DE CIBER RIESGOS
+         becomes EVALUACION CONTINUA DE CIBER RIESGOS. Each variant centres its own
+         line count, so the two simply cross-fade. -->
+    <g class="blk-short" data-block="assess2" data-from="1" data-until="2" data-cx="580" data-cy="450" data-r="88" data-lh="29" data-size="30" data-cls="t t-gear"></g>
+    <g class="blk-full" data-block="assess" data-from="3" data-cx="580" data-cy="450" data-r="88" data-lh="29" data-size="30" data-cls="t t-gear"></g>
   </g></g>
   <g class="zR" data-from="1"><g id="lblR">
-    <text class="t t-gear" data-from="3" x="1020" y="433" text-anchor="middle" textLength="110" lengthAdjust="spacingAndGlyphs">CONTINUOUS</text>
-    <g class="lbl2" data-from="1">
-      <text class="t t-gear" x="1020" y="462" text-anchor="middle" textLength="100" lengthAdjust="spacingAndGlyphs">CYBER RISK</text>
-      <text class="t t-gear" x="1020" y="491" text-anchor="middle" textLength="95" lengthAdjust="spacingAndGlyphs">REDUCTION</text>
-    </g>
+    <!-- Two phrasings, not one phrase plus a line. Before CONTINUOUS lands the
+         wording itself differs, and it differs per language: CYBER RISK ASSESSMENT
+         becomes CONTINUOUS CYBER RISK ASSESSMENT, but EVALUACION DE CIBER RIESGOS
+         becomes EVALUACION CONTINUA DE CIBER RIESGOS. Each variant centres its own
+         line count, so the two simply cross-fade. -->
+    <g class="blk-short" data-block="reduce2" data-from="1" data-until="2" data-cx="1020" data-cy="450" data-r="88" data-lh="29" data-size="30" data-cls="t t-gear"></g>
+    <g class="blk-full" data-block="reduce" data-from="3" data-cx="1020" data-cy="450" data-r="88" data-lh="29" data-size="30" data-cls="t t-gear"></g>
   </g></g>
-  <g class="zC" data-from="2"><g id="lblC">
+  <g class="zC" data-from="2"><g id="lblC" data-block="core" data-cx="800" data-cy="450" data-r="51" data-lh="27" data-size="28" data-cls="t t-core">
     <text class="t t-core" x="800" y="445" text-anchor="middle" textLength="49" lengthAdjust="spacingAndGlyphs">CYBER</text>
     <text class="t t-core" x="800" y="472" text-anchor="middle" textLength="65" lengthAdjust="spacingAndGlyphs">RISKOPS</text>
   </g></g>
 
   <!-- ===== 8 : the four phases, named ===== -->
   <g>
-    <text class="t t-flow" clip-path="url(#wCtx)" x="673" y="311.3" text-anchor="middle" textLength="172" lengthAdjust="spacingAndGlyphs">CONTEXTUALIZATION</text>
-    <text class="t t-flow" clip-path="url(#wPri)" x="931" y="311.3" text-anchor="middle" textLength="131" lengthAdjust="spacingAndGlyphs">PRIORITIZATION</text>
-    <text class="t t-flow" clip-path="url(#wMon)" x="667" y="609.3" text-anchor="middle" textLength="108" lengthAdjust="spacingAndGlyphs">MONITORING</text>
-    <text class="t t-flow" clip-path="url(#wVer)" x="931" y="609.3" text-anchor="middle" textLength="114" lengthAdjust="spacingAndGlyphs">VERIFICATION</text>
+    <text class="t t-flow" data-i18n="ctx" data-slot="170" clip-path="url(#wCtx)" data-wipe="wCtx" x="673" y="311.3" text-anchor="middle" textLength="172" lengthAdjust="spacingAndGlyphs">CONTEXTUALIZATION</text>
+    <text class="t t-flow" data-i18n="pri" data-slot="206" clip-path="url(#wPri)" data-wipe="wPri" x="931" y="311.3" text-anchor="middle" textLength="131" lengthAdjust="spacingAndGlyphs">PRIORITIZATION</text>
+    <text class="t t-flow" data-i18n="mon" data-slot="210" clip-path="url(#wMon)" data-wipe="wMon" x="667" y="609.3" text-anchor="middle" textLength="108" lengthAdjust="spacingAndGlyphs">MONITORING</text>
+    <text class="t t-flow" data-i18n="ver" data-slot="156" clip-path="url(#wVer)" data-wipe="wVer" x="931" y="609.3" text-anchor="middle" textLength="114" lengthAdjust="spacingAndGlyphs">VERIFICATION</text>
   </g>
 
   <!-- ======================= inspect mode =======================
@@ -460,10 +514,137 @@
 
 <script>
 (function(){
+/* ---- i18n: autodetect, switch, and refit every label ---------------------- */
+const NS = 'http://www.w3.org/2000/svg';
+
+function pickLang(){
+  const pref = (navigator.languages && navigator.languages.length ? navigator.languages
+                : [navigator.language || 'en']).map(s => (s || '').toLowerCase());
+  for (const l of pref){
+    if (l.startsWith('ja')) return 'ja';
+    if (l.startsWith('es')) return 'es';
+    if (l.startsWith('pt')) return 'pt';
+    if (l.startsWith('en')) return 'en';
+  }
+  return 'en';
+}
+/* Set a string and decide its width: the dictionary may carry a measured width
+   (English, taken from the reference render); otherwise the label runs at its
+   natural width and is only compressed if it would overflow its slot. */
+const CJK = /[\u3040-\u30FF\u3400-\u9FFF\uFF00-\uFF60\uFFE0-\uFFE6]/;
+function setText(el, val, slot){
+  const str = Array.isArray(val) ? val[0] : val;
+  const forced = Array.isArray(val) ? val[1] : null;
+  /* compression is a latin device; a CJK glyph sits on a fixed em and must not be
+     squeezed, so the test is on the script of the string, not the interface language */
+  const cjk = CJK.test(str);
+  el.textContent = str;
+  el.removeAttribute('textLength'); el.removeAttribute('lengthAdjust');
+  el.style.fontSize = '';
+  if (cjk){
+    /* never compress a CJK glyph: shrink the whole label instead */
+    const nat = el.getComputedTextLength();
+    if (slot && nat > slot){
+      const base = parseFloat(getComputedStyle(el).fontSize) || 24;
+      el.style.fontSize = (base * slot / nat).toFixed(2) + 'px';
+    }
+    return el.getComputedTextLength();
+  }
+  let len = forced || null;
+  if (!len && slot){
+    const nat = el.getComputedTextLength();
+    if (nat > slot) len = slot;
+  }
+  if (len){ el.setAttribute('textLength', len); el.setAttribute('lengthAdjust', 'spacingAndGlyphs'); }
+  return len || el.getComputedTextLength();
+}
+/* A gear's lettering: any number of lines, centred as a block, each line capped
+   by the chord available at its own height inside the body circle. */
+function setBlock(g, lines, D){
+  const cx = +g.dataset.cx, cy = +g.dataset.cy, r = +g.dataset.r,
+        lh = +g.dataset.lh, size = +g.dataset.size, cls = g.dataset.cls;
+  const cap = size * 0.688, n = lines.length;
+  while (g.firstChild) g.removeChild(g.firstChild);
+  const top = cy - ((n - 1) * lh) / 2;
+  lines.forEach((v, i) => {
+    const yc = top + i * lh;
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('class', cls);
+    t.setAttribute('x', cx);
+    t.setAttribute('y', (yc + cap / 2).toFixed(1));
+    t.setAttribute('text-anchor', 'middle');
+    g.appendChild(t);
+    const dy = Math.abs(yc - cy) + cap / 2;
+    const slot = 2 * Math.sqrt(Math.max(1, r * r - dy * dy)) - 12;
+    setText(t, v, slot);
+  });
+}
+/* Curved lettering: recentre on the path, since the string length changed. */
+function setArc(tp, val, slot){
+  const len = setText(tp, val, slot);
+  const path = document.getElementById(tp.dataset.arc);
+  const total = path.getTotalLength();
+  tp.setAttribute('startOffset', ((total - len) / 2).toFixed(1));
+  return len;
+}
+function applyLang(code, D, after){
+  const d = D[code] || D.en;
+  document.documentElement.setAttribute('lang', d.lang);
+  document.title = d.doc;
+  const svg = document.getElementById('loop');
+  svg.setAttribute('aria-label', d.aria);
+  const cjk = code === 'ja';
+  svg.classList.toggle('ja', cjk);
+  document.body.classList.toggle('ja', cjk);
+  /* chrome */
+  const put = (sel, txt) => { const e = document.querySelector(sel); if (e) e.textContent = txt; };
+  put('.eyebrow .compass-link', d.eyebrow_a);
+  const eb = document.querySelector('.eyebrow');
+  if (eb) eb.lastChild.textContent = ' \u00B7 ' + d.eyebrow_b;
+  const h1 = document.querySelector('.page-title .main');
+  if (h1) h1.innerHTML = d.h1_a + '<em>' + d.h1_em + '</em>' + d.h1_b;
+  put('.credit .label', d.credit);
+  put('.pub-title', d.pub);
+  /* labels */
+  svg.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n, slot = +el.dataset.slot || 0;
+    if (el.dataset.arc) setArc(el, d[key], slot);
+    else setText(el, d[key], slot);
+  });
+  svg.querySelectorAll('[data-block]').forEach(g => setBlock(g, d[g.dataset.block], D[code] || D.en));
+  /* Pair the two phrasings by role, declared per language, because the surviving
+     line is not always the same string: CYBER RISK stays CYBER RISK, but
+     EVALUACION DE becomes EVALUACION. Line 0 of the short phrasing becomes line
+     map[0] of the full one, so it travels there and changes wording on the way. */
+  svg.querySelectorAll('.blk-short').forEach(sg => {
+    const fg = sg.parentNode.querySelector('.blk-full');
+    if (!fg) return;
+    const S = [...sg.children], F = [...fg.children], y = el => +el.getAttribute('y');
+    const map = d.map || [];
+    F.forEach((f, k) => {
+      const i = map.indexOf(k);
+      f.style.setProperty('--dy', ((i >= 0 && S[i]) ? y(S[i]) - y(f) : 0).toFixed(1) + 'px');
+    });
+    S.forEach((s2, i) => {
+      const k = map[i];
+      s2.style.setProperty('--dy', ((k != null && F[k]) ? y(F[k]) - y(s2) : 0).toFixed(1) + 'px');
+    });
+  });
+  /* tooltips */
+  svg.querySelectorAll('.hit').forEach(h => {
+    const k = (h.getAttribute('href') || h.getAttribute('xlink:href')).replace('#sec-', '');
+    h.dataset.t = d['t_' + k]; h.dataset.d = d['d_' + k];
+  });
+  document.querySelectorAll('.lang-selector button').forEach(b =>
+    b.classList.toggle('active', b.dataset.lang === code));
+  if (after) after(d);
+}
+
+const I18N = {"en": {"lang": "en", "doc": "CyberRiskOps · Cyber Risk Operations Center (CROC)", "aria": "CyberRiskOps: the Cyber Risk Operations Center loop, running continuous cyber risk assessment and continuous cyber risk reduction through contextualization, prioritization, verification and monitoring.", "eyebrow_a": "Cybersecurity Compass", "eyebrow_b": "Before a Breach", "h1_a": "The ", "h1_em": "Operationalization", "h1_b": " of Cyber Risk", "credit": "Created and Designed by", "pub": "CyberRiskOps: The Operating Model for Cyber Resilience in the Age of AI", "btn_pause": "Pause gears", "btn_run": "Run gears", "btn_svg": "Download SVG", "btn_png": "Download PNG", "btn_replay": "Replay", "croc": ["CYBER RISK OPERATIONS CENTER (CROC)", 240], "crem": ["CYBER RISK EXPOSURE MANAGEMENT (CREM)", 268], "score": ["CONTINUOUS CYBER RISK SCORING & QUANTIFICATION", 319], "idf": ["CYBER RISK IDENTIFICATION", 204], "mit": ["CYBER RISK MITIGATION", 172], "ctx": ["CONTEXTUALIZATION", 172], "pri": ["PRIORITIZATION", 131], "mon": ["MONITORING", 108], "ver": ["VERIFICATION", 114], "assess": [["CONTINUOUS", 110], ["CYBER RISK", 100], ["ASSESSMENT", 109]], "reduce": [["CONTINUOUS", 110], ["CYBER RISK", 100], ["REDUCTION", 95]], "core": [["CYBER", 49], ["RISKOPS", 65]], "st": ["", "cyber risk assessment and reduction", "cyber riskops, the hinge", "continuous cyber risk, not periodic", "the cyber risk gears engage", "the cyber risk flow takes shape", "cyber risk identification and mitigation", "the cyber risk loop closes", "the four cyber risk phases, named", "cyber risk scoring and quantification", "cyber risk exposure management (crem)", "cyber risk operations center (croc)"], "t_idf": "Cyber Risk Identification", "t_ctx": "Cyber Risk Contextualization", "t_pri": "Cyber Risk Prioritization", "t_mit": "Cyber Risk Mitigation", "t_ver": "Cyber Risk Verification", "t_mon": "Cyber Risk Monitoring", "t_croc": "Cyber Risk Operations Center (CROC)", "t_crem": "Cyber Risk Exposure Management (CREM)", "t_score": "Continuous Cyber Risk Scoring & Quantification", "t_assess": "Continuous Cyber Risk Assessment", "t_reduce": "Continuous Cyber Risk Reduction", "t_core": "CyberRiskOps", "d_idf": "Discovery and mapping of cyber risk across the digital ecosystem: vulnerabilities in systems, applications and processes, plus external threats and emerging risk. It rests on a continuous asset inventory that captures the relationships and interdependencies between assets, not merely a catalogue of what exists. Identification is not a static inventory. It is continuous exposure discovery, and it has to reach past what the organization owns to what it connects to and consumes.", "d_ctx": "Risk without context is just noise. The same vulnerability or misconfiguration carries radically different consequences depending on where it sits and what it touches in the business. This is the stage that asks which process the component supports, what data it handles, what it can influence, and what the blast radius is if it fails or is abused. Context is what turns exposure into priority: it moves the question from what is vulnerable to what could truly hurt us, and why.", "d_pri": "In most organizations this is where good intentions go to die, with teams drowning in alerts, vulnerability counts and control gaps. Treated as a continuous risk decision rather than a patching queue, the objective is not to fix everything but to reduce the risks that matter most to the business, fastest, with the greatest measurable impact. That means weighing technical severity against exploitability, business criticality, data sensitivity, exposure pathways and likely downstream impact. It is also where heatmaps fail.", "d_mit": "Broader than remediation. Mitigation reduces exposure, likelihood, impact and uncertainty: sometimes patching, sometimes reconfiguring, sometimes guardrails, tighter permissions, hardened integrations or redesigned workflows so trust is not assumed where it should be verified. It is not about activity, it is about reduction. If reduced exposure, reduced consequence or reduced uncertainty cannot be demonstrated, the risk has not been mitigated.", "d_ver": "The most overlooked stage. Teams assume that once an issue is fixed the risk is reduced, but controls are often partially deployed, inconsistently applied, bypassed by architecture or broken by change. Verification tests whether the mitigation actually moved the risk posture: did the exposure path close, did permissions shrink, did governance become enforceable. Exposure validation, control testing and adversarial simulation are how it is done. This is where the organization moves from assumption to evidence.", "d_mon": "Monitoring closes the loop and restarts it. It is not passive logging but continuous awareness of changing exposure, changing business context and changing control effectiveness. What was low risk yesterday can be critical tomorrow because the surrounding context moved. Monitoring is the proof that the loop is alive: if risk cannot be observed continuously, it cannot be operated continuously.", "d_croc": "The operational nerve centre, and the outer ring for a reason: it is where risk is continuously observed, analysed, prioritized and acted upon. A traditional SOC monitors events. A CROC monitors risk, bringing telemetry, exposure intelligence, business context, scoring and operational decisions into one continuous cycle. It is what a mature organization needs when a SOC alone is no longer sufficient.", "d_crem": "The layer that gives the organization the ability to understand exposure across the environment continuously, rather than in periodic snapshots. CREM makes exposure visible: which assets, identities, services and third-party dependencies are exposed, by what path, and how that picture is changing.", "d_score": "The measurement spine that runs around the whole loop. Scoring gives leaders a way to compare unlike risks in one operational language and track whether exposure is rising or falling. Quantification translates that into economic and business terms, so the conversation covers not only that a risk exists but what it would mean as disruption, financial impact or lost resilience. Scoring makes risk comparable. Quantification makes it intelligible to the board and the CFO.", "d_assess": "One of two gears in the same machine. Assessment continuously maps how the environment is changing, where exposure is increasing and which business processes are affected. It answers what is exposed and what it would cost us. Assessment without reduction becomes reporting.", "d_reduce": "The other gear. Reduction continuously translates that intelligence into action: architectural change, governance enforcement, control tuning and business protection. It answers what we changed and what it bought us. Reduction without assessment becomes guesswork.", "d_core": "The connective tissue between strategy and execution, and the continuous operationalization of cyber risk. It turns risk management from a static process into a living system, driven by feedback loops rather than periodic review. The Cybersecurity Compass provides the strategic why, the CROC the operational where, and CyberRiskOps the process-driven how.", "assess2": [["CYBER RISK", 100], ["ASSESSMENT", 109]], "reduce2": [["CYBER RISK", 100], ["REDUCTION", 95]], "map": [1, 2]}, "es": {"lang": "es", "doc": "CyberRiskOps · Centro de Operaciones de Ciber Riesgo (CROC)", "aria": "CyberRiskOps: el ciclo del Centro de Operaciones de Ciber Riesgo, que opera la evaluación continua y la reducción continua de ciber riesgos mediante contextualización, priorización, verificación y monitoreo.", "eyebrow_a": "Cybersecurity Compass", "eyebrow_b": "Antes de una Brecha", "h1_a": "La ", "h1_em": "Operacionalización", "h1_b": " del Ciber Riesgo", "credit": "Creado y Diseñado por", "pub": "CyberRiskOps: El Modelo Operativo para la Ciber Resiliencia en la Era de la IA", "btn_pause": "Pausar engranajes", "btn_run": "Girar engranajes", "btn_svg": "Descargar SVG", "btn_png": "Descargar PNG", "btn_replay": "Repetir", "croc": "CENTRO DE OPERACIONES DE CIBER RIESGO (CROC)", "crem": "GESTIÓN DE EXPOSICIÓN A CIBER RIESGOS (CREM)", "score": "PUNTUACIÓN Y CUANTIFICACIÓN CONTINUA DE CIBER RIESGOS", "idf": "IDENTIFICACIÓN DE CIBER RIESGOS", "mit": "MITIGACIÓN DE CIBER RIESGOS", "ctx": "CONTEXTUALIZACIÓN", "pri": "PRIORIZACIÓN", "mon": "MONITOREO", "ver": "VERIFICACIÓN", "assess": ["EVALUACIÓN", "CONTINUA DE", "CIBER RIESGOS"], "reduce": ["REDUCCIÓN", "CONTINUA DE", "CIBER RIESGOS"], "core": ["CYBER", "RISKOPS"], "st": ["", "evaluación y reducción de ciber riesgos", "cyberriskops, la bisagra", "ciber riesgo continuo, no periódico", "los engranajes de ciber riesgo engranan", "el flujo de ciber riesgo toma forma", "identificación y mitigación de ciber riesgos", "el ciclo de ciber riesgo se cierra", "las cuatro fases de ciber riesgo, nombradas", "puntuación y cuantificación de ciber riesgos", "gestión de exposición a ciber riesgos (crem)", "centro de operaciones de ciber riesgo (croc)"], "t_idf": "Identificación de Ciber Riesgos", "t_ctx": "Contextualización de Ciber Riesgos", "t_pri": "Priorización de Ciber Riesgos", "t_mit": "Mitigación de Ciber Riesgos", "t_ver": "Verificación de Ciber Riesgos", "t_mon": "Monitoreo de Ciber Riesgos", "t_croc": "Centro de Operaciones de Ciber Riesgo (CROC)", "t_crem": "Gestión de Exposición a Ciber Riesgos (CREM)", "t_score": "Puntuación y Cuantificación Continua de Ciber Riesgos", "t_assess": "Evaluación Continua de Ciber Riesgos", "t_reduce": "Reducción Continua de Ciber Riesgos", "t_core": "CyberRiskOps", "d_idf": "Descubrimiento y mapeo del ciber riesgo en todo el ecosistema digital: vulnerabilidades en sistemas, aplicaciones y procesos, además de amenazas externas y riesgos emergentes. Se apoya en un inventario continuo de activos que captura las relaciones e interdependencias entre ellos, no en un simple catálogo de lo que existe. La identificación no es un inventario estático: es descubrimiento continuo de exposición, y debe ir más allá de lo que la organización posee para incluir aquello con lo que se conecta y consume.", "d_ctx": "El riesgo sin contexto es solo ruido. La misma vulnerabilidad o configuración incorrecta tiene consecuencias radicalmente distintas según dónde exista y qué toque en el negocio. Esta etapa pregunta qué proceso soporta el componente, qué datos maneja, qué sistemas puede influir y cuál es el radio de impacto si falla o es abusado. El contexto es lo que convierte la exposición en prioridad: cambia la pregunta de qué es vulnerable a qué podría realmente hacernos daño, y por qué.", "d_pri": "En la mayoría de las organizaciones aquí mueren las buenas intenciones, con equipos ahogados en alertas, conteos de vulnerabilidades y brechas de control. Tratada como una decisión continua de riesgo y no como una cola de parches, la prioridad no es arreglar todo, sino reducir los riesgos que más importan al negocio, más rápido y con el mayor impacto medible. Eso exige contrastar la severidad técnica con la explotabilidad, la criticidad del negocio, la sensibilidad de los datos, las rutas de exposición y el impacto probable. Es también donde fallan los mapas de calor.", "d_mit": "Más amplia que la remediación. La mitigación reduce exposición, probabilidad, impacto e incertidumbre: a veces parchear, a veces reconfigurar, a veces añadir barreras, ajustar permisos, endurecer integraciones o rediseñar flujos para no asumir confianza donde debe verificarse. No se trata de actividad, se trata de reducción. Si no se puede demostrar menor exposición, menor consecuencia o menor incertidumbre, el riesgo no ha sido mitigado.", "d_ver": "La etapa más pasada por alto. Se asume que al corregir un hallazgo el riesgo baja, pero los controles suelen estar parcialmente desplegados, aplicados de forma inconsistente, evadidos por la arquitectura o roto por el cambio. La verificación prueba si la mitigación movió realmente la postura de riesgo: se cerró la ruta de exposición, se redujeron los permisos, la gobernanza se volvió exigible. Validación de exposición, pruebas de control y simulación adversaria son el cómo. Aquí la organización pasa de la suposición a la evidencia.", "d_mon": "El monitoreo cierra el ciclo y lo reinicia. No es registro pasivo, sino conciencia continua de la exposición que cambia, del contexto de negocio que cambia y de la efectividad de los controles que cambia. Lo que ayer era riesgo bajo puede ser crítico mañana porque el contexto se movió. El monitoreo es la prueba de que el ciclo está vivo: si el riesgo no se puede observar de forma continua, no se puede operar de forma continua.", "d_croc": "El centro neurálgico operativo, y el anillo exterior por una razón: es donde el riesgo se observa, analiza, prioriza y atiende de forma continua. Un SOC tradicional monitorea eventos. Un CROC monitorea riesgo, integrando telemetría, inteligencia de exposición, contexto de negocio, puntuación y decisiones operativas en un mismo ciclo continuo. Es lo que una organización madura necesita cuando el SOC por sí solo ya no alcanza.", "d_crem": "La capa que permite entender la exposición en todo el entorno de forma continua, en lugar de instantáneas periódicas. CREM hace visible la exposición: qué activos, identidades, servicios y dependencias de terceros están expuestos, por qué ruta y cómo cambia ese panorama.", "d_score": "La columna de medición que recorre todo el ciclo. La puntuación da a los líderes una forma de comparar riesgos distintos en un mismo lenguaje operativo y seguir si la exposición sube o baja. La cuantificación lo traduce a términos económicos y de negocio, de modo que la conversación no cubra solo la existencia del riesgo sino lo que significaría como disrupción, impacto financiero o pérdida de resiliencia. La puntuación hace el riesgo comparable. La cuantificación lo hace inteligible para el consejo y el CFO.", "d_assess": "Uno de los dos engranajes de la misma máquina. La evaluación mapea de forma continua cómo cambia el entorno, dónde crece la exposición y qué procesos de negocio se ven afectados. Responde qué está expuesto y cuánto nos costaría. Evaluación sin reducción se convierte en reporte.", "d_reduce": "El otro engranaje. La reducción traduce continuamente esa inteligencia en acción: cambio arquitectónico, aplicación de gobernanza, ajuste de controles y protección del negocio. Responde qué cambiamos y qué obtuvimos con ello. Reducción sin evaluación se convierte en adivinanza.", "d_core": "El tejido conectivo entre estrategia y ejecución, y la operacionalización continua del ciber riesgo. Convierte la gestión de riesgo de un proceso estático en un sistema vivo, movido por bucles de retroalimentación y no por revisiones periódicas. El Cybersecurity Compass aporta el por qué estratégico, el CROC el dónde operativo, y CyberRiskOps el cómo del proceso.", "assess2": ["EVALUACIÓN DE", "CIBER RIESGOS"], "reduce2": ["REDUCCIÓN DE", "CIBER RIESGOS"], "map": [0, 2]}, "pt": {"lang": "pt", "doc": "CyberRiskOps · Centro de Operações de Ciber Risco (CROC)", "aria": "CyberRiskOps: o ciclo do Centro de Operações de Ciber Risco, que opera a avaliação contínua e a redução contínua de ciber riscos por meio de contextualização, priorização, verificação e monitoramento.", "eyebrow_a": "Cybersecurity Compass", "eyebrow_b": "Antes de uma Violação", "h1_a": "A ", "h1_em": "Operacionalização", "h1_b": " do Ciber Risco", "credit": "Criado e Desenhado por", "pub": "CyberRiskOps: O Modelo Operacional para a Ciber Resiliência na Era da IA", "btn_pause": "Pausar engrenagens", "btn_run": "Girar engrenagens", "btn_svg": "Baixar SVG", "btn_png": "Baixar PNG", "btn_replay": "Repetir", "croc": "CENTRO DE OPERAÇÕES DE CIBER RISCO (CROC)", "crem": "GESTÃO DA EXPOSIÇÃO A CIBER RISCOS (CREM)", "score": "PONTUAÇÃO E QUANTIFICAÇÃO CONTÍNUA DE CIBER RISCOS", "idf": "IDENTIFICAÇÃO DE CIBER RISCOS", "mit": "MITIGAÇÃO DE CIBER RISCOS", "ctx": "CONTEXTUALIZAÇÃO", "pri": "PRIORIZAÇÃO", "mon": "MONITORAMENTO", "ver": "VERIFICAÇÃO", "assess": ["AVALIAÇÃO", "CONTÍNUA DE", "CIBER RISCOS"], "reduce": ["REDUÇÃO", "CONTÍNUA DE", "CIBER RISCOS"], "core": ["CYBER", "RISKOPS"], "st": ["", "avaliação e redução de ciber riscos", "cyberriskops, a dobradiça", "ciber risco contínuo, não periódico", "as engrenagens de ciber risco engrenam", "o fluxo de ciber risco toma forma", "identificação e mitigação de ciber riscos", "o ciclo de ciber risco se fecha", "as quatro fases de ciber risco, nomeadas", "pontuação e quantificação de ciber riscos", "gestão da exposição a ciber riscos (crem)", "centro de operações de ciber risco (croc)"], "t_idf": "Identificação de Ciber Riscos", "t_ctx": "Contextualização de Ciber Riscos", "t_pri": "Priorização de Ciber Riscos", "t_mit": "Mitigação de Ciber Riscos", "t_ver": "Verificação de Ciber Riscos", "t_mon": "Monitoramento de Ciber Riscos", "t_croc": "Centro de Operações de Ciber Risco (CROC)", "t_crem": "Gestão da Exposição a Ciber Riscos (CREM)", "t_score": "Pontuação e Quantificação Contínua de Ciber Riscos", "t_assess": "Avaliação Contínua de Ciber Riscos", "t_reduce": "Redução Contínua de Ciber Riscos", "t_core": "CyberRiskOps", "d_idf": "Descoberta e mapeamento do ciber risco em todo o ecossistema digital: vulnerabilidades em sistemas, aplicações e processos, além de ameaças externas e riscos emergentes. Apoia-se num inventário contínuo de ativos que captura as relações e interdependências entre eles, e não num simples catálogo do que existe. A identificação não é um inventário estático: é descoberta contínua de exposição, e precisa ir além do que a organização possui para incluir aquilo a que se conecta e consome.", "d_ctx": "Risco sem contexto é apenas ruído. A mesma vulnerabilidade ou configuração incorreta carrega consequências radicalmente diferentes conforme onde existe e o que toca no negócio. Esta etapa pergunta qual processo o componente sustenta, quais dados manipula, o que pode influenciar e qual é o raio de impacto se falhar ou for abusado. O contexto é o que transforma exposição em prioridade: muda a pergunta de o que é vulnerável para o que poderia realmente nos ferir, e por quê.", "d_pri": "Na maioria das organizações é aqui que morrem as boas intenções, com equipes afogadas em alertas, contagens de vulnerabilidades e lacunas de controle. Tratada como decisão contínua de risco e não como fila de correções, a meta não é corrigir tudo, mas reduzir os riscos que mais importam ao negócio, mais rápido e com o maior impacto mensurável. Isso exige pesar a severidade técnica contra a explorabilidade, a criticidade do negócio, a sensibilidade dos dados, os caminhos de exposição e o impacto provável. É também onde os mapas de calor falham.", "d_mit": "Mais ampla que a remediação. A mitigação reduz exposição, probabilidade, impacto e incerteza: às vezes corrigir, às vezes reconfigurar, às vezes acrescentar barreiras, ajustar permissões, endurecer integrações ou redesenhar fluxos para não presumir confiança onde ela deve ser verificada. Não se trata de atividade, trata-se de redução. Se não for possível demonstrar menor exposição, menor consequência ou menor incerteza, o risco não foi mitigado.", "d_ver": "A etapa mais negligenciada. Presume-se que, corrigido o problema, o risco caiu, mas os controles muitas vezes estão parcialmente implantados, aplicados de forma inconsistente, contornados pela arquitetura ou quebrados pela mudança. A verificação testa se a mitigação realmente moveu a postura de risco: o caminho de exposição fechou, as permissões diminuíram, a governança tornou-se exigível. Validação de exposição, teste de controles e simulação adversária são o como. Aqui a organização passa da suposição à evidência.", "d_mon": "O monitoramento fecha o ciclo e o reinicia. Não é registro passivo, mas consciência contínua da exposição que muda, do contexto de negócio que muda e da eficácia dos controles que muda. O que ontem era risco baixo pode ser crítico amanhã porque o contexto ao redor se moveu. O monitoramento é a prova de que o ciclo está vivo: se o risco não pode ser observado continuamente, não pode ser operado continuamente.", "d_croc": "O centro nervoso operacional, e o anel externo por um motivo: é onde o risco é observado, analisado, priorizado e tratado continuamente. Um SOC tradicional monitora eventos. Um CROC monitora risco, reunindo telemetria, inteligência de exposição, contexto de negócio, pontuação e decisões operacionais em um único ciclo contínuo. É o que uma organização madura precisa quando o SOC sozinho já não basta.", "d_crem": "A camada que dá à organização a capacidade de entender a exposição em todo o ambiente de forma contínua, em vez de instantâneos periódicos. O CREM torna a exposição visível: quais ativos, identidades, serviços e dependências de terceiros estão expostos, por qual caminho e como esse quadro está mudando.", "d_score": "A espinha de medição que percorre todo o ciclo. A pontuação dá aos líderes uma forma de comparar riscos distintos em uma mesma linguagem operacional e acompanhar se a exposição sobe ou desce. A quantificação traduz isso em termos econômicos e de negócio, de modo que a conversa cubra não apenas a existência do risco, mas o que ele significaria como disrupção, impacto financeiro ou perda de resiliência. A pontuação torna o risco comparável. A quantificação o torna inteligível para o conselho e o CFO.", "d_assess": "Uma das duas engrenagens da mesma máquina. A avaliação mapeia continuamente como o ambiente muda, onde a exposição cresce e quais processos de negócio são afetados. Responde o que está exposto e quanto nos custaria. Avaliação sem redução torna-se relatório.", "d_reduce": "A outra engrenagem. A redução traduz continuamente essa inteligência em ação: mudança arquitetural, aplicação de governança, ajuste de controles e proteção do negócio. Responde o que mudamos e o que isso nos trouxe. Redução sem avaliação torna-se adivinhação.", "d_core": "O tecido conectivo entre estratégia e execução, e a operacionalização contínua do ciber risco. Transforma a gestão de risco de um processo estático em um sistema vivo, movido por ciclos de realimentação e não por revisões periódicas. O Cybersecurity Compass fornece o porquê estratégico, o CROC o onde operacional, e o CyberRiskOps o como do processo.", "assess2": ["AVALIAÇÃO DE", "CIBER RISCOS"], "reduce2": ["REDUÇÃO DE", "CIBER RISCOS"], "map": [0, 2]}, "ja": {"lang": "ja", "doc": "CyberRiskOps · サイバーリスクオペレーションセンター（CROC）", "aria": "CyberRiskOps：サイバーリスクオペレーションセンターのループ。継続的サイバーリスクアセスメントと継続的サイバーリスク低減を、コンテキスト化、優先順位付け、検証、監視によって運用する。", "eyebrow_a": "Cybersecurity Compass", "eyebrow_b": "侵害の前に", "h1_a": "サイバーリスクの", "h1_em": "運用化", "h1_b": "", "credit": "制作・デザイン", "pub": "CyberRiskOps：AI時代のサイバーレジリエンスのための運用モデル", "btn_pause": "歯車を停止", "btn_run": "歯車を回転", "btn_svg": "SVGを保存", "btn_png": "PNGを保存", "btn_replay": "再生", "croc": "サイバーリスクオペレーションセンター（CROC）", "crem": "サイバーリスクエクスポージャー管理（CREM）", "score": "継続的サイバーリスクスコアリングと定量化", "idf": "サイバーリスク特定", "mit": "サイバーリスク軽減", "ctx": "コンテキスト化", "pri": "優先順位付け", "mon": "監視", "ver": "検証", "assess": ["継続的", "サイバーリスク", "アセスメント"], "assess2": ["サイバーリスク", "アセスメント"], "reduce": ["継続的", "サイバーリスク", "低減"], "reduce2": ["サイバーリスク", "低減"], "core": ["CYBER", "RISKOPS"], "map": [1, 2], "st": ["", "サイバーリスクのアセスメントと低減", "CyberRiskOps、二つをつなぐ軸", "継続的なサイバーリスク、定期的ではない", "サイバーリスクの歯車が噛み合う", "サイバーリスクの流れが形になる", "サイバーリスクの特定と軽減", "サイバーリスクのループが閉じる", "四つのサイバーリスク段階に名前がつく", "サイバーリスクのスコアリングと定量化", "サイバーリスクエクスポージャー管理（CREM）", "サイバーリスクオペレーションセンター（CROC）"], "t_idf": "サイバーリスク特定", "t_ctx": "サイバーリスクのコンテキスト化", "t_pri": "サイバーリスクの優先順位付け", "t_mit": "サイバーリスク軽減", "t_ver": "サイバーリスクの検証", "t_mon": "サイバーリスクの監視", "t_croc": "サイバーリスクオペレーションセンター（CROC）", "t_crem": "サイバーリスクエクスポージャー管理（CREM）", "t_score": "継続的サイバーリスクスコアリングと定量化", "t_assess": "継続的サイバーリスクアセスメント", "t_reduce": "継続的サイバーリスク低減", "t_core": "CyberRiskOps", "d_idf": "デジタルエコシステム全体にわたるサイバーリスクの発見とマッピング。システム、アプリケーション、プロセスの脆弱性に加え、外部脅威と新たなリスクを対象とする。基盤となるのは、資産の一覧ではなく資産間の関係と相互依存を捉える継続的な資産インベントリである。特定は静的な棚卸しではなく、継続的なエクスポージャーの発見であり、自社が保有するものだけでなく、接続し利用しているものまで及ぶ必要がある。", "d_ctx": "コンテキストのないリスクは単なるノイズにすぎない。同じ脆弱性や設定不備でも、どこに存在し事業の何に触れているかで結果は大きく変わる。この段階では、その構成要素がどの業務プロセスを支え、どのデータを扱い、何に影響を与えられるのか、そして侵害された場合の影響範囲はどこまでかを問う。コンテキストこそがエクスポージャーを優先順位に変える。問いは「何が脆弱か」から「何が本当に損害をもたらすのか、そしてなぜか」へ移る。", "d_pri": "多くの組織では、ここで善意が尽きる。アラート、脆弱性の件数、統制のギャップに現場が溺れるからである。パッチの待ち行列ではなく継続的なリスク意思決定として扱えば、目的はすべてを修正することではなく、事業にとって最も重要なリスクを、最短で、最大の測定可能な効果をもって低減することになる。そのためには技術的深刻度を、悪用可能性、事業上の重要度、データの機微性、エクスポージャー経路、想定される波及影響と併せて判断する必要がある。ヒートマップが力を失うのもここである。", "d_mit": "是正措置よりも広い概念である。軽減はエクスポージャー、発生可能性、影響、そして不確実性を下げる。パッチ適用のこともあれば、再設定、ガードレールの追加、権限の絞り込み、連携の堅牢化、あるいは信頼を前提とせず検証する設計への作り替えのこともある。重要なのは活動量ではなく低減である。エクスポージャー、結果、不確実性のいずれかが下がったと示せないなら、そのリスクは軽減されていない。", "d_ver": "最も見落とされる段階である。問題を直せばリスクは下がると考えられがちだが、統制は部分的にしか適用されていない、運用が一貫しない、設計上迂回される、変更によって壊れるということが実際には起こる。検証は、その軽減が本当にリスク態勢を動かしたかを試す。エクスポージャー経路は閉じたか、権限は縮小したか、ガバナンスは強制可能になったか。エクスポージャーの妥当性確認、統制テスト、攻撃者視点のシミュレーションがその手段である。ここで組織は前提から証拠へ移る。", "d_mon": "監視はループを閉じ、同時に再び始める。受動的なログ収集ではなく、変化するエクスポージャー、変化する事業コンテキスト、変化する統制の有効性に対する継続的な認識である。昨日は低リスクだったものが、周囲のコンテキストが動いたために明日は重大になりうる。監視はループが生きている証拠である。リスクを継続的に観測できなければ、継続的に運用することはできない。", "d_croc": "運用上の神経中枢であり、外側のリングに置かれているのには理由がある。ここでリスクが継続的に観測され、分析され、優先順位づけされ、対処される。従来のSOCはイベントを監視する。CROCはリスクを監視し、テレメトリ、エクスポージャーインテリジェンス、事業コンテキスト、スコアリング、運用上の意思決定を一つの継続的なサイクルにまとめる。SOCだけでは足りなくなった成熟した組織が必要とするものである。", "d_crem": "環境全体のエクスポージャーを、定期的なスナップショットではなく継続的に把握する力を組織に与える層である。CREMはエクスポージャーを可視化する。どの資産、アイデンティティ、サービス、サードパーティ依存が、どの経路で露出しているのか、そしてその像がどう変化しているのかを示す。", "d_score": "ループ全体を貫く測定の背骨である。スコアリングは、性質の異なるリスクを一つの運用言語で比較し、エクスポージャーが上がっているのか下がっているのかを追う手段を経営に与える。定量化はそれを経済と事業の言葉に翻訳し、リスクが存在するという事実だけでなく、それが事業中断、財務影響、レジリエンスの喪失として何を意味するのかまで議論の対象にする。スコアリングはリスクを比較可能にし、定量化は取締役会とCFOに理解可能にする。", "d_assess": "同じ機械の二つの歯車のうちの一つ。アセスメントは、環境がどう変化し、どこでエクスポージャーが増え、どの業務プロセスが影響を受けるのかを継続的にマッピングする。「何が露出していて、それはいくらの損失になりうるか」に答える。低減を伴わないアセスメントは報告書になる。", "d_reduce": "もう一方の歯車。低減はその知見を継続的に行動へ翻訳する。アーキテクチャの変更、ガバナンスの強制、統制のチューニング、事業の保護である。「何を変え、それで何を得たか」に答える。アセスメントを伴わない低減は当て推量になる。", "d_core": "戦略と実行をつなぐ結合組織であり、サイバーリスクの継続的な運用化である。リスク管理を静的なプロセスから、定期的なレビューではなくフィードバックループで動く生きた仕組みへと変える。Cybersecurity Compassが戦略上の「なぜ」を、CROCが運用上の「どこで」を、CyberRiskOpsがプロセスとしての「どのように」を担う。"}};
   const svg = document.getElementById('loop'), stageEl = document.getElementById('stage');
   const read = document.getElementById('read');
   const els = [...svg.querySelectorAll('[data-from]')];
-  const NAMES = ['',
+  let NAMES = ['',
     'cyber risk assessment and reduction',      // 1
     'cyber riskops, the hinge',                 // 2
     'continuous cyber risk, not periodic',      // 3
@@ -484,8 +665,8 @@
       el.classList.toggle('on', stage >= from && stage <= until);
     });
     svg.classList.toggle('st13',    stage <= 3);
+    svg.classList.toggle('st3',     stage >= 3);
     svg.classList.toggle('st46',    stage >= 4 && stage <= 6);
-    svg.classList.toggle('two',     stage <= 2);
     svg.classList.toggle('tucked',  stage <= 6);
     svg.classList.toggle('st6',     stage >= 6);
     svg.classList.toggle('st8',     stage >= 8);
@@ -583,6 +764,43 @@
 
   render();
   setTimeout(run, 420);
+
+  /* ---- language ---- */
+  let L = I18N.en;
+  function fitWipe(key){
+    const t = svg.querySelector('[data-i18n="' + key + '"][data-wipe]');
+    const r = document.getElementById(t.dataset.wipe);
+    const b = t.getBBox();
+    r.setAttribute('x', (b.x - 4).toFixed(1));
+    r.setAttribute('y', (b.y - 4).toFixed(1));
+    r.setAttribute('width', (b.width + 8).toFixed(1));
+    r.setAttribute('height', (b.height + 8).toFixed(1));
+  }
+  function fitSweep(rectId, arcId, left){
+    const tp = svg.querySelector('[data-arc="' + arcId + '"]');
+    const a = (tp.getComputedTextLength() / 2 / 137) * 180 / Math.PI;
+    const r = document.getElementById(rectId);
+    r.style.setProperty('--from', (left ? -(180 + a) : -a).toFixed(1) + 'deg');
+    r.style.setProperty('--to',   (left ? -(180 - a) : +a).toFixed(1) + 'deg');
+  }
+  function afterLang(d){
+    L = d; NAMES = d.st;
+    document.getElementById('play').textContent = d.btn_replay;
+    ['ctx','pri','mon','ver'].forEach(fitWipe);
+    fitSweep('sIdf', 'arcL', true);
+    fitSweep('sMit', 'arcR', false);
+    clearTip();
+    render();
+  }
+  /* Compose twice: once now so the lettering is never blank, and again once the
+     webfont has actually arrived. Every width here is measured, so measuring against
+     a fallback face would fix the wrong layout in place — which is why the first
+     paint looked unconditioned until a language was switched. */
+  const draw = () => applyLang(document.documentElement.dataset.lang || pickLang(), I18N, afterLang);
+  document.querySelectorAll('.lang-selector button').forEach(b =>
+    b.addEventListener('click', () => { document.documentElement.dataset.lang = b.dataset.lang; draw(); }));
+  draw();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
 })();
 </script>
 </body>
