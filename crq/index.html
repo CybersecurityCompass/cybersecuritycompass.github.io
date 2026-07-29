@@ -236,21 +236,30 @@
   .gterm dd{
     margin:0;font-size:13px;color:var(--ink-dim);line-height:1.5;
   }
-  .lang-bar{display:flex;gap:8px;position:fixed;top:18px;right:24px;z-index:999}
-  .lang-btn{
+  .lang-bar{position:fixed;top:18px;right:24px;z-index:999}
+  .lang-select{
     font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.14em;
-    text-transform:uppercase;padding:5px 13px;border-radius:999px;cursor:pointer;
-    border:1px solid var(--panel-edge);background:transparent;color:var(--ink-faint);
-    transition:all .15s ease;
+    text-transform:uppercase;padding:7px 32px 7px 14px;border-radius:999px;cursor:pointer;
+    border:1px solid var(--panel-edge);background:var(--panel);color:var(--ink);
+    transition:all .15s ease;appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23bdbdc6' stroke-width='1.6'><path d='M6 8l4 4 4-4'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;background-size:12px;
   }
-  .lang-btn:hover{color:var(--ink);border-color:var(--ink-faint)}
-  .lang-btn.lang-active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .lang-select:hover{border-color:var(--ink-faint)}
+  .lang-select:focus{outline:none;border-color:var(--accent)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="lang-bar"><button class="lang-btn" data-lang="en" onclick="setLang(&#39;en&#39;)">EN</button><button class="lang-btn lang-active" data-lang="es" onclick="setLang(&#39;es&#39;)">ES</button><button class="lang-btn" data-lang="pt" onclick="setLang(&#39;pt&#39;)">PT</button></div>
+    <div class="lang-bar">
+      <select class="lang-select" id="lang-select" onchange="setLang(this.value)">
+        <option value="en">EN</option>
+        <option value="es" selected>ES</option>
+        <option value="pt">PT</option>
+        <option value="ja">JA</option>
+      </select>
+    </div>
     <div class="compass-links">
       <a class="compass-badge" href="https://cybersecuritycompass.github.io/" target="_blank" rel="noopener">Cybersecurity Compass</a>
       <a class="compass-badge" href="https://cybersecuritycompass.github.io/cyberrisk/" target="_blank" rel="noopener">Cyber Risk</a>
@@ -543,6 +552,21 @@ const UI = {
     defaultP2:"Selecione qualquer nó no diagrama para aprofundar.",
     eqRisk:"Risco", eqLikelihood:"Probabilidade", eqImpact:"Impacto", eqLoss:"Perda", eqEventLoss:"Perda por Evento", eqPELoss:"Perda Pós-Evento",
     lgOutput:"Ciber risco quantificado", lgLike:"Fator de probabilidade", lgLoss:"Fator de impacto", lgEngine:"Motor de avaliação", lgInput:"Entrada de dados",
+  },
+  ja:{
+    eyebrow:"サイバーリスク定量化・リファレンスモデル",
+    title:"サイバーリスク定量化(CRQ)の解説",
+    lede:"サイバーリスク定量化は、脅威が発生する可能性、発生した場合の損失額、そしてそれを防ぐための対策コストが見合うかどうかを、サイバーリスクに数値で示します。",
+    ledeAction:'ノードを選択すると、その役割と関連するフローを確認できます。ページ下部には完全な<a href="#glossary" id="ui-glossary-link">用語集</a>があります。',
+    hint:"ノードをクリック →",
+    tipLabel:"ヒント:",
+    tipText:"3つの黒いノードはエンジンです。それ以外の要素はすべて、そこから供給されるか、そこから導かれます。",
+    defaultTag:"ここから開始",
+    defaultTitle:"評価モデル",
+    defaultP1:"定量化されたリスクは、脅威が発生する可能性とその潜在的なコストの積です。このモデルはそれを2つの分岐に分け、それぞれを専用の評価で解決したうえで、各パラメータを数万回のモンテカルロシミュレーションに通し、信頼区間を伴う金額レンジを導き出します。",
+    defaultP2:"図中の任意のノードを選択すると詳細を確認できます。",
+    eqRisk:"リスク", eqLikelihood:"可能性", eqImpact:"影響度", eqLoss:"損失", eqEventLoss:"イベント損失", eqPELoss:"事後損失",
+    lgOutput:"定量化リスク", lgLike:"可能性要因", lgLoss:"影響度要因", lgEngine:"評価エンジン", lgInput:"データ入力",
   }
 };
 
@@ -601,6 +625,24 @@ const DATA = {
     "exposure-history":{tag:"Entrada de dados para Avaliação de Controle",title:"Histórico de CREM",body:`<p>O registro de mudanças no estado de exposição e controles do ambiente, incluindo remediações, para que as melhorias sejam refletidas positivamente no próximo ciclo de avaliação.</p>`,feeds:"Alimenta a <b>Avaliação de Controle</b>."},
     "scenario-inputs":{tag:"Entrada de dados para Controle e Impacto",title:"Entradas do Cenário",body:`<p>Entradas relacionadas a controles e impacto fornecidas pelo cliente quando a visibilidade dos sensores não é suficiente.</p><ul><li><b>Relacionadas a controle</b>: quais controles adicionais existem e em que grau estão implementados</li><li><b>Relacionadas a impacto</b>: receita, linhas de negócio, exposição legal, volumes de dados</li></ul><p>Coletadas durante o desenvolvimento do cenário por meio de questionários e documentos.</p>`,feeds:"Alimenta a <b>Avaliação de Controle</b> (relacionado a controle) e a <b>Avaliação de Impacto</b> (relacionado a impacto)."},
     "global-impact":{tag:"Entrada de dados para Avaliação de Impacto",title:"Inteligência Global de Ameaças · Impacto",body:`<p>Inteligência relacionada a perdas coletada de relatórios públicos de segurança e divulgações de adversários, usada para modelar o lado financeiro de um cenário.</p>`,feeds:"Alimenta a <b>Avaliação de Impacto</b>."}
+  },
+  ja:{
+    "quantified-risk":{tag:"アウトプット",title:"定量化サイバーリスク",body:`<p>最終結果:特定のリスクシナリオに対する金額レンジを、信頼区間とともに示したもの。以下の2つの分岐の積として算出されます。</p><p>シミュレーターは、脅威頻度、サイバーリスクエクスポージャー、イベント損失、事後損失という4つのパラメータを、数万回のモンテカルロシミュレーションに通してこれを導き出します。</p>`,feeds:"<b>可能性</b> × <b>損失影響度</b> から構成されます。"},
+    "likelihood":{tag:"可能性要因",title:"可能性",body:`<p>環境のアーキテクチャと既存の統制を前提として、脅威が弱点(CVEや設定不備)を突いて悪用に成功する確率。</p><p>次の2つのパラメータを通じて評価されます:</p><ul><li>脅威頻度</li><li>サイバーリスクエクスポージャー</li></ul>`,feeds:"<b>攻撃評価</b>と<b>統制評価</b>によって算出されます。"},
+    "loss-impact":{tag:"影響度要因",title:"損失影響度",body:`<p>どの資産が影響を受け、組織がどのように構成されているかによって決まる、リスクイベントが引き起こしうる損害の程度。</p><p>2つのパラメータに分類されます:</p><ul><li>イベント損失:即時的な損害</li><li>事後損失:長期的な影響</li></ul>`,feeds:"<b>影響評価</b>によって算出されます。"},
+    "threat-frequency":{tag:"可能性のためのパラメータ",title:"脅威頻度",body:`<p>特定の脅威タイプの攻撃がどの程度の頻度で発生しうるか。攻撃パラメータから、ポアソン分布を当てはめて導出されます。</p><div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div><p>この3つの数値は単一の推測値ではなく範囲を表します。<b>min</b>は楽観的なケース(想定される攻撃が最も少ない場合)、<b>most_likely</b>は典型的で最も確度の高い推定値、<b>max</b>は悲観的なケース(想定される攻撃が最も多い場合)です。固定値ではなくこの範囲をシミュレーションに投入することで、モデルは将来に関する実際の不確実性を反映できます。</p>`,feeds:"<b>攻撃評価</b>の出力であり、可能性に統合されます。"},
+    "cyber-risk-exposure":{tag:"可能性のためのパラメータ",title:"サイバーリスクエクスポージャー",body:`<p>対象範囲内の資産における脅威への曝露度を、0から1の間の値でスコア化したもの。</p><div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div><p>成熟した予防統制はこの値を下げ、無効化された統制はこの値を上げます。統制状況は変化しうり、また根拠情報も完全ではないため、エクスポージャーは単一の正確な数値ではなく、最良ケース(<b>min</b>)、現実的なケース(<b>most_likely</b>)、最悪ケース(<b>max</b>)という範囲で表現されます。</p>`,feeds:"<b>統制評価</b>によって形成され、可能性に統合されます。"},
+    "event-loss":{tag:"損失影響度のためのパラメータ",title:"イベント損失",body:`<p>シナリオによる即時的な損害を、対応する損失カテゴリごとに合算したもの:</p><ul><li>事業中断</li><li>インシデント対応</li><li>インシデント復旧</li><li>生産性の損失</li></ul><div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div><p>実際のインシデントのコストは事前にはわからないため、各カテゴリは範囲として見積もられます:抑制された低いコスト(<b>min</b>)、現実的な想定コスト(<b>most_likely</b>)、深刻な最悪ケースのコスト(<b>max</b>)。これらの範囲を合算することで、イベント損失全体にも現実的な広がりが与えられます。</p>`,feeds:"<b>影響評価</b>の出力であり、損失影響度に統合されます。"},
+    "post-event-loss":{tag:"損失影響度のためのパラメータ",title:"事後損失",body:`<p>イベント発生後の長期的な影響を、対応するカテゴリごとに合算したもの:</p><ul><li>企業対応および顧客に対する賠償責任</li><li>規制上の制裁金</li><li>評判および市場価値の毀損</li><li>顧客離反</li></ul><div class="tuple"><code>min</code><code>most_likely</code><code>max</code></div><p>これらの長期的なコストは特に不確実性が高いため、それぞれ範囲として捉えられます:軽微な結果(<b>min</b>)、想定される結果(<b>most_likely</b>)、深刻な結果(<b>max</b>)。単一の数値では、実際のコストがどれほど変動しうるかを隠してしまいます。</p>`,feeds:"<b>影響評価</b>の出力であり、損失影響度に統合されます。"},
+    "attack-assessment":{tag:"可能性のための評価エンジン",title:"攻撃評価",body:`<p>攻撃パラメータと脅威頻度を推定します。3つのデータ入力を組み合わせたうえで、特に検知の有効性を中心に統制の成熟度に応じて生の結果を調整します。可視化された攻撃は失敗する可能性が高いためです。</p><ul><li>グローバル脅威インテリジェンス</li><li>自組織の検知履歴(一定期間の時間枠で分析)</li><li>類似の匿名化されたプロファイルからのピア参照</li></ul>`,feeds:"<b>脅威頻度</b>と<b>サイバーリスクエクスポージャー</b>に供給します。<b>統制評価</b>からの結果を受け取ります。"},
+    "control-assessment":{tag:"攻撃・影響・エクスポージャーのための評価エンジン",title:"統制評価",body:`<p>エクスポージャーと統制をNIST SP 800-53の項目にマッピングし、すべての統制を6つのカテゴリに分類したうえで、それらの相互作用をモデル化します。</p><ul><li><b>検知</b> → 脅威頻度</li><li><b>予防</b> → サイバーリスクエクスポージャー</li><li><b>復旧</b> → イベント損失</li><li><b>緩和</b> → 事後損失</li><li><b>支援</b>と<b>手順</b> → 他の4つを間接的に強化</li></ul>`,feeds:"その結果は<b>攻撃評価</b>と<b>影響評価</b>の両方に流れ込み、<b>サイバーリスクエクスポージャー</b>を決定します。"},
+    "impact-assessment":{tag:"損失影響度のための評価エンジン",title:"影響評価",body:`<p>イベント損失および事後損失を評価します。損失カテゴリをシナリオにマッピングし、緩和・復旧統制に応じて調整したうえで合算します。</p><p>多くのカテゴリは財務、法務、広報などセキュリティ以外の領域にまたがるため、事業データは構造化された質問と検証済みの入力を通じて収集されます。</p>`,feeds:"<b>イベント損失</b>と<b>事後損失</b>を算出します。<b>統制評価</b>の結果とグローバル影響インテリジェンスを利用します。"},
+    "global-attack":{tag:"攻撃評価のためのデータ入力",title:"グローバル脅威インテリジェンス・攻撃",body:`<p>公開情報源から抽出された実際の攻撃データ。例えばセキュリティレポートに基づく業界全体の攻撃発生率などがあり、攻撃パラメータの精度向上に利用されます。</p>`,feeds:"<b>攻撃評価</b>に供給します。"},
+    "peer-history":{tag:"攻撃評価のためのデータ入力",title:"ピア/地域検知履歴",body:`<p>業界、地域、規模、収益プロファイルが類似するピアの匿名化された検知結果。統計的手法により自組織の履歴と組み合わせて、攻撃発生可能性のベンチマークに用いられます。</p>`,feeds:"<b>攻撃評価</b>に供給します。"},
+    "customer-history":{tag:"攻撃評価のためのデータ入力",title:"顧客検知履歴",body:`<p>自組織における攻撃・脅威検知の履歴で、<b>14日ごとの時間枠に分割した過去6か月間</b>にわたって分析されます。各時間枠では、シナリオの脅威タイプに対応する攻撃テクニックが追跡されます。直近の時間枠ほど重み付けが大きくなります。</p>`,feeds:"<b>攻撃評価</b>に供給します。"},
+    "exposure-history":{tag:"統制評価のためのデータ入力",title:"CREM 履歴",body:`<p>環境内のエクスポージャーおよび統制状況の変化(是正措置を含む)の記録。これにより、改善が次回の評価サイクルに適切に反映されます。</p>`,feeds:"<b>統制評価</b>に供給します。"},
+    "scenario-inputs":{tag:"統制・影響のためのデータ入力",title:"シナリオ入力",body:`<p>センサーによる可視性だけでは不十分な場合に、顧客から提供される統制関連および影響関連の入力情報。</p><ul><li><b>統制関連</b>:どのような追加統制が存在し、どの程度実装されているか</li><li><b>影響関連</b>:収益、事業ライン、法的エクスポージャー、データ量</li></ul><p>シナリオ策定の過程で、質問票や文書を通じて収集されます。</p>`,feeds:"<b>統制評価</b>(統制関連)と<b>影響評価</b>(影響関連)に供給します。"},
+    "global-impact":{tag:"影響評価のためのデータ入力",title:"グローバル脅威インテリジェンス・影響",body:`<p>公開されているセキュリティレポートや攻撃者に関する開示情報から収集された、損失に関連するインテリジェンス。シナリオの財務的側面をモデル化するために利用されます。</p>`,feeds:"<b>影響評価</b>に供給します。"}
   }
 };
 
@@ -615,6 +657,7 @@ function detectLang(){
     const code = l.toLowerCase().split('-')[0];
     if(code === 'es') return 'es';
     if(code === 'pt') return 'pt';
+    if(code === 'ja') return 'ja';
     if(code === 'en') return 'en';
   }
   return 'en';
@@ -639,10 +682,9 @@ function applyLang(lang){
   document.getElementById('lg-engine').textContent = u.lgEngine;
   document.getElementById('lg-input').textContent = u.lgInput;
 
-  // update lang buttons
-  document.querySelectorAll('.lang-btn').forEach(b=>{
-    b.classList.toggle('lang-active', b.dataset.lang===lang);
-  });
+  // update lang select
+  const langSelect = document.getElementById('lang-select');
+  if(langSelect) langSelect.value = lang;
   updateSvgLabels(lang);
   applyGlossary(lang);
 
@@ -877,33 +919,50 @@ const SVG_T = {
     "crem-title":"Histórico de CREM","crem-sub":"Histórico de Exposição",
     "cr-label":"Relacionado a Controle","ir-label":"Relacionado a Impacto","ci-label":"Entradas do Cliente para Cenário",
     "gi-title":"Global","gi-sub1":"Inteligência de Ameaças","gi-sub2":"sobre o Impacto"
+  },
+  ja:{
+    "qcr":"定量化サイバーリスク","likelihood":"可能性","loss-impact":"損失影響度",
+    "tf1":"脅威","tf2":"頻度","cre1":"サイバーリスク","cre2":"エクスポージャー",
+    "el1":"イベント","el2":"損失","pel1":"事後","pel2":"損失",
+    "aa1":"攻撃","aa2":"評価","ca1":"統制","ca2":"評価","ia1":"影響","ia2":"評価",
+    "ga-title":"グローバル","ga-sub1":"脅威インテリジェンス","ga-sub2":"(攻撃)",
+    "peer-title":"ピア/地域","peer-sub1":"CREM 脅威","peer-sub2":"検知履歴",
+    "cust-title":"顧客","cust-sub1":"CREM 脅威","cust-sub2":"検知履歴",
+    "crem-title":"CREM 履歴","crem-sub":"エクスポージャー履歴",
+    "cr-label":"統制関連","ir-label":"影響関連","ci-label":"シナリオ用の顧客入力",
+    "gi-title":"グローバル","gi-sub1":"脅威インテリジェンス","gi-sub2":"(影響)"
   }
 };
 
 const CREMSUB_LINES = {
   en:["Management of","Cyber Risk Exposure"],
   es:["Gestión de Exposición","al Ciber Riesgo"],
-  pt:["Gestão de Exposição","ao Ciber Risco"]
+  pt:["Gestão de Exposição","ao Ciber Risco"],
+  ja:["サイバーリスク","エクスポージャーの管理"]
 };
 const CI_LINES = {
   en:["Customer Inputs for","Selected Scenario"],
   es:["Datos del Cliente","del Escenario Seleccionado"],
-  pt:["Dados do Cliente","do Cenário Selecionado"]
+  pt:["Dados do Cliente","do Cenário Selecionado"],
+  ja:["選択シナリオのための","顧客入力"]
 };
 const CR_LINES = {
   en:["Control","Related"],
   es:["Relacionado","al Control"],
-  pt:["Relacionado","a Controle"]
+  pt:["Relacionado","a Controle"],
+  ja:["統制","関連"]
 };
 const IR_LINES = {
   en:["Impact","Related"],
   es:["Relacionado","al Impacto"],
-  pt:["Relacionado","a Impacto"]
+  pt:["Relacionado","a Impacto"],
+  ja:["影響","関連"]
 };
 const QCR_LINES = {
   en:["Quantified Cyber Risk",""],
   es:["Ciber Riesgo","Cuantificado"],
-  pt:["Ciber Risco","Quantificado"]
+  pt:["Ciber Risco","Quantificado"],
+  ja:["定量化","サイバーリスク"]
 };
 function updateSvgLabels(lang){
   const t = SVG_T[lang];
@@ -1197,6 +1256,89 @@ const GLOSSARY = {
         ["ARO (Taxa de Ocorrência Anualizada)","O número esperado de vezes que um evento de risco ocorre em um ano, intimamente relacionado ao parâmetro de Frequência de Ameaça deste modelo."],
         ["ROSI (Retorno do Investimento em Segurança)","O retorno financeiro gerado por um controle de segurança, calculado comparando a redução da perda esperada que ele produz com seu custo. Usado para justificar ou priorizar investimentos em controles."],
         ["Valor em Risco (VaR)","A perda máxima esperada durante um determinado período com um nível de confiança especificado, por exemplo, a perda que não se espera exceder 95% das vezes. Uma forma padrão de expressar o risco quantificado para conselhos, reguladores e seguradoras."]
+      ]}
+    ]
+  },
+  ja:{
+    heading:"用語集",
+    categories:[
+      {name:"コアリスク概念", color:"#E63A37", terms:[
+        ["リスク","シナリオの定量化された結果で、可能性 × 影響度として算出される。信頼区間を伴う金額レンジとして表現される。"],
+        ["可能性","環境のアーキテクチャと既存の統制を前提として、脅威が弱点を突いて悪用に成功する確率。脅威頻度とサイバーリスクエクスポージャーを通じて評価される。"],
+        ["影響度","リスクイベントが引き起こしうる損害の程度。即時的なイベント損失と長期的な事後損失に分類される。"],
+        ["リスクシナリオ","脅威アクターがエクスポージャーを悪用し、資産、業務、または評判に影響を与える経緯を説明する、構造化された現実的なシナリオ。"],
+        ["固有リスク","いかなる統制や低減策も適用される前に存在するリスクの水準で、未管理の生のエクスポージャーを反映する。"],
+        ["残存リスク","統制と低減策が適用された後に残るリスクの水準で、組織が実際に負っているエクスポージャーを表す。"],
+        ["リスクアペタイト","組織が目標達成のために許容する意思があるリスクの量と種類で、残存リスクを比較する際の基準として用いられる。"],
+        ["リスク許容度","リスクアペタイトを中心として是正措置が発動されるまでに許容される変動幅。リスクアペタイトが目標とするリスク水準を定めるのに対し、リスク許容度はその周囲の許容範囲を定める。"],
+        ["リスク移転","リスクの発生可能性や影響度を直接低減するのではなく、主にサイバー保険を通じて、その財務的影響を第三者に移転すること。"]
+      ]},
+      {name:"リスクモデルパラメータ", color:"#FF6A2C", terms:[
+        ["脅威頻度","特定の脅威タイプの攻撃がどの程度の頻度で発生しうるかを、ポアソン分布でモデル化し、3点タプルとして表現したもの。"],
+        ["サイバーリスクエクスポージャー","対象範囲内の資産における脅威への曝露度を、統制の成熟度に基づき0から1の間の値でスコア化したもの。"],
+        ["イベント損失","事業中断、インシデント対応、インシデント復旧など、シナリオによる即時的な財務的損害。"],
+        ["事後損失","規制上の制裁金、評判の毀損、顧客離反など、イベント発生後の長期的な影響。"]
+      ]},
+      {name:"リスクシナリオの構造", color:"#F19A38", terms:[
+        ["分析","分析対象の範囲を定義し、資産、脅威アクター、結果を明確にする境界を設定することで、何が定量化の対象であり何がそうでないかについて関係者の認識を一致させる。"],
+        ["評価","リスクの評価と比較の方法に一貫性を持たせ、曖昧さを排除し、シナリオ間での再現性を可能にする。"],
+        ["モデリング","シナリオが汎用的なものではなく評価対象組織に固有のものとなるよう、データ収集のための構造を提供する。"],
+        ["意思決定","低減コストと想定される損失を比較することで、統制、保険、対応計画に関する投資とリソース配分の優先順位を評価・提言する。"]
+      ]},
+      {name:"リスクシナリオの構成要素", color:"#4FB4A6", terms:[
+        ["リスク対象資産","クラウドデータベースに保存された個人を特定できる顧客情報など、影響を受ける可能性のある特定のシステム、データ、プロセス、またはリソース。"],
+        ["脅威アクター","サイバー犯罪者、国家、内部関係者など、悪意の有無を問わずリスクイベントを引き起こしうる個人または集団。"],
+        ["エクスポージャー","脆弱なパスワード、パッチ未適用のソフトウェア、不完全なプロセスなど、損害を引き起こすために悪用されうる組織のシステム、プロセス、または行動上の弱点や欠陥。"],
+        ["攻撃ベクトル","フィッシングメール、マルウェア、ソーシャルエンジニアリング、物理的アクセスなど、攻撃に用いられる手法や経路。"],
+        ["イベントシーケンス","脅威アクターの行動から組織への影響に至るまでの一連の手順やイベント。"],
+        ["事業への影響","金銭的損失や業務の中断など、サイバーイベントが及ぼしうる潜在的な財務的・業務的影響。"]
+      ]},
+      {name:"CRQタスク要素", color:"#5B8FE0", terms:[
+        ["脅威タイプ","ランサムウェアやデータ窃取など、分析対象として選択されたリスクシナリオで発生する脅威の種類。"],
+        ["攻撃テクニック","ブルートフォースやプロセスインジェクションなど、攻撃フェーズでアクターが用いる手法で、通常は既知の攻撃マトリクスにマッピングされる。"],
+        ["資産スコープ","評価対象としてシナリオに含まれる資産で、単一の資産の場合もあれば、デバイス、アカウント、データの集合である場合もある。"],
+        ["セキュリティ統制","特定の脅威タイプに対する攻撃テクニックを防御するために用いられうる統制策で、通常は既知の統制カタログにマッピングされる。"],
+        ["損失カテゴリ","対象となる脅威タイプに基づいて考慮される損失やコストの種類で、事業中断、調査コスト、評判の毀損などがあり、イベントまたは事後パラメータとして表示される。"]
+      ]},
+      {name:"統計モデリング", color:"#9B7FE0", terms:[
+        ["3点タプル","変数の最小値、最も可能性の高い値、最大値を表現したもので、現実的な範囲を定義するためベータPERT分布に従う。"],
+        ["ベータPERT分布","3点タプルをモデル化するために用いられる統計分布で、最も可能性の高い値を重視しつつ、最小値と最大値の間の現実的な広がりを許容する。"],
+        ["ポアソン分布","攻撃のような離散的なイベントが一定期間内にどの程度の頻度で発生するかをモデル化するために用いられる統計分布で、脅威頻度のタプルを導出するために使われる。"],
+        ["モンテカルロシミュレーション","モデルのパラメータタプルを数万回のランダム化されたシミュレーションラウンドに通す計算手法。単一の結果を出すのではなく、起こりうる結果の分布全体を生成し、シミュレーターが変動性を定量化し、最終的な定量化リスクを信頼区間とともに表現できるようにする。結果は通常、リスク分布のヒストグラムや損失超過曲線として可視化される。"],
+        ["信頼区間","シミュレートされた結果の確からしさの水準を示す、定量化された結果を中心とした統計的範囲。"],
+        ["損失超過曲線","モンテカルロシミュレーションの出力から導かれる、損失が特定の金額しきい値を超える確率を示すグラフ。"]
+      ]},
+      {name:"フレームワークとシステム", color:"#E07FB8", terms:[
+        ["FAIR","情報リスクを定量化するための業界で認知された手法であるFactor Analysis of Information Riskの略称で、本モデルの構造の一部に着想を与えている。"],
+        ["NIST SP 800-53","特定されたエクスポージャーを機能別の統制カテゴリに分類・マッピングするために用いられる、セキュリティおよびプライバシー統制のカタログ。"],
+        ["MITRE ATT&CKマトリクス","攻撃に関連するリスクイベントを既知の攻撃パターンにマッピングするために用いられる、敵対者の戦術とテクニックに関するナレッジベース。"],
+        ["統制カテゴリ","統制を分類し、リスクパラメータへの影響をモデル化するために用いられる、検知、予防、復旧、緩和、支援、手順という6つの機能グループ。"],
+        ["サイバーリスクインデックス","個々の資産のリスクスコアから集約された、0から100の間の浮動小数点数で表される全社的な定性的リスクスコア。"],
+        ["ピアリファレンス","業界、規模、地域、収益プロファイルが類似する組織からの匿名化された検知データまたは損失データで、顧客自身の結果をベンチマークするために用いられる。"],
+        ["CREM","環境全体のエクスポージャーと統制状況を追跡する、より広範な規律であるCyber Risk Exposure Managementの略称。CREMの履歴と調査結果は統制評価に供給され、ひいてはサイバーリスクエクスポージャーパラメータに反映される。"]
+      ]},
+      {name:"統制カテゴリの種類", color:"#6FCF97", terms:[
+        ["支援","組織内の他の統制や実践に適用された際に、手順を整備したりプロセスを改善したりする統制。リスクパラメータに直接影響を与えることはないが、他の5つのカテゴリを強化する。"],
+        ["手順","セキュリティ上の問題に対応するための最初のステップとして認識される統制または実践。支援と同様、パラメータに直接影響するのではなく、他のカテゴリを強化する。"],
+        ["検知","攻撃の試みや挙動を検知できる統制。可視化された攻撃は発見され失敗する可能性が高いため、脅威頻度を直接低下させる。"],
+        ["予防","攻撃が正常に開始されるのを防ぐことができる統制。サイバーリスクエクスポージャーを直接低下させる。"],
+        ["復旧","損失が発生した際に、組織がイベント後に元の状態へ回復するのを助ける統制。イベント損失を直接低下させる。"],
+        ["緩和","損失が発生した際に、損失発生後の状態を緩和する統制。事後損失を直接低下させる。"]
+      ]},
+      {name:"データ入力とシステム", color:"#D9A94E", terms:[
+        ["グローバル攻撃インテリジェンス","公開されているインテリジェンス情報源から抽出された結果で、業界全体の攻撃発生率など、実世界の文脈をもって攻撃パラメータを評価するために用いられる。"],
+        ["自組織攻撃検知履歴","攻撃パラメータを算出し、組織固有の環境を反映するために分析される、顧客自身の攻撃・脅威検知履歴。"],
+        ["ピア攻撃リファレンス","類似のプロファイルを持つピアからのCRQベースの検知結果で、顧客自身の攻撃パラメータの参考およびベンチマークに用いられる。"],
+        ["顧客プロファイル","ピア比較のためのベンチマークを作成するために用いられる、地域、業界、規模、収益に関する匿名化された事業データ。"],
+        ["イベントライブラリ","CRQ機能の統計分析の中で、顧客の脅威検知およびエクスポージャー履歴を関連付けるシステム。"],
+        ["インテリジェンスハブ","公開インテリジェンス情報源からデータを監視、収集、浄化、精製するシステム。"]
+      ]},
+      {name:"業界のリスク指標", color:"#4EC9E0", terms:[
+        ["ALE(年間予想損失額)","単一予想損失額に年間発生率を乗じて算出される、特定のリスクによる1年間の予想財務損失額。組織全体でリスクを比較・優先順位付けするための標準的な指標。"],
+        ["SLE(単一予想損失額)","直接的な損害と対応コストを合わせた、リスクイベントが一度発生した場合に想定される財務損失額。本モデルにおけるイベント損失と事後損失を1回分合算したものにおおむね相当する。"],
+        ["ARO(年間発生率)","リスクイベントが1年間に発生すると想定される回数で、本モデルの脅威頻度パラメータと密接に関連する。"],
+        ["ROSI(セキュリティ投資収益率)","セキュリティ統制によって生み出される財務的リターンで、その統制がもたらす予想損失の低減効果をコストと比較して算出される。統制への投資を正当化・優先順位付けするために用いられる。"],
+        ["バリュー・アット・リスク(VaR)","特定の信頼水準において、一定期間内に想定される最大損失額。例えば95%の確率で超えないと想定される損失額など。定量化されたリスクを取締役会、規制当局、保険会社に提示するための標準的な方法。"]
       ]}
     ]
   }
