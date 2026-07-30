@@ -52,14 +52,25 @@
   body.ja #tip b{letter-spacing:.04em}
   body.ja #tip span{line-height:1.75}
   body.ja .read{letter-spacing:.02em}
-  .lang-selector{position:fixed;top:22px;right:28px;z-index:20;display:flex;gap:0;align-items:center;
-                 font-family:var(--ui);font-size:10.5px;font-weight:600;letter-spacing:.12em;user-select:none}
-  .lang-selector button{background:none;border:none;color:#888;padding:4px 10px;cursor:pointer;
-                        font-family:inherit;font-size:inherit;font-weight:inherit;letter-spacing:inherit;
-                        transition:color .15s ease}
-  .lang-selector button:hover{color:#FFFFFF}
-  .lang-selector button.active{color:var(--accent)}
-  .lang-selector .sep{color:#444;font-weight:400}
+  .lang-selector{position:fixed;top:22px;right:28px;z-index:20;font-family:var(--ui);
+                 font-size:10.5px;font-weight:600;letter-spacing:.12em;user-select:none}
+  .lang-current{display:flex;align-items:center;gap:7px;background:none;border:1px solid #303030;
+                color:#888;padding:5px 9px 4px 11px;cursor:pointer;font:inherit;letter-spacing:inherit;
+                transition:color .15s ease,border-color .15s ease}
+  .lang-current:hover{color:#FFFFFF;border-color:#555}
+  .lang-current i{font-style:normal;font-size:7px;line-height:1;color:#666;transition:transform .18s ease}
+  .lang-selector.open .lang-current{color:#FFFFFF;border-color:#555}
+  .lang-selector.open .lang-current i{transform:rotate(180deg)}
+  .lang-list{position:absolute;top:calc(100% + 5px);right:0;min-width:100%;margin:0;padding:4px 0;
+             list-style:none;background:rgba(8,8,8,.96);border:1px solid #2A2A2A;
+             opacity:0;visibility:hidden;transform:translateY(-4px);
+             transition:opacity .15s ease,transform .15s ease,visibility .15s}
+  .lang-selector.open .lang-list{opacity:1;visibility:visible;transform:none}
+  .lang-list button{display:block;width:100%;background:none;border:none;color:#888;padding:5px 11px;
+                    cursor:pointer;font:inherit;letter-spacing:inherit;text-align:right;
+                    transition:color .15s ease}
+  .lang-list button:hover{color:#FFFFFF}
+  .lang-list button.active{color:var(--accent)}
 
   /* ---- page title, credit and citation: taken from the CRML page's own CSS ---- */
   .page-title{position:fixed;top:30px;left:36px;z-index:10;user-select:none;max-width:480px;pointer-events:none}
@@ -151,6 +162,11 @@
   .zR{transform-origin:1020px 450px}
   .zC{transform-origin:800px 450px}
 
+  /* ---- Clearing is not the build played backwards. While this class is on, every
+     transition and animation is suspended, so setting stage 0 lands instantly
+     instead of unwinding each effect in reverse. ---- */
+  svg.nofx, svg.nofx *{transition:none !important;animation:none !important}
+
   /* ---- Step 3 rearranges the lettering. Any line that survives the rephrasing
      travels to its new place, and the fade happens while it moves, so it reads as
      one line sliding rather than two crossing. --dy is set per line at run time by
@@ -239,11 +255,14 @@
 </style>
 </head>
 <body>
-<div class="lang-selector" role="group" aria-label="Language">
-  <button type="button" data-lang="en" class="active">EN</button><span class="sep">&middot;</span>
-  <button type="button" data-lang="es">ES</button><span class="sep">&middot;</span>
-  <button type="button" data-lang="pt">PT</button><span class="sep">&middot;</span>
-  <button type="button" data-lang="ja">JA</button>
+<div class="lang-selector" id="lang">
+  <button type="button" class="lang-current" aria-haspopup="listbox" aria-expanded="false">EN<i>&#9662;</i></button>
+  <ul class="lang-list" role="listbox" aria-label="Language">
+    <li><button type="button" role="option" data-lang="en">EN</button></li>
+    <li><button type="button" role="option" data-lang="es">ES</button></li>
+    <li><button type="button" role="option" data-lang="pt">PT</button></li>
+    <li><button type="button" role="option" data-lang="ja">JA</button></li>
+  </ul>
 </div>
 
 <div class="page-title">
@@ -635,8 +654,10 @@ function applyLang(code, D, after){
     const k = (h.getAttribute('href') || h.getAttribute('xlink:href')).replace('#sec-', '');
     h.dataset.t = d['t_' + k]; h.dataset.d = d['d_' + k];
   });
-  document.querySelectorAll('.lang-selector button').forEach(b =>
+  document.querySelectorAll('.lang-list button').forEach(b =>
     b.classList.toggle('active', b.dataset.lang === code));
+  const trig = document.querySelector('.lang-current');
+  if (trig) trig.firstChild.textContent = code.toUpperCase();
   if (after) after(d);
 }
 
@@ -686,7 +707,14 @@ const I18N = {"en": {"lang": "en", "doc": "CyberRiskOps · Cyber Risk Operations
       timer = setTimeout(tick, GAP);
     })();
   }
-  function replay(){ stop(); go(0); setTimeout(run, GAP); }   // blank canvas for one full beat before it rebuilds
+  /* Clear on the spot, hold the empty canvas for one beat, then rebuild. */
+  function hardReset(){
+    svg.classList.add('nofx');
+    go(0);
+    void svg.getBoundingClientRect();          // flush, so stage 0 is already painted
+    requestAnimationFrame(() => svg.classList.remove('nofx'));
+  }
+  function replay(){ stop(); hardReset(); setTimeout(run, GAP); }
 
   document.getElementById('next').addEventListener('click', e => { e.stopPropagation(); stop(); go(stage+1); });
   document.getElementById('prev').addEventListener('click', e => { e.stopPropagation(); stop(); go(stage-1); });
@@ -762,7 +790,7 @@ const I18N = {"en": {"lang": "en", "doc": "CyberRiskOps · Cyber Risk Operations
   });
   svg.addEventListener('pointerleave', clearTip);
 
-  render();
+  hardReset();
   setTimeout(run, 420);
 
   /* ---- language ---- */
@@ -792,13 +820,30 @@ const I18N = {"en": {"lang": "en", "doc": "CyberRiskOps · Cyber Risk Operations
     clearTip();
     render();
   }
+
+  /* ---- language dropdown ---- */
+  const langBox = document.getElementById('lang');
+  const langCur = langBox.querySelector('.lang-current');
+  langCur.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = langBox.classList.toggle('open');
+    langCur.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  function closeLang(){ langBox.classList.remove('open'); langCur.setAttribute('aria-expanded','false'); }
+  document.addEventListener('click', closeLang);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLang(); });
+
   /* Compose twice: once now so the lettering is never blank, and again once the
      webfont has actually arrived. Every width here is measured, so measuring against
      a fallback face would fix the wrong layout in place — which is why the first
      paint looked unconditioned until a language was switched. */
   const draw = () => applyLang(document.documentElement.dataset.lang || pickLang(), I18N, afterLang);
-  document.querySelectorAll('.lang-selector button').forEach(b =>
-    b.addEventListener('click', () => { document.documentElement.dataset.lang = b.dataset.lang; draw(); }));
+  document.querySelectorAll('.lang-list button').forEach(b =>
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      document.documentElement.dataset.lang = b.dataset.lang;
+      closeLang(); draw();
+    }));
   draw();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
 })();
