@@ -136,7 +136,7 @@
   .ringIn.on{transform:scale(1)}
   /* the four phase labels wipe in along their own direction of flow: the top pair
      left to right, the bottom pair right to left, matching their arrows */
-  .wipe{transform-box:fill-box;transform-origin:left center;transform:scaleX(0);
+  .wipe{-webkit-transform-box:fill-box;transform-box:fill-box;transform-origin:left center;transform:scaleX(0);
         transition:transform .6s cubic-bezier(.3,0,.2,1)}
   .wipe.r{transform-origin:right center}
   svg.st8 .wipe{transform:scaleX(1)}
@@ -162,10 +162,13 @@
   .zR{transform-origin:1020px 450px}
   .zC{transform-origin:800px 450px}
 
-  /* ---- Clearing is not the build played backwards. While this class is on, every
-     transition and animation is suspended, so setting stage 0 lands instantly
-     instead of unwinding each effect in reverse. ---- */
-  svg.nofx, svg.nofx *{transition:none !important;animation:none !important}
+  /* ---- Suspending motion. Safari commits style changes on a different schedule
+     from Blink, so any DOM work that changes measured layout has to happen with
+     transitions off, or the element animates from its previous values and the
+     effect appears to replay. .nofx holds transitions only, so gear rotation is
+     left alone; .wipe-now also stops animations, for a true reset. ---- */
+  svg.nofx, svg.nofx *{transition:none !important}
+  svg.wipe-now, svg.wipe-now *{transition:none !important;animation:none !important}
 
   /* ---- Step 3 rearranges the lettering. Any line that survives the rephrasing
      travels to its new place, and the fade happens while it moves, so it reads as
@@ -215,7 +218,7 @@
   /* ---- the lifecycle turns once the gears are cut ---- */
   @keyframes cw {to{transform:rotate(360deg)}}
   @keyframes ccw{to{transform:rotate(-360deg)}}
-  .spin{transform-origin:580px 450px}
+  .spin{transform-origin:580px 450px;will-change:transform}
   .spin.r{transform-origin:1020px 450px}
   .spin.c{transform-origin:800px 450px}
   svg.running .spin{animation:cw 30s linear infinite}
@@ -536,6 +539,17 @@
 /* ---- i18n: autodetect, switch, and refit every label ---------------------- */
 const NS = 'http://www.w3.org/2000/svg';
 
+/* Run DOM work with motion suspended, then restore it. Two frames are needed:
+   the first commits the new styles, the second re-enables transitions, so Safari
+   cannot coalesce both into one recalculation and animate the difference. */
+function withoutMotion(svg, fn, alsoAnimations){
+  const cls = alsoAnimations ? 'wipe-now' : 'nofx';
+  svg.classList.add(cls);
+  fn();
+  void getComputedStyle(svg).opacity;          // force the flush Safari needs
+  requestAnimationFrame(() => requestAnimationFrame(() => svg.classList.remove(cls)));
+}
+
 function pickLang(){
   const pref = (navigator.languages && navigator.languages.length ? navigator.languages
                 : [navigator.language || 'en']).map(s => (s || '').toLowerCase());
@@ -583,16 +597,19 @@ function setBlock(g, lines, D){
   const cx = +g.dataset.cx, cy = +g.dataset.cy, r = +g.dataset.r,
         lh = +g.dataset.lh, size = +g.dataset.size, cls = g.dataset.cls;
   const cap = size * 0.688, n = lines.length;
-  while (g.firstChild) g.removeChild(g.firstChild);
+  while (g.children.length > n) g.removeChild(g.lastChild);
   const top = cy - ((n - 1) * lh) / 2;
   lines.forEach((v, i) => {
     const yc = top + i * lh;
-    const t = document.createElementNS(NS, 'text');
+    let t = g.children[i];
+    if (!t){
+      t = document.createElementNS(NS, 'text');
+      t.setAttribute('text-anchor', 'middle');
+      g.appendChild(t);
+    }
     t.setAttribute('class', cls);
     t.setAttribute('x', cx);
     t.setAttribute('y', (yc + cap / 2).toFixed(1));
-    t.setAttribute('text-anchor', 'middle');
-    g.appendChild(t);
     const dy = Math.abs(yc - cy) + cap / 2;
     const slot = 2 * Math.sqrt(Math.max(1, r * r - dy * dy)) - 12;
     setText(t, v, slot);
@@ -607,6 +624,9 @@ function setArc(tp, val, slot){
   return len;
 }
 function applyLang(code, D, after){
+  withoutMotion(document.getElementById('loop'), () => applyLangNow(code, D, after));
+}
+function applyLangNow(code, D, after){
   const d = D[code] || D.en;
   document.documentElement.setAttribute('lang', d.lang);
   document.title = d.doc;
@@ -708,12 +728,7 @@ const I18N = {"en": {"lang": "en", "doc": "CyberRiskOps · Cyber Risk Operations
     })();
   }
   /* Clear on the spot, hold the empty canvas for one beat, then rebuild. */
-  function hardReset(){
-    svg.classList.add('nofx');
-    go(0);
-    void svg.getBoundingClientRect();          // flush, so stage 0 is already painted
-    requestAnimationFrame(() => svg.classList.remove('nofx'));
-  }
+  function hardReset(){ withoutMotion(svg, () => go(0), true); }
   function replay(){ stop(); hardReset(); setTimeout(run, GAP); }
 
   document.getElementById('next').addEventListener('click', e => { e.stopPropagation(); stop(); go(stage+1); });
