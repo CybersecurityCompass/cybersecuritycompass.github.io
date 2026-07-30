@@ -762,6 +762,27 @@ const nodes = document.querySelectorAll('.node');
     maskPathFor.set(el, maskPath);
   });
 
+  // ---- manual rAF-driven animation (avoids Safari's unreliable CSS-transition-on-SVG-attribute-in-mask rendering) ----
+  function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+  const rafTokens = new WeakMap();
+  function animateDashoffset(el, from, to, durationMs, onDone){
+    const myToken = {};
+    rafTokens.set(el, myToken);
+    const start = performance.now();
+    function step(now){
+      if(rafTokens.get(el) !== myToken) return; // superseded by a newer animation on this element
+      const t = Math.min(1, (now - start) / durationMs);
+      const eased = easeOutCubic(t);
+      el.setAttribute('stroke-dashoffset', String(from + (to - from) * eased));
+      if(t < 1){
+        requestAnimationFrame(step);
+      } else if(onDone){
+        onDone();
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
   // ---- path draw helpers ----
   const pathLen = new WeakMap();
   function hidePath(el){
@@ -770,16 +791,16 @@ const nodes = document.querySelectorAll('.node');
       const maskPath = maskPathFor.get(el);
       let len = pathLen.get(maskPath);
       if(len === undefined){ len = maskPath.getTotalLength(); pathLen.set(maskPath, len); }
-      maskPath.style.transition = 'none';
-      maskPath.style.strokeDasharray = len + ' ' + len;
-      maskPath.style.strokeDashoffset = String(len);
+      rafTokens.set(maskPath, {}); // cancel any in-flight animation
+      maskPath.setAttribute('stroke-dasharray', len + ' ' + len);
+      maskPath.setAttribute('stroke-dashoffset', String(len));
       return;
     }
     let len = pathLen.get(el);
     if(len === undefined){ len = el.getTotalLength(); pathLen.set(el, len); }
-    el.style.transition = 'none';
-    el.style.strokeDasharray = len + ' ' + len;
-    el.style.strokeDashoffset = String(len);
+    rafTokens.set(el, {}); // cancel any in-flight animation
+    el.setAttribute('stroke-dasharray', len + ' ' + len);
+    el.setAttribute('stroke-dashoffset', String(len));
     el.style.animation = 'none';
     if(el.hasAttribute('marker-end')){
       el.dataset.markerEnd = el.getAttribute('marker-end');
@@ -791,25 +812,19 @@ const nodes = document.querySelectorAll('.node');
       const maskPath = maskPathFor.get(el);
       const len = pathLen.get(maskPath);
       const reversed = el.classList.contains('aflow-rev');
-      void maskPath.getBoundingClientRect();
-      maskPath.style.transition = 'stroke-dashoffset ' + durationMs + 'ms ease';
       // "aflow" flows start->end, so reveal offset goes len->0 (grows from the start).
       // "aflow-rev" flows end->start, so reveal offset goes len->2*len (grows from the end, backing toward the start).
-      maskPath.style.strokeDashoffset = reversed ? String(len * 2) : '0';
+      animateDashoffset(maskPath, len, reversed ? len * 2 : 0, durationMs);
       return;
     }
-    void el.getBoundingClientRect();
     const len = pathLen.get(el);
     const baseReversed = reversedDSet.has(el.getAttribute('d'));
-    el.style.transition = 'stroke-dashoffset ' + durationMs + 'ms ease';
-    el.style.strokeDashoffset = baseReversed ? String(len * 2) : '0';
-    setTimeout(()=>{
+    animateDashoffset(el, len, baseReversed ? len * 2 : 0, durationMs, ()=>{
       if(el.dataset.markerEnd){ el.setAttribute('marker-end', el.dataset.markerEnd); }
-      el.style.transition = '';
-      el.style.strokeDasharray = '';
-      el.style.strokeDashoffset = '';
+      el.setAttribute('stroke-dasharray', '');
+      el.setAttribute('stroke-dashoffset', '');
       el.style.animation = '';
-    }, durationMs);
+    });
   }
 
   const allEls = Object.values(stepEls).flat();
