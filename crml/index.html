@@ -9,7 +9,7 @@
   body {
     background: #000;
     color: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', Meiryo, 'Noto Sans JP', sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -65,7 +65,11 @@
     color: #e6e6e6;
     font-size: 14px;
     line-height: 1.6;
-    pointer-events: auto;
+    /* Default is none: at cursor+22px the panel usually covers the next label the
+       user is heading for, and pointer-events:auto made it eat that label's hover.
+       Re-enabled via .interactive only when the cursor is on the panel with no
+       label beneath it, or when the panel is pinned. */
+    pointer-events: none;
     z-index: 1000;
     opacity: 0;
     transform: scale(0.82) translateY(10px);
@@ -111,6 +115,8 @@
   .tooltip.visible {
     animation: tipIn 0.36s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+  .tooltip.interactive { pointer-events: auto; }
+  .tooltip.pinned { border-color: rgba(255, 255, 255, 0.14); }
   @keyframes tipIn {
     0%   { opacity: 0; transform: scale(0.82) translateY(10px); }
     100% { opacity: 1; transform: scale(1) translateY(0); }
@@ -144,6 +150,12 @@
     color: #C4322B;
     font-weight: 500;
   }
+  .page-title .acronym-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
   .page-title .acronym {
     display: inline-block;
     font-size: 10.5px;
@@ -154,6 +166,26 @@
     padding: 5px 12px 4px 14px;
     border: 1px solid rgba(196, 50, 43, 0.4);
     border-radius: 3px;
+  }
+  /* Sibling badge that links out to the CyberRiskOps framework */
+  .page-title .acronym-link {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.34em;
+    color: #C4322B;
+    text-decoration: none;
+    padding: 5px 12px 4px 14px;
+    border: 1px solid rgba(196, 50, 43, 0.4);
+    border-radius: 3px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .page-title .acronym-link:hover,
+  .page-title .acronym-link:focus-visible {
+    border-color: rgba(196, 50, 43, 0.85);
+    background: rgba(196, 50, 43, 0.12);
+    outline: none;
   }
   button.replay {
     position: fixed;
@@ -286,14 +318,12 @@
     pointer-events: none !important;
   }
 
+  /* ===== Language selector (dropdown) ===== */
   .lang-selector {
     position: fixed;
     top: 22px;
     right: 28px;
     z-index: 20;
-    display: flex;
-    gap: 0;
-    align-items: center;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 10.5px;
     font-weight: 600;
@@ -301,27 +331,86 @@
     user-select: none;
     transition: opacity 220ms ease;
   }
-  .lang-selector button {
-    background: none;
-    border: none;
-    color: #888;
-    padding: 4px 10px;
+  .lang-trigger {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    color: #C4322B;
+    padding: 5px 9px 5px 11px;
     cursor: pointer;
     font-family: inherit;
     font-size: inherit;
     font-weight: inherit;
     letter-spacing: inherit;
-    transition: color 0.15s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: border-color 0.15s ease, color 0.15s ease;
   }
-  .lang-selector button:hover {
+  .lang-trigger:hover {
+    border-color: rgba(196, 50, 43, 0.55);
+  }
+  .lang-trigger .lang-caret {
+    width: 7px;
+    height: 7px;
+    flex: none;
+    opacity: 0.65;
+    transition: transform 0.18s ease;
+  }
+  .lang-selector.open .lang-trigger .lang-caret {
+    transform: rotate(180deg);
+  }
+  .lang-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 132px;
+    padding: 4px;
+    background: rgba(10, 10, 10, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 5px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    display: none;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .lang-selector.open .lang-menu { display: flex; }
+  .lang-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: none;
+    border: none;
+    border-radius: 3px;
+    color: #888;
+    padding: 7px 10px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    transition: color 0.13s ease, background 0.13s ease;
+  }
+  .lang-menu button:hover {
     color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.06);
   }
-  .lang-selector button.active {
-    color: #C4322B;
+  .lang-menu button.active { color: #C4322B; }
+  .lang-menu .lang-code {
+    flex: none;
+    width: 20px;
+    opacity: 0.75;
   }
-  .lang-selector .sep {
-    color: #444;
-    font-weight: 400;
+  .lang-menu .lang-name {
+    letter-spacing: 0.04em;
+    text-transform: none;
+    font-weight: 500;
   }
   body.cr-modal-open .lang-selector {
     opacity: 0 !important;
@@ -407,12 +496,17 @@
 </style>
 </head>
 <body>
-  <div class="lang-selector" role="group" aria-label="Language selector">
-    <button type="button" data-lang="en" class="active">EN</button>
-    <span class="sep">·</span>
-    <button type="button" data-lang="es">ES</button>
-    <span class="sep">·</span>
-    <button type="button" data-lang="pt">PT</button>
+  <div class="lang-selector" id="lang-selector">
+    <button type="button" class="lang-trigger" id="lang-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Language selector">
+      <span id="lang-trigger-label">EN</span>
+      <svg class="lang-caret" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="lang-menu" id="lang-menu" role="listbox" aria-label="Language">
+      <button type="button" role="option" data-lang="en" class="active"><span class="lang-code">EN</span><span class="lang-name">English</span></button>
+      <button type="button" role="option" data-lang="es"><span class="lang-code">ES</span><span class="lang-name">Español</span></button>
+      <button type="button" role="option" data-lang="pt"><span class="lang-code">PT</span><span class="lang-name">Português</span></button>
+      <button type="button" role="option" data-lang="ja"><span class="lang-code">JA</span><span class="lang-name">日本語</span></button>
+    </div>
   </div>
   <div id="cta-tip" class="cta-tooltip" role="status" aria-hidden="true" aria-live="polite">
     <span data-i18n="cta.venn">Click for the Cyber Risk Visual Definition →</span>
@@ -422,10 +516,13 @@
   <div class="page-title">
     <div class="eyebrow" data-i18n-html="page.eyebrow"><span id="compass-trigger" class="compass-link" role="button" tabindex="0" onclick="openCompass()">Cybersecurity Compass</span> · Before a Breach</div>
     <div class="main" data-i18n-html="page.main">The Cyber Risk Management <em>Lifecycle</em></div>
-    <div class="acronym">CRML</div>
+    <div class="acronym-row">
+      <div class="acronym">CRML</div>
+      <a class="acronym-link" href="https://cybersecuritycompass.github.io/cyberriskops" target="_blank" rel="noopener" title="CyberRiskOps">CyberRiskOps</a>
+    </div>
   </div>
   <div class="stage">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="100%" preserveAspectRatio="xMidYMid meet" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="100%" preserveAspectRatio="xMidYMid meet" font-family="'Segoe UI', 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', Meiryo, 'Noto Sans JP', sans-serif">
   <!-- Black background -->
   <rect width="1600" height="900" fill="#000000"/>
 
@@ -705,8 +802,11 @@
   <script>
     (function() {
       const tip = document.getElementById('tip');
-      let activeEl = null;
+      let activeEl = null;      // label whose content is currently in the panel
+      let pinnedEl = null;      // label pinned by click/tap; hover is ignored while set
       let hideTimer = null;
+      let lastX = 0, lastY = 0, rafPending = false, hasPointer = false;
+
       function cancelHide() {
         if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
       }
@@ -714,68 +814,113 @@
         cancelHide();
         hideTimer = setTimeout(hide, delay);
       }
-      function show(el, x, y) {
-        const op = parseFloat(getComputedStyle(el).opacity);
-        if (!isNaN(op) && op < 0.5) return;
-        cancelHide();
-        tip.classList.remove('visible');
-        void tip.offsetWidth;
-        tip.innerHTML = el.dataset.tip;
-        const accent = el.dataset.color || '#F19A38';
-        tip.style.setProperty('--tip-accent', accent);
-        tip.setAttribute('aria-hidden', 'false');
+      function place(x, y) {
         tip.style.left = (x + 22) + 'px';
         tip.style.top = (y + 22) + 'px';
-        requestAnimationFrame(() => {
-          const r = tip.getBoundingClientRect();
-          if (r.right > window.innerWidth - 16) {
-            tip.style.left = Math.max(16, x - r.width - 22) + 'px';
-          }
-          if (r.bottom > window.innerHeight - 16) {
-            tip.style.top = Math.max(16, y - r.height - 22) + 'px';
-          }
-        });
+        const r = tip.getBoundingClientRect();
+        if (r.right > window.innerWidth - 16) {
+          tip.style.left = Math.max(16, x - r.width - 22) + 'px';
+        }
+        if (r.bottom > window.innerHeight - 16) {
+          tip.style.top = Math.max(16, y - r.height - 22) + 'px';
+        }
+      }
+      function show(el, x, y) {
+        const op = parseFloat(getComputedStyle(el).opacity);
+        if (!isNaN(op) && op < 0.5) return;   // label has not faded in yet
+        cancelHide();
+        tip.classList.remove('visible');
+        void tip.offsetWidth;                 // restart the entry animation
+        tip.innerHTML = el.dataset.tip;
+        tip.style.setProperty('--tip-accent', el.dataset.color || '#F19A38');
+        tip.setAttribute('aria-hidden', 'false');
+        place(x, y);
+        requestAnimationFrame(() => place(x, y));   // re-flip once content has laid out
         activeEl = el;
         tip.classList.add('visible');
       }
       function hide() {
-        tip.classList.remove('visible');
+        tip.classList.remove('visible', 'interactive', 'pinned');
         tip.setAttribute('aria-hidden', 'true');
         activeEl = null;
+        pinnedEl = null;
         hideTimer = null;
       }
+
+      // Topmost .info-label under the cursor. elementsFromPoint returns the whole
+      // stack, so the panel lying on top of a label no longer hides it from us.
+      function triggerAt(x, y) {
+        if (!document.elementsFromPoint) return null;
+        const stack = document.elementsFromPoint(x, y) || [];
+        for (let i = 0; i < stack.length; i++) {
+          const n = stack[i];
+          if (n === tip || tip.contains(n)) continue;   // skip the panel itself
+          const t = n.closest ? n.closest('.info-label') : null;
+          if (t) return t;
+        }
+        return null;
+      }
+      function pointerOverTip() {
+        if (!tip.classList.contains('visible')) return false;
+        const r = tip.getBoundingClientRect();
+        return lastX >= r.left && lastX <= r.right && lastY >= r.top && lastY <= r.bottom;
+      }
+
+      function evaluate() {
+        rafPending = false;
+        if (pinnedEl) return;                 // pinned panels ignore hover entirely
+        const trg = triggerAt(lastX, lastY);
+        if (trg) {
+          tip.classList.remove('interactive');
+          if (trg !== activeEl) show(trg, lastX, lastY);
+          else place(lastX, lastY);
+          return;
+        }
+        if (pointerOverTip()) {
+          // On the panel with nothing behind it: allow clicks so links work.
+          tip.classList.add('interactive');
+          cancelHide();
+          return;
+        }
+        tip.classList.remove('interactive');
+        // Guard on hideTimer, otherwise continuous movement over empty space keeps
+        // pushing the deadline back and the panel never closes.
+        if (activeEl && !hideTimer) scheduleHide(260);
+      }
+
+      document.addEventListener('mousemove', (e) => {
+        hasPointer = true;
+        lastX = e.clientX; lastY = e.clientY;
+        if (!rafPending) { rafPending = true; requestAnimationFrame(evaluate); }
+      }, { passive: true });
+
+      // Cursor left the window entirely
+      document.addEventListener('mouseleave', () => { if (!pinnedEl) scheduleHide(120); });
+
+      // Scrolling or resizing invalidates the cached hit position
+      window.addEventListener('resize', () => { if (!pinnedEl) hide(); });
+
+      // Click / tap a label to pin it, so its links stay reachable even where the
+      // panel overlaps another label. Also the only path on touch, which has no hover.
       document.querySelectorAll('.info-label').forEach(el => {
-        el.addEventListener('mouseenter', e => {
-          show(el, e.clientX, e.clientY);
-        });
-        el.addEventListener('mousemove', e => {
-          // Keep the tooltip near the cursor while moving across large hit areas,
-          // but only reposition (cheap) without rebuilding content.
-          if (activeEl === el) {
-            tip.style.left = (e.clientX + 22) + 'px';
-            tip.style.top = (e.clientY + 22) + 'px';
-            const r = tip.getBoundingClientRect();
-            if (r.right > window.innerWidth - 16) {
-              tip.style.left = Math.max(16, e.clientX - r.width - 22) + 'px';
-            }
-            if (r.bottom > window.innerHeight - 16) {
-              tip.style.top = Math.max(16, e.clientY - r.height - 22) + 'px';
-            }
+        el.addEventListener('click', (e) => {
+          if (pinnedEl === el) { hide(); e.stopPropagation(); return; }
+          pinnedEl = null;
+          show(el, e.clientX || lastX, e.clientY || lastY);
+          if (activeEl === el) {                 // show() may bail if not yet faded in
+            pinnedEl = el;
+            tip.classList.add('interactive', 'pinned');
           }
-        });
-        el.addEventListener('mouseleave', () => scheduleHide(300));
-        el.addEventListener('click', e => {
-          if (activeEl === el) { hide(); return; }
-          show(el, e.clientX, e.clientY);
           e.stopPropagation();
         });
       });
-      // Keep the tooltip open while the cursor is inside it (so links are clickable)
-      tip.addEventListener('mouseenter', cancelHide);
-      tip.addEventListener('mouseleave', () => scheduleHide(150));
-      // Clicking outside both the trigger and the tooltip closes it
-      document.addEventListener('click', e => {
+
+      // Clicking outside the panel closes it; Escape does too
+      document.addEventListener('click', (e) => {
         if (activeEl && !tip.contains(e.target)) hide();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && activeEl) hide();
       });
     })();
   </script>
@@ -812,7 +957,7 @@
       height: 100%;
       background: transparent;
       color: #fff;
-      font-family: 'Helvetica Neue', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Helvetica Neue', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', Meiryo, 'Noto Sans JP', sans-serif;
       overflow: hidden;
     }
 
@@ -1154,7 +1299,7 @@
 <body>
   <div class="stage">
     <div class="svg-wrap">
-      <svg id="cyberRiskSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-family="&#39;Helvetica Neue&#39;, &#39;Arial Black&#39;, Arial, sans-serif" role="img" aria-label="Cyber Risk Venn diagram" aria-describedby="svg-desc">
+      <svg id="cyberRiskSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-family="&#39;Helvetica Neue&#39;, &#39;Arial Black&#39;, Arial, &#39;Hiragino Kaku Gothic ProN&#39;, &#39;Yu Gothic&#39;, Meiryo, sans-serif" role="img" aria-label="Cyber Risk Venn diagram" aria-describedby="svg-desc">
         <desc id="svg-desc">A Venn diagram showing Cyber Risk as the intersection of Threat, Vulnerability, and Consequence, with pairwise overlaps labelled Potential Cyber Risk, Theoretical Cyber Risk, and Cyber Risk Exposure.</desc>
 
         <!-- Background -->
@@ -1639,6 +1784,65 @@
         'tip.consolidate': `<strong>Consolidar Ciber Risco</strong><span class="meta">AGREGADO · VISÃO ORGANIZACIONAL · ESTRATÉGICO</span><span class="body">Todas as pontuações de ciber risco por ativo da etapa anterior são normalizadas e agregadas. A consolidação pode ser executada no nível da organização para uma visão unificada, ou em sub-níveis por grupos de ativos etiquetados (unidades de negócio, geografias, portfólios de aplicações, ou qualquer dimensão operacional) para visibilidade direcionada. Isso move a conversa de achados técnicos isolados para uma imagem holística, alinhada ao negócio, sobre a qual os executivos e membros do conselho podem agir.</span>`,
         'tip.apply': `<strong>Aplicar Defesas e Controles</strong><span class="meta">IMPLANTAR · TÉCNICO + ADMINISTRATIVO · PRIORIZADO</span><span class="body">Com base no perfil de ciber risco priorizado da etapa anterior, implante as defesas apropriadas, soluções técnicas como firewalls e criptografia, mais controles administrativos como políticas de acesso e treinamento. Os controles são escolhidos para enfrentar os ciber riscos de maior prioridade, não como uma lista de verificação universal.</span>`,
         'tip.monitoring': `<strong>Monitoramento do Ciber Risco</strong><span class="meta">CONTÍNUO · SOC + CROC · TEMPO REAL</span><span class="body">Supervisão contínua que circunda as cinco etapas e nunca para. O monitoramento do ciber risco não é um projeto, é uma postura: novos ativos aparecem, novas vulnerabilidades surgem, o panorama de ameaças muda, e um recálculo que estava correto na semana passada está incorreto hoje. O monitoramento é o que diz ao ciclo quando girar novamente. Executado por um <a href="https://www.researchgate.net/publication/388194441" target="_blank" rel="noopener">Cyber Risk Operations Center (CROC)</a> dedicado, junto com o SOC.</span>`,
+      },
+      ja: {
+        'page.eyebrow': '<span id="compass-trigger" class="compass-link" role="button" tabindex="0" onclick="openCompass()">Cybersecurity Compass</span> · 侵害発生前',
+        'page.main': 'サイバーリスク管理<em>ライフサイクル</em>',
+        'replay': '再生',
+        'credit.eyebrow': '企画・デザイン',
+        'pub.title': 'AI時代におけるサイバーリスク管理ライフサイクル（CRML）の再考',
+        'hub.line1': 'サイバーリスク',
+        'hub.line2': '管理',
+        'hub.line3': 'ライフサイクル',
+        'pillar.people': '人材',
+        'pillar.process': 'プロセス',
+        'pillar.technology': 'テクノロジー',
+        'arc.monitoring': 'サイバーリスクの監視',
+        'arc.asset': 'デジタル資産ごとに',
+        'arc.consolidate': 'サイバーリスクの統合',
+        'arc.apply': '防御策と統制の適用',
+        'sat.inventory.l1': 'デジタル資産の棚卸し、',
+        'sat.inventory.l2': '文脈付けと価値評価',
+        'sat.identify.l1': '脆弱性、脅威、',
+        'sat.identify.l2': 'そして影響の',
+        'sat.identify.l3': '特定',
+        'sat.assessment.l1': 'サイバーリスクの評価、',
+        'sat.assessment.l2': '算定と優先順位付け',
+        'sat.mitigation.l1': 'サイバーリスク',
+        'sat.mitigation.l2': '緩和',
+        'sat.recalc.l1': 'サイバーリスクの',
+        'sat.recalc.l2': '再評価と再算定',
+        'venn.threat': '脅威',
+        'venn.vuln': '脆弱性',
+        'venn.consequence': '影響',
+        'venn.potential.l1': '潜在的な',
+        'venn.potential.l2': 'サイバー',
+        'venn.potential.l3': 'リスク',
+        'venn.theoretical.l1': '理論上の',
+        'venn.theoretical.l2': 'サイバー',
+        'venn.theoretical.l3': 'リスク',
+        'venn.exposure.l1': 'サイバー',
+        'venn.exposure.l2': 'リスク',
+        'venn.exposure.l3': 'エクスポージャー',
+        'venn.cyberrisk.l1': 'サイバー',
+        'venn.cyberrisk.l2': 'リスク',
+        'venn.refTitle': 'サイバーリスクを解読する：ビジュアルによる表現',
+        'cta.venn': 'クリックしてサイバーリスクのビジュアル定義を見る →',
+        'cta.compass': 'クリックしてサイバーセキュリティ・コンパスを開く →',
+        // -- Tooltip HTML strings --
+        'tip.crml': `<strong>サイバーリスク管理ライフサイクル（CRML）</strong><span class="meta">侵害発生前 · 戦略フレームワーク · 継続的ループ</span><span class="body">デジタル資産ごとに、侵害が起きる前の段階で回り続ける継続的なループであり、<a href="https://www.researchgate.net/publication/389628862" target="_blank" rel="noopener">サイバーセキュリティ・コンパス</a>の運用エンジンとして機能し、NIST CSF 2.0、DORA、NIS2、ISO 27001 といった成果指向のフレームワークや規制を補完します。これらのフレームワークが目的地を示すのに対し、CRML は航路と周期を与えます。すなわち、特定し、評価し、緩和し、低減を検証する。<a href="https://www.researchgate.net/publication/398971490" target="_blank" rel="noopener">攻撃者がマシンスピードで動く</a>AI の時代においては、このループもマシンスピードで回らなければなりません。ただし常に人間のガバナンスの下で。脅威、脆弱性、影響という三つの力がサイバーリスクへと収束し、CRML はそれをデジタル資産ごとに、侵害が起きる前に適用します。</span><span class="quote">「<a href="https://www.researchgate.net/publication/388653064" target="_blank" rel="noopener">定義されないものは測定できない。測定されないものは改善できない。改善されないものは、常に劣化する。</a>」</span>`,
+        'tip.people': `<strong>人材</strong><span class="meta">基盤の柱 · 文化 · サイバーリスクハンター</span><span class="body">サイバーセキュリティを支える三つの基盤の柱の一つ。人的要素、セキュリティ意識向上、トレーニング、組織文化を包含します。加えて、組織がどこから侵害され得るのかを問う専任の<a href="https://www.researchgate.net/publication/395721548" target="_blank" rel="noopener">サイバーリスクハンター</a>が含まれ、すでに侵害されているのかを問うスレットハンターと相互に補完し合います。</span>`,
+        'tip.process': `<strong>プロセス</strong><span class="meta">基盤の柱 · CYBERRISKOPS · CROC + CROM</span><span class="body">三つの基盤の柱の一つ。CRML そのものを含め、サイバーセキュリティの実践方法を構造化するポリシー、手順、方法論です。先進的なプログラムはこれを<a href="https://www.researchgate.net/publication/402149983" target="_blank" rel="noopener">CyberRiskOps</a>によって運用に落とし込みます。CyberRiskOps は、サイバーリスクの評価と<a href="https://www.researchgate.net/publication/388564202" target="_blank" rel="noopener">サイバーリスクの低減</a>を単一のループに統合する継続的かつ適応的なプロセスであり、リスクを特定することと実際に低減することのあいだに従来存在してきた断絶を解消します。CyberRiskOps は専任の<a href="https://www.researchgate.net/publication/388194441" target="_blank" rel="noopener">Cyber Risk Operations Center（CROC）</a>が実行し、侵害発生前の段階で継続的にエクスポージャーを探索して低減を推進します。一方 SOC はすでに起きている事象に対応します。<a href="https://www.researchgate.net/publication/390490235" target="_blank" rel="noopener">Cyber Risk Operational Model（CROM）</a>は、静的なリスクマッピングから能動的なオペレーションへとプログラムを進化させる成熟度の道筋を示します。</span>`,
+        'tip.technology': `<strong>テクノロジー</strong><span class="meta">基盤の柱 · CREM + CRQ + AEV</span><span class="body">三つの基盤の柱の一つ。サイバーリスク管理を大規模に運用可能にするプラットフォーム群です。Cyber Risk Exposure Management（CREM）は、資産インベントリ、AI による資産の文脈付け、攻撃対象領域全体の関係性を可視化する<a href="https://www.researchgate.net/publication/388321083" target="_blank" rel="noopener">Cyber Risk Asset Graph</a>、<a href="https://www.researchgate.net/publication/388421250" target="_blank" rel="noopener">リスクベース脆弱性管理（RBVM）</a>、そしてエクスポージャー評価を統合します。<a href="https://www.researchgate.net/publication/396206049" target="_blank" rel="noopener">サイバーリスクの定量化（CRQ）</a>は、発生可能性と影響を色ではなく想定損失額とその幅に変換し、経営層が判断できる財務言語でサイバーリスクを表現します。Adversarial Exposure Validation（AEV）は実際の攻撃手法に対して防御を試し、統制が本当に機能しているかを検証します。これらが揃うことで、サイバーリスクは測定可能で、優先順位付けが可能で、継続的に低減できるものになります。</span>`,
+        'tip.inventory': `<strong>デジタル資産の棚卸し、文脈付けと価値評価</strong><span class="meta">ステージ 1 · 資産 + 文脈 · 重要度</span><span class="body">ライフサイクルはここから始まります。すべてのデジタル資産、すなわち端末、アプリケーション、データ、そしてとくにサイバー犯罪者が狙いやすいアイデンティティを洗い出し、それぞれを<a href="https://www.researchgate.net/publication/388321083" target="_blank" rel="noopener">業務上の役割と依存関係</a>のなかに位置づけます。価値評価が意味を持つのは文脈があるからです。同じサーバーが、ある組織では周辺的でも、別の組織ではミッションクリティカルになり得ます。ここで得られる資産の重要度が、以降のすべての優先順位判断を左右します。それがなければ、優先順位付けは当て推量になります。</span>`,
+        'tip.identify': `<strong>脆弱性、脅威、そして影響の特定</strong><span class="meta">ステージ 2 · トライアド分析 · 診断</span><span class="body">資産ごとに<a href="https://www.researchgate.net/publication/388386953" target="_blank" rel="noopener">交差する三つの要素</a>を分析し、そのサイバーリスクスコアを算定します。脆弱性、すなわち未修正のソフトウェア、設定不備、ソーシャルエンジニアリングへの露出といった弱点。脅威、すなわち外部の攻撃者から内部不正までの、それを悪用し得る行為者や事象。影響、すなわち前段で定めた資産の重要度で重み付けされた、業務、レピュテーション、法務、財務への影響。この三つが交わるところがサイバーリスクであり、資産単位で算定されます。ここはライフサイクルの診断の瞬間です。トライアドを明示的に分析しなければ、低減策は誤った的を狙い、リスク低減に見えるものは単なる活動にすぎません。</span>`,
+        'tip.assessment': `<strong>サイバーリスクの評価、算定と優先順位付け</strong><span class="meta">ステージ 3 · CRI · NIST + MITRE ATT&amp;CK</span><span class="body">サイバーリスクは<a href="https://www.researchgate.net/publication/389001302" target="_blank" rel="noopener">サイバーリスク指標（CRI）</a>として定量化されます。これは NIST や MITRE ATT&amp;CK といった業界標準を用いて算定される数値であり、データが尽きる領域では専門家の判断で補われます。重要なのは数値そのものではなく、順位です。明確なサイバーリスクプロファイルは、限られたリソースを最も重大なエクスポージャーへ先に振り向けます。もとより等しくないサイバーリスクに、均等に配分するのではなく。</span>`,
+        'tip.mitigation': `<strong>サイバーリスクの緩和</strong><span class="meta">ステージ 4 · 統制 · 実行</span><span class="body">脅威の発生可能性または影響を下げるために、技術的な対策（ファイアウォール、暗号化、セグメンテーション）と管理的な対策（アクセスポリシー、教育、インシデント対応）を実行します。重要な点として、緩和策の実施は<a href="https://www.researchgate.net/publication/388564202" target="_blank" rel="noopener">サイバーリスクの低減</a>と同じではありません。低減とは、その緩和策が実際に効いた結果として測定できるエクスポージャーの減少です。</span>`,
+        'tip.recalc': `<strong>サイバーリスクの再評価と再算定</strong><span class="meta">ステージ 5 · 検証 · 組織 + 資産レベル</span><span class="body">ほとんどのプログラムが飛ばしてしまうステージです。統制を適用したあと、<a href="https://www.researchgate.net/publication/389001302" target="_blank" rel="noopener">サイバーリスク指標（CRI）</a>を組織レベルと資産レベルで再算定し、各統制が本当にサイバーリスクを下げたのか、それとも下げたように見えただけなのかを検証します。チケットを閉じたのは活動であり、数値が下がったことが低減です。これはまた、組織を最後の監査の速度ではなく、ビジネスの速度と<a href="https://www.researchgate.net/publication/398971490" target="_blank" rel="noopener">攻撃者の速度</a>に合わせ続けるための要でもあります。</span>`,
+        'tip.asset': `<strong>デジタル資産ごとに</strong><span class="meta">資産単位 · 動的 · 共有される · 継続的</span><span class="body">CRML はすべてのデジタル資産に個別に適用されます。そこが脅威、脆弱性、影響がサイバーリスクへと収束する点です。あらゆる端末、アイデンティティ、アプリケーション、接続がサイバーリスクを内包し、それは算定されなければなりません。AI の時代においては、<a href="https://www.researchgate.net/publication/406634241" target="_blank" rel="noopener">エージェントが自ら接続を作り出し</a>、API や Model Context Protocol を通じたその一つ一つが新たなエクスポージャーになります。サイバーリスクは動的で、共有され、継続的です。リアルタイムに変化し、すべての関係者の協調を必要とし、ある時点のスナップショットではなく継続的な再評価を要求します。</span>`,
+        'tip.consolidate': `<strong>サイバーリスクの統合</strong><span class="meta">集約 · 組織全体のビュー · 戦略的</span><span class="body">前段で算定した資産ごとのサイバーリスクスコアを正規化し、集約します。統合は、全体を一つのビューで見るために組織レベルで行うこともでき、タグ付けした資産グループ（事業部門、地域、アプリケーションポートフォリオ、その他あらゆる運用上の切り口）ごとのサブレベルで行い、狙いを定めた可視性を得ることもできます。これにより、議論は孤立した技術的な検出結果から、経営層や取締役会が意思決定できる、ビジネスに紐づいた全体像へと移ります。</span>`,
+        'tip.apply': `<strong>防御策と統制の適用</strong><span class="meta">展開 · 技術的 + 管理的 · 優先順位付け</span><span class="body">前段で得た優先順位付きのサイバーリスクプロファイルに基づき、適切な防御を展開します。ファイアウォールや暗号化といった技術的ソリューションに加え、アクセスポリシーや教育といった管理的統制です。統制は画一的なチェックリストとしてではなく、最も優先度の高いサイバーリスクに対処するために選ばれます。</span>`,
+        'tip.monitoring': `<strong>サイバーリスクの監視</strong><span class="meta">継続的 · SOC + CROC · リアルタイム</span><span class="body">五つのステージを取り囲み、決して止まらない継続的な観測です。サイバーリスクの監視はプロジェクトではなく、姿勢です。新しい資産が現れ、新しい脆弱性が浮上し、脅威の様相は移り変わり、先週正しかった再算定は今日には誤りになります。監視は、ループをいつ次へ回すべきかを教えるものです。SOC と並んで、専任の<a href="https://www.researchgate.net/publication/388194441" target="_blank" rel="noopener">Cyber Risk Operations Center（CROC）</a>が担います。</span>`,
       }
     };
 
@@ -1740,6 +1944,40 @@
       requestAnimationFrame(tick);
     })();
 
+    // ---- Per-language SVG label geometry ----
+    // Japanese sets every glyph at full width (1em), so a label positioned for
+    // Latin text can run into a satellite circle. Keyed by the label's first
+    // data-i18n key; 'def' is the shipped Latin layout, and any language without
+    // an entry falls back to it. `rect` is the label's larger hover target.
+    const LABEL_GEOM = {
+      'sat.mitigation.l1': {
+        // Mitigation circle is cx=705 r=65, so its left edge is x=640.
+        // Recalculation circle is cx=365 r=70, right edge x=435.
+        def: { x: 570, rect: { x: 510, width: 120 } },
+        ja:  { x: 545, rect: { x: 460, width: 172 } }
+      }
+    };
+    function applyLabelGeometry(lang) {
+      Object.keys(LABEL_GEOM).forEach(key => {
+        const entry = LABEL_GEOM[key];
+        const g = entry[lang] || entry.def;
+        const first = document.querySelector('[data-i18n="' + key + '"]');
+        const textEl = first && first.closest ? first.closest('text') : null;
+        if (textEl) {
+          textEl.setAttribute('x', g.x);
+          textEl.querySelectorAll('tspan').forEach(t => t.setAttribute('x', g.x));
+        }
+        if (g.rect && textEl) {
+          const tipKey = textEl.getAttribute('data-tip-key');
+          const hit = tipKey ? document.querySelector('rect[data-tip-key="' + tipKey + '"]') : null;
+          if (hit) {
+            hit.setAttribute('x', g.rect.x);
+            hit.setAttribute('width', g.rect.width);
+          }
+        }
+      });
+    }
+
     function setLanguage(lang) {
       if (!I18N[lang]) lang = 'en';
       _currentLang = lang;
@@ -1759,30 +1997,68 @@
         const key = el.getAttribute('data-tip-key');
         if (dict[key] !== undefined) el.setAttribute('data-tip', dict[key]);
       });
-      // Update active state on selector buttons
-      document.querySelectorAll('.lang-selector button[data-lang]').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+      // Update active state on selector options
+      document.querySelectorAll('.lang-menu button[data-lang]').forEach(btn => {
+        const on = btn.getAttribute('data-lang') === lang;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
       });
+      // Reposition any SVG labels that need language-specific geometry
+      applyLabelGeometry(lang);
+      // Update the dropdown trigger label
+      const _trigLabel = document.getElementById('lang-trigger-label');
+      if (_trigLabel) _trigLabel.textContent = (LANG_CODES[lang] || lang).toUpperCase();
       // Update document language attribute
       document.documentElement.lang = lang;
     }
 
-    // Wire up language selector buttons
-    document.querySelectorAll('.lang-selector button[data-lang]').forEach(btn => {
-      btn.addEventListener('click', () => setLanguage(btn.getAttribute('data-lang')));
+    // ---- Language dropdown behaviour ----
+    const LANG_CODES = { en: 'EN', es: 'ES', pt: 'PT', ja: 'JA' };
+    const _langSelector = document.getElementById('lang-selector');
+    const _langTrigger = document.getElementById('lang-trigger');
+    const _langMenu = document.getElementById('lang-menu');
+
+    function closeLangMenu() {
+      if (!_langSelector) return;
+      _langSelector.classList.remove('open');
+      if (_langTrigger) _langTrigger.setAttribute('aria-expanded', 'false');
+    }
+    function toggleLangMenu() {
+      if (!_langSelector) return;
+      const open = !_langSelector.classList.contains('open');
+      _langSelector.classList.toggle('open', open);
+      if (_langTrigger) _langTrigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    if (_langTrigger) {
+      _langTrigger.addEventListener('click', (e) => { e.stopPropagation(); toggleLangMenu(); });
+    }
+    // Wire up language options
+    document.querySelectorAll('.lang-menu button[data-lang]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setLanguage(btn.getAttribute('data-lang'));
+        closeLangMenu();
+      });
+    });
+    // Close on outside click or Escape
+    document.addEventListener('click', (e) => {
+      if (_langSelector && !_langSelector.contains(e.target)) closeLangMenu();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLangMenu();
     });
 
     // Auto-detect browser language on load
     // Walk navigator.languages (the user's full preference list, e.g. ["pt-BR", "pt", "en-US", "en"])
     // and pick the first one that matches our supported set (es | pt). If none matches, stay on en (default).
     (function autoDetectLanguage() {
-      const supported = new Set(['en', 'es', 'pt']);
+      const supported = new Set(['en', 'es', 'pt', 'ja']);
       const prefs = (navigator.languages && navigator.languages.length)
         ? navigator.languages
         : [navigator.language || navigator.userLanguage || 'en'];
       for (const raw of prefs) {
         if (!raw) continue;
-        const code = raw.toLowerCase().slice(0, 2); // 'es-MX' → 'es', 'pt-BR' → 'pt', 'en-US' → 'en'
+        const code = raw.toLowerCase().slice(0, 2); // 'es-MX' → 'es', 'pt-BR' → 'pt', 'ja-JP' → 'ja'
         if (supported.has(code)) {
           setLanguage(code);
           return;
@@ -1816,16 +2092,16 @@ html,body{background:#000;height:100%;}
 #compass-svg{position:absolute;inset:0;width:100%;height:100%;display:block;}
 /* UI overlays */
 #lang-bar{position:absolute;top:10px;right:10px;z-index:100;display:flex;gap:4px;align-items:center;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:4px 6px;}
-#lang-bar button{padding:3px 9px;border-radius:5px;border:none;cursor:pointer;font-weight:600;font-size:10px;font-family:Inter,system-ui,sans-serif;transition:all .2s;letter-spacing:.04em;}
-#compass-title{position:absolute;top:12px;left:14px;z-index:100;font-family:Inter,Arial,sans-serif;font-size:clamp(16px,3.2vmin,35px);font-weight:600;color:#fff;letter-spacing:.2px;pointer-events:none;}
-#credit{position:absolute;bottom:10px;left:12px;z-index:100;font-family:Inter,Arial,sans-serif;font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.04em;line-height:1.6;pointer-events:auto;}
-#pub-link{position:absolute;bottom:10px;right:12px;z-index:100;font-family:Inter,Arial,sans-serif;font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.03em;line-height:1.6;text-align:right;max-width:52%;pointer-events:auto;}
+#lang-bar button{padding:3px 9px;border-radius:5px;border:none;cursor:pointer;font-weight:600;font-size:10px;font-family:Inter,system-ui,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;transition:all .2s;letter-spacing:.04em;}
+#compass-title{position:absolute;top:12px;left:14px;z-index:100;font-family:Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;font-size:clamp(16px,3.2vmin,35px);font-weight:600;color:#fff;letter-spacing:.2px;pointer-events:none;}
+#credit{position:absolute;bottom:10px;left:12px;z-index:100;font-family:Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.04em;line-height:1.6;pointer-events:auto;}
+#pub-link{position:absolute;bottom:10px;right:12px;z-index:100;font-family:Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.03em;line-height:1.6;text-align:right;max-width:52%;pointer-events:auto;}
 /* Tooltip */
 #tt{position:absolute;pointer-events:none;z-index:300;opacity:0;transition:opacity .2s ease;width:285px;background:rgba(8,10,12,.94);border:1px solid rgba(255,255,255,.13);border-radius:10px;padding:14px 16px;backdrop-filter:blur(12px);}
 #tt.on{opacity:1;}
-#tt-h{font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#E01C24;margin-bottom:4px;}
-#tt-s{font-family:Inter,Arial,sans-serif;font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:10px;}
-#tt-b{font-family:Inter,Arial,sans-serif;font-size:11px;line-height:1.7;color:rgba(255,255,255,.78);}
+#tt-h{font-family:Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#E01C24;margin-bottom:4px;}
+#tt-s{font-family:Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:10px;}
+#tt-b{font-family:Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;font-size:11px;line-height:1.7;color:rgba(255,255,255,.78);}
 /* Hit areas */
 #hits{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:50;}
 #hits path{pointer-events:all;cursor:pointer;fill:transparent;}
@@ -1835,6 +2111,7 @@ html,body,#wrap,#stage{background:transparent !important;}
 #stage{box-shadow:none !important;}
 .bg1,.bg2,.bg3,.bg4,.bg5{display:none !important;}
 #lang-bar{display:none !important;}
+html[lang="ja"] #compass-title{font-size:clamp(20px,4.3vmin,46px);letter-spacing:0.02em;}
 #compass-title{left:0 !important; right:0 !important; text-align:center !important; font-size:clamp(26px,5.2vmin,58px) !important; font-weight:700 !important; letter-spacing:0.5px !important; text-shadow: 0 0 18px rgba(0,0,0,1), 0 0 42px rgba(0,0,0,0.95), 0 0 80px rgba(0,0,0,0.85), 0 0 130px rgba(0,0,0,0.6) !important;}
 </style>
 </head>
@@ -1844,7 +2121,7 @@ html,body,#wrap,#stage{background:transparent !important;}
   <div class="bg1"></div><div class="bg2"></div><div class="bg3"></div><div class="bg4"></div><div class="bg5"></div>
 
   <svg id="compass-svg" viewBox="0 0 1080 1080" style="position:absolute;inset:0;width:100%;height:100%;display:block;">
-<defs><lineargradient id="bg0" gradientUnits="userSpaceOnUse" x1="885.8" y1="447.34" x2="742.84" y2="485.65"><stop offset="0" stop-color="#42454b"></stop><stop offset="1" stop-color="#0c0d10"></stop></lineargradient><lineargradient id="ag0" gradientUnits="userSpaceOnUse" x1="644.82" y1="148.8" x2="826.38" y2="826.38"><stop offset="0" stop-color="#4a1014"></stop><stop offset="1" stop-color="#E01C24"></stop></lineargradient><lineargradient id="bg1" gradientUnits="userSpaceOnUse" x1="447.34" y1="885.8" x2="485.65" y2="742.84"><stop offset="0" stop-color="#93989c"></stop><stop offset="1" stop-color="#494c50"></stop></lineargradient><lineargradient id="ag1" gradientUnits="userSpaceOnUse" x1="826.38" y1="826.38" x2="148.8" y2="644.82"><stop offset="0" stop-color="#4a1014"></stop><stop offset="1" stop-color="#E01C24"></stop></lineargradient><lineargradient id="bg2" gradientUnits="userSpaceOnUse" x1="286.86" y1="286.86" x2="391.51" y2="391.51"><stop offset="0" stop-color="#5a5e63"></stop><stop offset="1" stop-color="#2a2c30"></stop></lineargradient><lineargradient id="ag2" gradientUnits="userSpaceOnUse" x1="148.8" y1="644.82" x2="644.82" y2="148.8"><stop offset="0" stop-color="#4a1014"></stop><stop offset="1" stop-color="#E01C24"></stop></lineargradient><path id="pl0" d="M 679.63 288.11 A 288 288 0 0 1 786.86 688.33" fill="none"></path><path id="sl0" d="M 659.49 341.14 A 232 232 0 0 1 742.91 652.48" fill="none"></path><path id="ol0" d="M 723.87 179.14 A 405 405 0 0 1 879.66 760.58" fill="none"></path><path id="pl1" d="M 288.11 679.63 A 288 288 0 0 0 688.33 786.86" fill="none"></path><path id="sl1" d="M 341.14 659.49 A 232 232 0 0 0 652.48 742.91" fill="none"></path><path id="ol1" d="M 179.14 723.87 A 405 405 0 0 0 760.58 879.66" fill="none"></path><path id="pl2" d="M 252.04 545.03 A 288 288 0 0 1 545.03 252.04" fill="none"></path><path id="sl2" d="M 308.04 535.95 A 232 232 0 0 1 535.95 308.04" fill="none"></path><path id="ol2" d="M 135.56 561.2 A 405 405 0 0 1 561.2 135.56" fill="none"></path><path id="pz0" d="M 449.41 405.7 A 162 162 0 0 1 630.59 405.7" fill="none"></path><path id="pz1" d="M 611.02 685.6 A 162 162 0 0 0 701.61 528.7" fill="none"></path><path id="pz2" d="M 378.39 528.7 A 162 162 0 0 0 468.98 685.6" fill="none"></path></defs><g id="compassRoot" transform="translate(540,540) rotate(0.00) scale(1.000) translate(-540,-540)" opacity="1.000"><g class="grp" id="grp0" opacity="0.700"><path d="M 651.81 122.72 A 432 432 0 0 1 845.47 845.47 L 772.3 871.76 L 807.29 807.29 A 378 378 0 0 0 637.83 174.88 L 711.16 172.95 Z" fill="url(#ag0)"></path><path d="M 632.66 194.2 A 358 358 0 0 1 793.14 793.14 L 698.81 775.45 L 688.49 688.49 A 210 210 0 0 0 594.35 337.16 L 664.5 284.74 Z" fill="url(#bg0)"></path><path id="glow0" d="M 632.66 194.2 A 358 358 0 0 1 793.14 793.14 L 698.81 775.45 L 688.49 688.49 A 210 210 0 0 0 594.35 337.16 L 664.5 284.74 Z" fill="#ffffff" opacity="0.000"></path><text font-family="Inter,Arial" font-weight="600" font-size="35" fill="#ffffff" letter-spacing="0.2"><textpath href="#pl0" startOffset="50%" text-anchor="middle" id="t-crm">Gestión del Ciber Riesgo</textpath></text><text font-family="Inter,Arial" font-weight="500" font-size="17" fill="#d6d8da" letter-spacing="0.2"><textpath href="#sl0" startOffset="50%" text-anchor="middle" id="t-pap">Proactivo y Predictivo</textpath></text><text font-family="Inter,Arial" font-weight="600" font-size="25" fill="#ffffff" letter-spacing="0.2" dominant-baseline="central"><textpath href="#ol0" startOffset="50%" text-anchor="middle" id="t-bab">Antes de una Brecha</textpath></text></g><g class="grp" id="grp1" opacity="0.849"><path d="M 845.47 845.47 A 432 432 0 0 1 122.72 651.81 L 136.54 575.3 L 174.88 637.83 A 378 378 0 0 0 807.29 807.29 L 772.3 871.76 Z" fill="url(#ag1)"></path><path d="M 793.14 793.14 A 358 358 0 0 1 194.2 632.66 L 256.69 559.81 L 337.16 594.35 A 210 210 0 0 0 688.49 688.49 L 698.81 775.45 Z" fill="url(#bg1)"></path><path id="glow1" d="M 793.14 793.14 A 358 358 0 0 1 194.2 632.66 L 256.69 559.81 L 337.16 594.35 A 210 210 0 0 0 688.49 688.49 L 698.81 775.45 Z" fill="#ffffff" opacity="0.088"></path><text font-family="Inter,Arial" font-weight="600" font-size="35" fill="#ffffff" letter-spacing="0.2"><textpath href="#pl1" startOffset="50%" text-anchor="middle" id="t-dar">Detección y Respuesta</textpath></text><text font-family="Inter,Arial" font-weight="500" font-size="17" fill="#d6d8da" letter-spacing="0.2"><textpath href="#sl1" startOffset="50%" text-anchor="middle" id="t-rad">Reactivo y Defensivo</textpath></text><text font-family="Inter,Arial" font-weight="600" font-size="25" fill="#ffffff" letter-spacing="0.2" dominant-baseline="central"><textpath href="#ol1" startOffset="50%" text-anchor="middle" id="t-dub">Durante una Brecha</textpath></text></g><g class="grp" id="grp2" opacity="0.700"><path d="M 122.72 651.81 A 432 432 0 0 1 651.81 122.72 L 711.16 172.95 L 637.83 174.88 A 378 378 0 0 0 174.88 637.83 L 136.54 575.3 Z" fill="url(#ag2)"></path><path d="M 194.2 632.66 A 358 358 0 0 1 632.66 194.2 L 664.5 284.74 L 594.35 337.16 A 210 210 0 0 0 337.16 594.35 L 256.69 559.81 Z" fill="url(#bg2)"></path><path id="glow2" d="M 194.2 632.66 A 358 358 0 0 1 632.66 194.2 L 664.5 284.74 L 594.35 337.16 A 210 210 0 0 0 337.16 594.35 L 256.69 559.81 Z" fill="#ffffff" opacity="0.000"></path><text font-family="Inter,Arial" font-weight="600" font-size="35" fill="#ffffff" letter-spacing="0.2"><textpath href="#pl2" startOffset="50%" text-anchor="middle" id="t-cr">Ciber Resiliencia</textpath></text><text font-family="Inter,Arial" font-weight="500" font-size="17" fill="#d6d8da" letter-spacing="0.2"><textpath href="#sl2" startOffset="50%" text-anchor="middle" id="t-rai">Recuperar y Mejorar</textpath></text><text font-family="Inter,Arial" font-weight="600" font-size="25" fill="#ffffff" letter-spacing="0.2" dominant-baseline="central"><textpath href="#ol2" startOffset="50%" text-anchor="middle" id="t-aab">Después de una Brecha</textpath></text></g><circle cx="540" cy="540" r="372" fill="none" stroke="#ffffff" stroke-width="5"></circle><circle cx="540" cy="540" r="205" fill="none" stroke="#ffffff" stroke-width="5"></circle><g opacity="0.9"><line x1="540" y1="188" x2="540" y2="180" stroke="#ffffff" stroke-width="2"></line><line x1="564.55" y1="188.86" x2="565.11" y2="180.88" stroke="#ffffff" stroke-width="2"></line><line x1="588.99" y1="191.43" x2="590.1" y2="183.5" stroke="#ffffff" stroke-width="2"></line><line x1="613.18" y1="195.69" x2="614.85" y2="187.87" stroke="#ffffff" stroke-width="2"></line><line x1="637.02" y1="201.64" x2="639.23" y2="193.95" stroke="#ffffff" stroke-width="2"></line><line x1="660.39" y1="209.23" x2="663.13" y2="201.71" stroke="#ffffff" stroke-width="2"></line><line x1="683.17" y1="218.43" x2="686.43" y2="211.12" stroke="#ffffff" stroke-width="2"></line><line x1="705.25" y1="229.2" x2="709.01" y2="222.14" stroke="#ffffff" stroke-width="2"></line><line x1="726.53" y1="241.49" x2="730.77" y2="234.7" stroke="#ffffff" stroke-width="2"></line><line x1="746.9" y1="255.23" x2="751.6" y2="248.75" stroke="#ffffff" stroke-width="2"></line><line x1="766.26" y1="270.35" x2="771.4" y2="264.22" stroke="#ffffff" stroke-width="2"></line><line x1="784.52" y1="286.79" x2="790.08" y2="281.04" stroke="#ffffff" stroke-width="2"></line><line x1="801.59" y1="304.47" x2="807.53" y2="299.11" stroke="#ffffff" stroke-width="2"></line><line x1="817.38" y1="323.29" x2="823.68" y2="318.36" stroke="#ffffff" stroke-width="2"></line><line x1="831.82" y1="343.16" x2="838.45" y2="338.69" stroke="#ffffff" stroke-width="2"></line><line x1="844.84" y1="364" x2="851.77" y2="360" stroke="#ffffff" stroke-width="2"></line><line x1="856.38" y1="385.69" x2="863.57" y2="382.19" stroke="#ffffff" stroke-width="2"></line><line x1="866.37" y1="408.14" x2="873.79" y2="405.14" stroke="#ffffff" stroke-width="2"></line><line x1="874.77" y1="431.23" x2="882.38" y2="428.75" stroke="#ffffff" stroke-width="2"></line><line x1="881.54" y1="454.84" x2="889.31" y2="452.91" stroke="#ffffff" stroke-width="2"></line><line x1="886.65" y1="478.88" x2="894.53" y2="477.49" stroke="#ffffff" stroke-width="2"></line><line x1="890.07" y1="503.21" x2="898.03" y2="502.37" stroke="#ffffff" stroke-width="2"></line><line x1="891.79" y1="527.72" x2="899.78" y2="527.44" stroke="#ffffff" stroke-width="2"></line><line x1="891.79" y1="552.28" x2="899.78" y2="552.56" stroke="#ffffff" stroke-width="2"></line><line x1="890.07" y1="576.79" x2="898.03" y2="577.63" stroke="#ffffff" stroke-width="2"></line><line x1="886.65" y1="601.12" x2="894.53" y2="602.51" stroke="#ffffff" stroke-width="2"></line><line x1="881.54" y1="625.16" x2="889.31" y2="627.09" stroke="#ffffff" stroke-width="2"></line><line x1="874.77" y1="648.77" x2="882.38" y2="651.25" stroke="#ffffff" stroke-width="2"></line><line x1="866.37" y1="671.86" x2="873.79" y2="674.86" stroke="#ffffff" stroke-width="2"></line><line x1="856.38" y1="694.31" x2="863.57" y2="697.81" stroke="#ffffff" stroke-width="2"></line><line x1="844.84" y1="716" x2="851.77" y2="720" stroke="#ffffff" stroke-width="2"></line><line x1="831.82" y1="736.84" x2="838.45" y2="741.31" stroke="#ffffff" stroke-width="2"></line><line x1="817.38" y1="756.71" x2="823.68" y2="761.64" stroke="#ffffff" stroke-width="2"></line><line x1="801.59" y1="775.53" x2="807.53" y2="780.89" stroke="#ffffff" stroke-width="2"></line><line x1="784.52" y1="793.21" x2="790.08" y2="798.96" stroke="#ffffff" stroke-width="2"></line><line x1="766.26" y1="809.65" x2="771.4" y2="815.78" stroke="#ffffff" stroke-width="2"></line><line x1="746.9" y1="824.77" x2="751.6" y2="831.25" stroke="#ffffff" stroke-width="2"></line><line x1="726.53" y1="838.51" x2="730.77" y2="845.3" stroke="#ffffff" stroke-width="2"></line><line x1="705.25" y1="850.8" x2="709.01" y2="857.86" stroke="#ffffff" stroke-width="2"></line><line x1="683.17" y1="861.57" x2="686.43" y2="868.88" stroke="#ffffff" stroke-width="2"></line><line x1="660.39" y1="870.77" x2="663.13" y2="878.29" stroke="#ffffff" stroke-width="2"></line><line x1="637.02" y1="878.36" x2="639.23" y2="886.05" stroke="#ffffff" stroke-width="2"></line><line x1="613.18" y1="884.31" x2="614.85" y2="892.13" stroke="#ffffff" stroke-width="2"></line><line x1="588.99" y1="888.57" x2="590.1" y2="896.5" stroke="#ffffff" stroke-width="2"></line><line x1="564.55" y1="891.14" x2="565.11" y2="899.12" stroke="#ffffff" stroke-width="2"></line><line x1="540" y1="892" x2="540" y2="900" stroke="#ffffff" stroke-width="2"></line><line x1="515.45" y1="891.14" x2="514.89" y2="899.12" stroke="#ffffff" stroke-width="2"></line><line x1="491.01" y1="888.57" x2="489.9" y2="896.5" stroke="#ffffff" stroke-width="2"></line><line x1="466.82" y1="884.31" x2="465.15" y2="892.13" stroke="#ffffff" stroke-width="2"></line><line x1="442.98" y1="878.36" x2="440.77" y2="886.05" stroke="#ffffff" stroke-width="2"></line><line x1="419.61" y1="870.77" x2="416.87" y2="878.29" stroke="#ffffff" stroke-width="2"></line><line x1="396.83" y1="861.57" x2="393.57" y2="868.88" stroke="#ffffff" stroke-width="2"></line><line x1="374.75" y1="850.8" x2="370.99" y2="857.86" stroke="#ffffff" stroke-width="2"></line><line x1="353.47" y1="838.51" x2="349.23" y2="845.3" stroke="#ffffff" stroke-width="2"></line><line x1="333.1" y1="824.77" x2="328.4" y2="831.25" stroke="#ffffff" stroke-width="2"></line><line x1="313.74" y1="809.65" x2="308.6" y2="815.78" stroke="#ffffff" stroke-width="2"></line><line x1="295.48" y1="793.21" x2="289.92" y2="798.96" stroke="#ffffff" stroke-width="2"></line><line x1="278.41" y1="775.53" x2="272.47" y2="780.89" stroke="#ffffff" stroke-width="2"></line><line x1="262.62" y1="756.71" x2="256.32" y2="761.64" stroke="#ffffff" stroke-width="2"></line><line x1="248.18" y1="736.84" x2="241.55" y2="741.31" stroke="#ffffff" stroke-width="2"></line><line x1="235.16" y1="716" x2="228.23" y2="720" stroke="#ffffff" stroke-width="2"></line><line x1="223.62" y1="694.31" x2="216.43" y2="697.81" stroke="#ffffff" stroke-width="2"></line><line x1="213.63" y1="671.86" x2="206.21" y2="674.86" stroke="#ffffff" stroke-width="2"></line><line x1="205.23" y1="648.77" x2="197.62" y2="651.25" stroke="#ffffff" stroke-width="2"></line><line x1="198.46" y1="625.16" x2="190.69" y2="627.09" stroke="#ffffff" stroke-width="2"></line><line x1="193.35" y1="601.12" x2="185.47" y2="602.51" stroke="#ffffff" stroke-width="2"></line><line x1="189.93" y1="576.79" x2="181.97" y2="577.63" stroke="#ffffff" stroke-width="2"></line><line x1="188.21" y1="552.28" x2="180.22" y2="552.56" stroke="#ffffff" stroke-width="2"></line><line x1="188.21" y1="527.72" x2="180.22" y2="527.44" stroke="#ffffff" stroke-width="2"></line><line x1="189.93" y1="503.21" x2="181.97" y2="502.37" stroke="#ffffff" stroke-width="2"></line><line x1="193.35" y1="478.88" x2="185.47" y2="477.49" stroke="#ffffff" stroke-width="2"></line><line x1="198.46" y1="454.84" x2="190.69" y2="452.91" stroke="#ffffff" stroke-width="2"></line><line x1="205.23" y1="431.23" x2="197.62" y2="428.75" stroke="#ffffff" stroke-width="2"></line><line x1="213.63" y1="408.14" x2="206.21" y2="405.14" stroke="#ffffff" stroke-width="2"></line><line x1="223.62" y1="385.69" x2="216.43" y2="382.19" stroke="#ffffff" stroke-width="2"></line><line x1="235.16" y1="364" x2="228.23" y2="360" stroke="#ffffff" stroke-width="2"></line><line x1="248.18" y1="343.16" x2="241.55" y2="338.69" stroke="#ffffff" stroke-width="2"></line><line x1="262.62" y1="323.29" x2="256.32" y2="318.36" stroke="#ffffff" stroke-width="2"></line><line x1="278.41" y1="304.47" x2="272.47" y2="299.11" stroke="#ffffff" stroke-width="2"></line><line x1="295.48" y1="286.79" x2="289.92" y2="281.04" stroke="#ffffff" stroke-width="2"></line><line x1="313.74" y1="270.35" x2="308.6" y2="264.22" stroke="#ffffff" stroke-width="2"></line><line x1="333.1" y1="255.23" x2="328.4" y2="248.75" stroke="#ffffff" stroke-width="2"></line><line x1="353.47" y1="241.49" x2="349.23" y2="234.7" stroke="#ffffff" stroke-width="2"></line><line x1="374.75" y1="229.2" x2="370.99" y2="222.14" stroke="#ffffff" stroke-width="2"></line><line x1="396.83" y1="218.43" x2="393.57" y2="211.12" stroke="#ffffff" stroke-width="2"></line><line x1="419.61" y1="209.23" x2="416.87" y2="201.71" stroke="#ffffff" stroke-width="2"></line><line x1="442.98" y1="201.64" x2="440.77" y2="193.95" stroke="#ffffff" stroke-width="2"></line><line x1="466.82" y1="195.69" x2="465.15" y2="187.87" stroke="#ffffff" stroke-width="2"></line><line x1="491.01" y1="191.43" x2="489.9" y2="183.5" stroke="#ffffff" stroke-width="2"></line><line x1="515.45" y1="188.86" x2="514.89" y2="180.88" stroke="#ffffff" stroke-width="2"></line></g><polyline points="632.66 194.2 L 664.5 284.74 L 594.35 337.16" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"></polyline><polyline points="793.14 793.14 L 698.81 775.45 L 688.49 688.49" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"></polyline><polyline points="194.2 632.66 L 256.69 559.81 L 337.16 594.35" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"></polyline><g id="puzzle" transform="rotate(255.69 540 540)"><path d="M 366.79 440 A 200 200 0 0 1 713.21 440 L 687.66 454.75 A 15 15 0 1 1 672.07 463.75 L 646.52 478.5 A 123 123 0 0 0 433.48 478.5 L 407.93 463.75 A 15 15 0 1 0 392.34 454.75 L 366.79 440 Z" fill="#a4a8ac"></path><path d="M 713.21 440 A 200 200 0 0 1 540 740 L 540 710.5 A 15 15 0 1 1 540 692.5 L 540 663 A 123 123 0 0 0 646.52 478.5 L 672.07 463.75 A 15 15 0 1 0 687.66 454.75 L 713.21 440 Z" fill="#6a6e72"></path><path d="M 540 740 A 200 200 0 0 1 366.79 440 L 392.34 454.75 A 15 15 0 1 1 407.93 463.75 L 433.48 478.5 A 123 123 0 0 0 540 663 L 540 692.5 A 15 15 0 1 0 540 710.5 L 540 740 Z" fill="#878b8f"></path><text font-family="Inter,Arial" font-weight="600" font-size="29" fill="#ffffff" letter-spacing="0.2" dominant-baseline="central"><textpath href="#pz0" startOffset="50%" text-anchor="middle" id="t-ppl">Personas</textpath></text><text font-family="Inter,Arial" font-weight="600" font-size="29" fill="#ffffff" letter-spacing="0.2" dominant-baseline="central"><textpath href="#pz1" startOffset="50%" text-anchor="middle" id="t-prc">Procesos</textpath></text><text font-family="Inter,Arial" font-weight="600" font-size="29" fill="#ffffff" letter-spacing="0.2" dominant-baseline="central"><textpath href="#pz2" startOffset="50%" text-anchor="middle" id="t-tch">Tecnología</textpath></text></g><circle cx="540" cy="540" r="122" fill="#f4f4f3"></circle><g opacity="0.5"><line x1="540" y1="434" x2="540" y2="427" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="551.08" y1="434.58" x2="551.81" y2="427.62" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="562.04" y1="436.32" x2="563.49" y2="429.47" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="572.76" y1="439.19" x2="574.92" y2="432.53" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="583.11" y1="443.16" x2="585.96" y2="436.77" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="593" y1="448.2" x2="596.5" y2="442.14" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="602.31" y1="454.24" x2="606.42" y2="448.58" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="610.93" y1="461.23" x2="615.61" y2="456.02" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="618.77" y1="469.07" x2="623.98" y2="464.39" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="625.76" y1="477.69" x2="631.42" y2="473.58" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="631.8" y1="487" x2="637.86" y2="483.5" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="636.84" y1="496.89" x2="643.23" y2="494.04" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="640.81" y1="507.24" x2="647.47" y2="505.08" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="643.68" y1="517.96" x2="650.53" y2="516.51" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="645.42" y1="528.92" x2="652.38" y2="528.19" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="646" y1="540" x2="653" y2="540" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="645.42" y1="551.08" x2="652.38" y2="551.81" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="643.68" y1="562.04" x2="650.53" y2="563.49" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="640.81" y1="572.76" x2="647.47" y2="574.92" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="636.84" y1="583.11" x2="643.23" y2="585.96" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="631.8" y1="593" x2="637.86" y2="596.5" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="625.76" y1="602.31" x2="631.42" y2="606.42" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="618.77" y1="610.93" x2="623.98" y2="615.61" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="610.93" y1="618.77" x2="615.61" y2="623.98" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="602.31" y1="625.76" x2="606.42" y2="631.42" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="593" y1="631.8" x2="596.5" y2="637.86" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="583.11" y1="636.84" x2="585.96" y2="643.23" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="572.76" y1="640.81" x2="574.92" y2="647.47" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="562.04" y1="643.68" x2="563.49" y2="650.53" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="551.08" y1="645.42" x2="551.81" y2="652.38" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="540" y1="646" x2="540" y2="653" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="528.92" y1="645.42" x2="528.19" y2="652.38" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="517.96" y1="643.68" x2="516.51" y2="650.53" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="507.24" y1="640.81" x2="505.08" y2="647.47" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="496.89" y1="636.84" x2="494.04" y2="643.23" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="487" y1="631.8" x2="483.5" y2="637.86" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="477.69" y1="625.76" x2="473.58" y2="631.42" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="469.07" y1="618.77" x2="464.39" y2="623.98" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="461.23" y1="610.93" x2="456.02" y2="615.61" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="454.24" y1="602.31" x2="448.58" y2="606.42" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="448.2" y1="593" x2="442.14" y2="596.5" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="443.16" y1="583.11" x2="436.77" y2="585.96" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="439.19" y1="572.76" x2="432.53" y2="574.92" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="436.32" y1="562.04" x2="429.47" y2="563.49" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="434.58" y1="551.08" x2="427.62" y2="551.81" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="434" y1="540" x2="427" y2="540" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="434.58" y1="528.92" x2="427.62" y2="528.19" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="436.32" y1="517.96" x2="429.47" y2="516.51" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="439.19" y1="507.24" x2="432.53" y2="505.08" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="443.16" y1="496.89" x2="436.77" y2="494.04" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="448.2" y1="487" x2="442.14" y2="483.5" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="454.24" y1="477.69" x2="448.58" y2="473.58" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="461.23" y1="469.07" x2="456.02" y2="464.39" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="469.07" y1="461.23" x2="464.39" y2="456.02" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="477.69" y1="454.24" x2="473.58" y2="448.58" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="487" y1="448.2" x2="483.5" y2="442.14" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="496.89" y1="443.16" x2="494.04" y2="436.77" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="507.24" y1="439.19" x2="505.08" y2="432.53" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="517.96" y1="436.32" x2="516.51" y2="429.47" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="528.92" y1="434.58" x2="528.19" y2="427.62" stroke="#9a9ea2" stroke-width="1.6"></line></g><g id="rose"><path d="M 540 448 L 538.44 530.12 L 540 540 Z" fill="#dcdee0"></path><path d="M 540 448 L 541.56 530.12 L 540 540 Z" fill="#b9bcbf"></path><path d="M 605.05 474.95 L 545.88 531.91 L 540 540 Z" fill="#dcdee0"></path><path d="M 605.05 474.95 L 548.09 534.12 L 540 540 Z" fill="#b9bcbf"></path><path d="M 632 540 L 549.88 538.44 L 540 540 Z" fill="#dcdee0"></path><path d="M 632 540 L 549.88 541.56 L 540 540 Z" fill="#b9bcbf"></path><path d="M 605.05 605.05 L 548.09 545.88 L 540 540 Z" fill="#dcdee0"></path><path d="M 605.05 605.05 L 545.88 548.09 L 540 540 Z" fill="#b9bcbf"></path><path d="M 540 632 L 541.56 549.88 L 540 540 Z" fill="#dcdee0"></path><path d="M 540 632 L 538.44 549.88 L 540 540 Z" fill="#b9bcbf"></path><path d="M 474.95 605.05 L 534.12 548.09 L 540 540 Z" fill="#dcdee0"></path><path d="M 474.95 605.05 L 531.91 545.88 L 540 540 Z" fill="#b9bcbf"></path><path d="M 448 540 L 530.12 541.56 L 540 540 Z" fill="#dcdee0"></path><path d="M 448 540 L 530.12 538.44 L 540 540 Z" fill="#b9bcbf"></path><path d="M 474.95 474.95 L 531.91 534.12 L 540 540 Z" fill="#dcdee0"></path><path d="M 474.95 474.95 L 534.12 531.91 L 540 540 Z" fill="#b9bcbf"></path><path d="M 557.6 497.5 L 541.63 533.19 L 540 540 Z" fill="#e3e5e7"></path><path d="M 557.6 497.5 L 543.66 534.03 L 540 540 Z" fill="#cbced1"></path><path d="M 582.5 522.4 L 545.97 536.34 L 540 540 Z" fill="#e3e5e7"></path><path d="M 582.5 522.4 L 546.81 538.37 L 540 540 Z" fill="#cbced1"></path><path d="M 582.5 557.6 L 546.81 541.63 L 540 540 Z" fill="#e3e5e7"></path><path d="M 582.5 557.6 L 545.97 543.66 L 540 540 Z" fill="#cbced1"></path><path d="M 557.6 582.5 L 543.66 545.97 L 540 540 Z" fill="#e3e5e7"></path><path d="M 557.6 582.5 L 541.63 546.81 L 540 540 Z" fill="#cbced1"></path><path d="M 522.4 582.5 L 538.37 546.81 L 540 540 Z" fill="#e3e5e7"></path><path d="M 522.4 582.5 L 536.34 545.97 L 540 540 Z" fill="#cbced1"></path><path d="M 497.5 557.6 L 534.03 543.66 L 540 540 Z" fill="#e3e5e7"></path><path d="M 497.5 557.6 L 533.19 541.63 L 540 540 Z" fill="#cbced1"></path><path d="M 497.5 522.4 L 533.19 538.37 L 540 540 Z" fill="#e3e5e7"></path><path d="M 497.5 522.4 L 534.03 536.34 L 540 540 Z" fill="#cbced1"></path><path d="M 522.4 497.5 L 536.34 534.03 L 540 540 Z" fill="#e3e5e7"></path><path d="M 522.4 497.5 L 538.37 533.19 L 540 540 Z" fill="#cbced1"></path></g><g id="needle" transform="rotate(195.95 540 540)">
+<defs><lineargradient id="bg0" gradientUnits="userSpaceOnUse" x1="885.8" y1="447.34" x2="742.84" y2="485.65"><stop offset="0" stop-color="#42454b"></stop><stop offset="1" stop-color="#0c0d10"></stop></lineargradient><lineargradient id="ag0" gradientUnits="userSpaceOnUse" x1="644.82" y1="148.8" x2="826.38" y2="826.38"><stop offset="0" stop-color="#4a1014"></stop><stop offset="1" stop-color="#E01C24"></stop></lineargradient><lineargradient id="bg1" gradientUnits="userSpaceOnUse" x1="447.34" y1="885.8" x2="485.65" y2="742.84"><stop offset="0" stop-color="#93989c"></stop><stop offset="1" stop-color="#494c50"></stop></lineargradient><lineargradient id="ag1" gradientUnits="userSpaceOnUse" x1="826.38" y1="826.38" x2="148.8" y2="644.82"><stop offset="0" stop-color="#4a1014"></stop><stop offset="1" stop-color="#E01C24"></stop></lineargradient><lineargradient id="bg2" gradientUnits="userSpaceOnUse" x1="286.86" y1="286.86" x2="391.51" y2="391.51"><stop offset="0" stop-color="#5a5e63"></stop><stop offset="1" stop-color="#2a2c30"></stop></lineargradient><lineargradient id="ag2" gradientUnits="userSpaceOnUse" x1="148.8" y1="644.82" x2="644.82" y2="148.8"><stop offset="0" stop-color="#4a1014"></stop><stop offset="1" stop-color="#E01C24"></stop></lineargradient><path id="pl0" d="M 679.63 288.11 A 288 288 0 0 1 786.86 688.33" fill="none"></path><path id="sl0" d="M 659.49 341.14 A 232 232 0 0 1 742.91 652.48" fill="none"></path><path id="ol0" d="M 723.87 179.14 A 405 405 0 0 1 879.66 760.58" fill="none"></path><path id="pl1" d="M 288.11 679.63 A 288 288 0 0 0 688.33 786.86" fill="none"></path><path id="sl1" d="M 341.14 659.49 A 232 232 0 0 0 652.48 742.91" fill="none"></path><path id="ol1" d="M 179.14 723.87 A 405 405 0 0 0 760.58 879.66" fill="none"></path><path id="pl2" d="M 252.04 545.03 A 288 288 0 0 1 545.03 252.04" fill="none"></path><path id="sl2" d="M 308.04 535.95 A 232 232 0 0 1 535.95 308.04" fill="none"></path><path id="ol2" d="M 135.56 561.2 A 405 405 0 0 1 561.2 135.56" fill="none"></path><path id="pz0" d="M 449.41 405.7 A 162 162 0 0 1 630.59 405.7" fill="none"></path><path id="pz1" d="M 611.02 685.6 A 162 162 0 0 0 701.61 528.7" fill="none"></path><path id="pz2" d="M 378.39 528.7 A 162 162 0 0 0 468.98 685.6" fill="none"></path></defs><g id="compassRoot" transform="translate(540,540) rotate(0.00) scale(1.000) translate(-540,-540)" opacity="1.000"><g class="grp" id="grp0" opacity="0.700"><path d="M 651.81 122.72 A 432 432 0 0 1 845.47 845.47 L 772.3 871.76 L 807.29 807.29 A 378 378 0 0 0 637.83 174.88 L 711.16 172.95 Z" fill="url(#ag0)"></path><path d="M 632.66 194.2 A 358 358 0 0 1 793.14 793.14 L 698.81 775.45 L 688.49 688.49 A 210 210 0 0 0 594.35 337.16 L 664.5 284.74 Z" fill="url(#bg0)"></path><path id="glow0" d="M 632.66 194.2 A 358 358 0 0 1 793.14 793.14 L 698.81 775.45 L 688.49 688.49 A 210 210 0 0 0 594.35 337.16 L 664.5 284.74 Z" fill="#ffffff" opacity="0.000"></path><text font-family="Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif" font-weight="600" font-size="35" fill="#ffffff" letter-spacing="0.2"><textpath href="#pl0" startOffset="50%" text-anchor="middle" id="t-crm">Gestión del Ciber Riesgo</textpath></text><text font-family="Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif" font-weight="500" font-size="17" fill="#d6d8da" letter-spacing="0.2"><textpath href="#sl0" startOffset="50%" text-anchor="middle" id="t-pap">Proactivo y Predictivo</textpath></text><text font-family="Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif" font-weight="600" font-size="25" fill="#ffffff" letter-spacing="0.2" dominant-baseline="central"><textpath href="#ol0" startOffset="50%" text-anchor="middle" id="t-bab">Antes de una Brecha</textpath></text></g><g class="grp" id="grp1" opacity="0.849"><path d="M 845.47 845.47 A 432 432 0 0 1 122.72 651.81 L 136.54 575.3 L 174.88 637.83 A 378 378 0 0 0 807.29 807.29 L 772.3 871.76 Z" fill="url(#ag1)"></path><path d="M 793.14 793.14 A 358 358 0 0 1 194.2 632.66 L 256.69 559.81 L 337.16 594.35 A 210 210 0 0 0 688.49 688.49 L 698.81 775.45 Z" fill="url(#bg1)"></path><path id="glow1" d="M 793.14 793.14 A 358 358 0 0 1 194.2 632.66 L 256.69 559.81 L 337.16 594.35 A 210 210 0 0 0 688.49 688.49 L 698.81 775.45 Z" fill="#ffffff" opacity="0.088"></path><text font-family="Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif" font-weight="600" font-size="35" fill="#ffffff" letter-spacing="0.2"><textpath href="#pl1" startOffset="50%" text-anchor="middle" id="t-dar">Detección y Respuesta</textpath></text><text font-family="Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif" font-weight="500" font-size="17" fill="#d6d8da" letter-spacing="0.2"><textpath href="#sl1" startOffset="50%" text-anchor="middle" id="t-rad">Reactivo y Defensivo</textpath></text><text font-family="Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif" font-weight="600" font-size="25" fill="#ffffff" letter-spacing="0.2" dominant-baseline="central"><textpath href="#ol1" startOffset="50%" text-anchor="middle" id="t-dub">Durante una Brecha</textpath></text></g><g class="grp" id="grp2" opacity="0.700"><path d="M 122.72 651.81 A 432 432 0 0 1 651.81 122.72 L 711.16 172.95 L 637.83 174.88 A 378 378 0 0 0 174.88 637.83 L 136.54 575.3 Z" fill="url(#ag2)"></path><path d="M 194.2 632.66 A 358 358 0 0 1 632.66 194.2 L 664.5 284.74 L 594.35 337.16 A 210 210 0 0 0 337.16 594.35 L 256.69 559.81 Z" fill="url(#bg2)"></path><path id="glow2" d="M 194.2 632.66 A 358 358 0 0 1 632.66 194.2 L 664.5 284.74 L 594.35 337.16 A 210 210 0 0 0 337.16 594.35 L 256.69 559.81 Z" fill="#ffffff" opacity="0.000"></path><text font-family="Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif" font-weight="600" font-size="35" fill="#ffffff" letter-spacing="0.2"><textpath href="#pl2" startOffset="50%" text-anchor="middle" id="t-cr">Ciber Resiliencia</textpath></text><text font-family="Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif" font-weight="500" font-size="17" fill="#d6d8da" letter-spacing="0.2"><textpath href="#sl2" startOffset="50%" text-anchor="middle" id="t-rai">Recuperar y Mejorar</textpath></text><text font-family="Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif" font-weight="600" font-size="25" fill="#ffffff" letter-spacing="0.2" dominant-baseline="central"><textpath href="#ol2" startOffset="50%" text-anchor="middle" id="t-aab">Después de una Brecha</textpath></text></g><circle cx="540" cy="540" r="372" fill="none" stroke="#ffffff" stroke-width="5"></circle><circle cx="540" cy="540" r="205" fill="none" stroke="#ffffff" stroke-width="5"></circle><g opacity="0.9"><line x1="540" y1="188" x2="540" y2="180" stroke="#ffffff" stroke-width="2"></line><line x1="564.55" y1="188.86" x2="565.11" y2="180.88" stroke="#ffffff" stroke-width="2"></line><line x1="588.99" y1="191.43" x2="590.1" y2="183.5" stroke="#ffffff" stroke-width="2"></line><line x1="613.18" y1="195.69" x2="614.85" y2="187.87" stroke="#ffffff" stroke-width="2"></line><line x1="637.02" y1="201.64" x2="639.23" y2="193.95" stroke="#ffffff" stroke-width="2"></line><line x1="660.39" y1="209.23" x2="663.13" y2="201.71" stroke="#ffffff" stroke-width="2"></line><line x1="683.17" y1="218.43" x2="686.43" y2="211.12" stroke="#ffffff" stroke-width="2"></line><line x1="705.25" y1="229.2" x2="709.01" y2="222.14" stroke="#ffffff" stroke-width="2"></line><line x1="726.53" y1="241.49" x2="730.77" y2="234.7" stroke="#ffffff" stroke-width="2"></line><line x1="746.9" y1="255.23" x2="751.6" y2="248.75" stroke="#ffffff" stroke-width="2"></line><line x1="766.26" y1="270.35" x2="771.4" y2="264.22" stroke="#ffffff" stroke-width="2"></line><line x1="784.52" y1="286.79" x2="790.08" y2="281.04" stroke="#ffffff" stroke-width="2"></line><line x1="801.59" y1="304.47" x2="807.53" y2="299.11" stroke="#ffffff" stroke-width="2"></line><line x1="817.38" y1="323.29" x2="823.68" y2="318.36" stroke="#ffffff" stroke-width="2"></line><line x1="831.82" y1="343.16" x2="838.45" y2="338.69" stroke="#ffffff" stroke-width="2"></line><line x1="844.84" y1="364" x2="851.77" y2="360" stroke="#ffffff" stroke-width="2"></line><line x1="856.38" y1="385.69" x2="863.57" y2="382.19" stroke="#ffffff" stroke-width="2"></line><line x1="866.37" y1="408.14" x2="873.79" y2="405.14" stroke="#ffffff" stroke-width="2"></line><line x1="874.77" y1="431.23" x2="882.38" y2="428.75" stroke="#ffffff" stroke-width="2"></line><line x1="881.54" y1="454.84" x2="889.31" y2="452.91" stroke="#ffffff" stroke-width="2"></line><line x1="886.65" y1="478.88" x2="894.53" y2="477.49" stroke="#ffffff" stroke-width="2"></line><line x1="890.07" y1="503.21" x2="898.03" y2="502.37" stroke="#ffffff" stroke-width="2"></line><line x1="891.79" y1="527.72" x2="899.78" y2="527.44" stroke="#ffffff" stroke-width="2"></line><line x1="891.79" y1="552.28" x2="899.78" y2="552.56" stroke="#ffffff" stroke-width="2"></line><line x1="890.07" y1="576.79" x2="898.03" y2="577.63" stroke="#ffffff" stroke-width="2"></line><line x1="886.65" y1="601.12" x2="894.53" y2="602.51" stroke="#ffffff" stroke-width="2"></line><line x1="881.54" y1="625.16" x2="889.31" y2="627.09" stroke="#ffffff" stroke-width="2"></line><line x1="874.77" y1="648.77" x2="882.38" y2="651.25" stroke="#ffffff" stroke-width="2"></line><line x1="866.37" y1="671.86" x2="873.79" y2="674.86" stroke="#ffffff" stroke-width="2"></line><line x1="856.38" y1="694.31" x2="863.57" y2="697.81" stroke="#ffffff" stroke-width="2"></line><line x1="844.84" y1="716" x2="851.77" y2="720" stroke="#ffffff" stroke-width="2"></line><line x1="831.82" y1="736.84" x2="838.45" y2="741.31" stroke="#ffffff" stroke-width="2"></line><line x1="817.38" y1="756.71" x2="823.68" y2="761.64" stroke="#ffffff" stroke-width="2"></line><line x1="801.59" y1="775.53" x2="807.53" y2="780.89" stroke="#ffffff" stroke-width="2"></line><line x1="784.52" y1="793.21" x2="790.08" y2="798.96" stroke="#ffffff" stroke-width="2"></line><line x1="766.26" y1="809.65" x2="771.4" y2="815.78" stroke="#ffffff" stroke-width="2"></line><line x1="746.9" y1="824.77" x2="751.6" y2="831.25" stroke="#ffffff" stroke-width="2"></line><line x1="726.53" y1="838.51" x2="730.77" y2="845.3" stroke="#ffffff" stroke-width="2"></line><line x1="705.25" y1="850.8" x2="709.01" y2="857.86" stroke="#ffffff" stroke-width="2"></line><line x1="683.17" y1="861.57" x2="686.43" y2="868.88" stroke="#ffffff" stroke-width="2"></line><line x1="660.39" y1="870.77" x2="663.13" y2="878.29" stroke="#ffffff" stroke-width="2"></line><line x1="637.02" y1="878.36" x2="639.23" y2="886.05" stroke="#ffffff" stroke-width="2"></line><line x1="613.18" y1="884.31" x2="614.85" y2="892.13" stroke="#ffffff" stroke-width="2"></line><line x1="588.99" y1="888.57" x2="590.1" y2="896.5" stroke="#ffffff" stroke-width="2"></line><line x1="564.55" y1="891.14" x2="565.11" y2="899.12" stroke="#ffffff" stroke-width="2"></line><line x1="540" y1="892" x2="540" y2="900" stroke="#ffffff" stroke-width="2"></line><line x1="515.45" y1="891.14" x2="514.89" y2="899.12" stroke="#ffffff" stroke-width="2"></line><line x1="491.01" y1="888.57" x2="489.9" y2="896.5" stroke="#ffffff" stroke-width="2"></line><line x1="466.82" y1="884.31" x2="465.15" y2="892.13" stroke="#ffffff" stroke-width="2"></line><line x1="442.98" y1="878.36" x2="440.77" y2="886.05" stroke="#ffffff" stroke-width="2"></line><line x1="419.61" y1="870.77" x2="416.87" y2="878.29" stroke="#ffffff" stroke-width="2"></line><line x1="396.83" y1="861.57" x2="393.57" y2="868.88" stroke="#ffffff" stroke-width="2"></line><line x1="374.75" y1="850.8" x2="370.99" y2="857.86" stroke="#ffffff" stroke-width="2"></line><line x1="353.47" y1="838.51" x2="349.23" y2="845.3" stroke="#ffffff" stroke-width="2"></line><line x1="333.1" y1="824.77" x2="328.4" y2="831.25" stroke="#ffffff" stroke-width="2"></line><line x1="313.74" y1="809.65" x2="308.6" y2="815.78" stroke="#ffffff" stroke-width="2"></line><line x1="295.48" y1="793.21" x2="289.92" y2="798.96" stroke="#ffffff" stroke-width="2"></line><line x1="278.41" y1="775.53" x2="272.47" y2="780.89" stroke="#ffffff" stroke-width="2"></line><line x1="262.62" y1="756.71" x2="256.32" y2="761.64" stroke="#ffffff" stroke-width="2"></line><line x1="248.18" y1="736.84" x2="241.55" y2="741.31" stroke="#ffffff" stroke-width="2"></line><line x1="235.16" y1="716" x2="228.23" y2="720" stroke="#ffffff" stroke-width="2"></line><line x1="223.62" y1="694.31" x2="216.43" y2="697.81" stroke="#ffffff" stroke-width="2"></line><line x1="213.63" y1="671.86" x2="206.21" y2="674.86" stroke="#ffffff" stroke-width="2"></line><line x1="205.23" y1="648.77" x2="197.62" y2="651.25" stroke="#ffffff" stroke-width="2"></line><line x1="198.46" y1="625.16" x2="190.69" y2="627.09" stroke="#ffffff" stroke-width="2"></line><line x1="193.35" y1="601.12" x2="185.47" y2="602.51" stroke="#ffffff" stroke-width="2"></line><line x1="189.93" y1="576.79" x2="181.97" y2="577.63" stroke="#ffffff" stroke-width="2"></line><line x1="188.21" y1="552.28" x2="180.22" y2="552.56" stroke="#ffffff" stroke-width="2"></line><line x1="188.21" y1="527.72" x2="180.22" y2="527.44" stroke="#ffffff" stroke-width="2"></line><line x1="189.93" y1="503.21" x2="181.97" y2="502.37" stroke="#ffffff" stroke-width="2"></line><line x1="193.35" y1="478.88" x2="185.47" y2="477.49" stroke="#ffffff" stroke-width="2"></line><line x1="198.46" y1="454.84" x2="190.69" y2="452.91" stroke="#ffffff" stroke-width="2"></line><line x1="205.23" y1="431.23" x2="197.62" y2="428.75" stroke="#ffffff" stroke-width="2"></line><line x1="213.63" y1="408.14" x2="206.21" y2="405.14" stroke="#ffffff" stroke-width="2"></line><line x1="223.62" y1="385.69" x2="216.43" y2="382.19" stroke="#ffffff" stroke-width="2"></line><line x1="235.16" y1="364" x2="228.23" y2="360" stroke="#ffffff" stroke-width="2"></line><line x1="248.18" y1="343.16" x2="241.55" y2="338.69" stroke="#ffffff" stroke-width="2"></line><line x1="262.62" y1="323.29" x2="256.32" y2="318.36" stroke="#ffffff" stroke-width="2"></line><line x1="278.41" y1="304.47" x2="272.47" y2="299.11" stroke="#ffffff" stroke-width="2"></line><line x1="295.48" y1="286.79" x2="289.92" y2="281.04" stroke="#ffffff" stroke-width="2"></line><line x1="313.74" y1="270.35" x2="308.6" y2="264.22" stroke="#ffffff" stroke-width="2"></line><line x1="333.1" y1="255.23" x2="328.4" y2="248.75" stroke="#ffffff" stroke-width="2"></line><line x1="353.47" y1="241.49" x2="349.23" y2="234.7" stroke="#ffffff" stroke-width="2"></line><line x1="374.75" y1="229.2" x2="370.99" y2="222.14" stroke="#ffffff" stroke-width="2"></line><line x1="396.83" y1="218.43" x2="393.57" y2="211.12" stroke="#ffffff" stroke-width="2"></line><line x1="419.61" y1="209.23" x2="416.87" y2="201.71" stroke="#ffffff" stroke-width="2"></line><line x1="442.98" y1="201.64" x2="440.77" y2="193.95" stroke="#ffffff" stroke-width="2"></line><line x1="466.82" y1="195.69" x2="465.15" y2="187.87" stroke="#ffffff" stroke-width="2"></line><line x1="491.01" y1="191.43" x2="489.9" y2="183.5" stroke="#ffffff" stroke-width="2"></line><line x1="515.45" y1="188.86" x2="514.89" y2="180.88" stroke="#ffffff" stroke-width="2"></line></g><polyline points="632.66 194.2 L 664.5 284.74 L 594.35 337.16" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"></polyline><polyline points="793.14 793.14 L 698.81 775.45 L 688.49 688.49" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"></polyline><polyline points="194.2 632.66 L 256.69 559.81 L 337.16 594.35" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"></polyline><g id="puzzle" transform="rotate(255.69 540 540)"><path d="M 366.79 440 A 200 200 0 0 1 713.21 440 L 687.66 454.75 A 15 15 0 1 1 672.07 463.75 L 646.52 478.5 A 123 123 0 0 0 433.48 478.5 L 407.93 463.75 A 15 15 0 1 0 392.34 454.75 L 366.79 440 Z" fill="#a4a8ac"></path><path d="M 713.21 440 A 200 200 0 0 1 540 740 L 540 710.5 A 15 15 0 1 1 540 692.5 L 540 663 A 123 123 0 0 0 646.52 478.5 L 672.07 463.75 A 15 15 0 1 0 687.66 454.75 L 713.21 440 Z" fill="#6a6e72"></path><path d="M 540 740 A 200 200 0 0 1 366.79 440 L 392.34 454.75 A 15 15 0 1 1 407.93 463.75 L 433.48 478.5 A 123 123 0 0 0 540 663 L 540 692.5 A 15 15 0 1 0 540 710.5 L 540 740 Z" fill="#878b8f"></path><text font-family="Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif" font-weight="600" font-size="29" fill="#ffffff" letter-spacing="0.2" dominant-baseline="central"><textpath href="#pz0" startOffset="50%" text-anchor="middle" id="t-ppl">Personas</textpath></text><text font-family="Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif" font-weight="600" font-size="29" fill="#ffffff" letter-spacing="0.2" dominant-baseline="central"><textpath href="#pz1" startOffset="50%" text-anchor="middle" id="t-prc">Procesos</textpath></text><text font-family="Inter,Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif" font-weight="600" font-size="29" fill="#ffffff" letter-spacing="0.2" dominant-baseline="central"><textpath href="#pz2" startOffset="50%" text-anchor="middle" id="t-tch">Tecnología</textpath></text></g><circle cx="540" cy="540" r="122" fill="#f4f4f3"></circle><g opacity="0.5"><line x1="540" y1="434" x2="540" y2="427" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="551.08" y1="434.58" x2="551.81" y2="427.62" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="562.04" y1="436.32" x2="563.49" y2="429.47" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="572.76" y1="439.19" x2="574.92" y2="432.53" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="583.11" y1="443.16" x2="585.96" y2="436.77" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="593" y1="448.2" x2="596.5" y2="442.14" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="602.31" y1="454.24" x2="606.42" y2="448.58" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="610.93" y1="461.23" x2="615.61" y2="456.02" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="618.77" y1="469.07" x2="623.98" y2="464.39" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="625.76" y1="477.69" x2="631.42" y2="473.58" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="631.8" y1="487" x2="637.86" y2="483.5" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="636.84" y1="496.89" x2="643.23" y2="494.04" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="640.81" y1="507.24" x2="647.47" y2="505.08" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="643.68" y1="517.96" x2="650.53" y2="516.51" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="645.42" y1="528.92" x2="652.38" y2="528.19" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="646" y1="540" x2="653" y2="540" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="645.42" y1="551.08" x2="652.38" y2="551.81" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="643.68" y1="562.04" x2="650.53" y2="563.49" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="640.81" y1="572.76" x2="647.47" y2="574.92" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="636.84" y1="583.11" x2="643.23" y2="585.96" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="631.8" y1="593" x2="637.86" y2="596.5" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="625.76" y1="602.31" x2="631.42" y2="606.42" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="618.77" y1="610.93" x2="623.98" y2="615.61" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="610.93" y1="618.77" x2="615.61" y2="623.98" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="602.31" y1="625.76" x2="606.42" y2="631.42" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="593" y1="631.8" x2="596.5" y2="637.86" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="583.11" y1="636.84" x2="585.96" y2="643.23" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="572.76" y1="640.81" x2="574.92" y2="647.47" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="562.04" y1="643.68" x2="563.49" y2="650.53" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="551.08" y1="645.42" x2="551.81" y2="652.38" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="540" y1="646" x2="540" y2="653" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="528.92" y1="645.42" x2="528.19" y2="652.38" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="517.96" y1="643.68" x2="516.51" y2="650.53" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="507.24" y1="640.81" x2="505.08" y2="647.47" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="496.89" y1="636.84" x2="494.04" y2="643.23" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="487" y1="631.8" x2="483.5" y2="637.86" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="477.69" y1="625.76" x2="473.58" y2="631.42" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="469.07" y1="618.77" x2="464.39" y2="623.98" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="461.23" y1="610.93" x2="456.02" y2="615.61" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="454.24" y1="602.31" x2="448.58" y2="606.42" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="448.2" y1="593" x2="442.14" y2="596.5" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="443.16" y1="583.11" x2="436.77" y2="585.96" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="439.19" y1="572.76" x2="432.53" y2="574.92" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="436.32" y1="562.04" x2="429.47" y2="563.49" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="434.58" y1="551.08" x2="427.62" y2="551.81" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="434" y1="540" x2="427" y2="540" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="434.58" y1="528.92" x2="427.62" y2="528.19" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="436.32" y1="517.96" x2="429.47" y2="516.51" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="439.19" y1="507.24" x2="432.53" y2="505.08" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="443.16" y1="496.89" x2="436.77" y2="494.04" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="448.2" y1="487" x2="442.14" y2="483.5" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="454.24" y1="477.69" x2="448.58" y2="473.58" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="461.23" y1="469.07" x2="456.02" y2="464.39" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="469.07" y1="461.23" x2="464.39" y2="456.02" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="477.69" y1="454.24" x2="473.58" y2="448.58" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="487" y1="448.2" x2="483.5" y2="442.14" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="496.89" y1="443.16" x2="494.04" y2="436.77" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="507.24" y1="439.19" x2="505.08" y2="432.53" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="517.96" y1="436.32" x2="516.51" y2="429.47" stroke="#9a9ea2" stroke-width="1.6"></line><line x1="528.92" y1="434.58" x2="528.19" y2="427.62" stroke="#9a9ea2" stroke-width="1.6"></line></g><g id="rose"><path d="M 540 448 L 538.44 530.12 L 540 540 Z" fill="#dcdee0"></path><path d="M 540 448 L 541.56 530.12 L 540 540 Z" fill="#b9bcbf"></path><path d="M 605.05 474.95 L 545.88 531.91 L 540 540 Z" fill="#dcdee0"></path><path d="M 605.05 474.95 L 548.09 534.12 L 540 540 Z" fill="#b9bcbf"></path><path d="M 632 540 L 549.88 538.44 L 540 540 Z" fill="#dcdee0"></path><path d="M 632 540 L 549.88 541.56 L 540 540 Z" fill="#b9bcbf"></path><path d="M 605.05 605.05 L 548.09 545.88 L 540 540 Z" fill="#dcdee0"></path><path d="M 605.05 605.05 L 545.88 548.09 L 540 540 Z" fill="#b9bcbf"></path><path d="M 540 632 L 541.56 549.88 L 540 540 Z" fill="#dcdee0"></path><path d="M 540 632 L 538.44 549.88 L 540 540 Z" fill="#b9bcbf"></path><path d="M 474.95 605.05 L 534.12 548.09 L 540 540 Z" fill="#dcdee0"></path><path d="M 474.95 605.05 L 531.91 545.88 L 540 540 Z" fill="#b9bcbf"></path><path d="M 448 540 L 530.12 541.56 L 540 540 Z" fill="#dcdee0"></path><path d="M 448 540 L 530.12 538.44 L 540 540 Z" fill="#b9bcbf"></path><path d="M 474.95 474.95 L 531.91 534.12 L 540 540 Z" fill="#dcdee0"></path><path d="M 474.95 474.95 L 534.12 531.91 L 540 540 Z" fill="#b9bcbf"></path><path d="M 557.6 497.5 L 541.63 533.19 L 540 540 Z" fill="#e3e5e7"></path><path d="M 557.6 497.5 L 543.66 534.03 L 540 540 Z" fill="#cbced1"></path><path d="M 582.5 522.4 L 545.97 536.34 L 540 540 Z" fill="#e3e5e7"></path><path d="M 582.5 522.4 L 546.81 538.37 L 540 540 Z" fill="#cbced1"></path><path d="M 582.5 557.6 L 546.81 541.63 L 540 540 Z" fill="#e3e5e7"></path><path d="M 582.5 557.6 L 545.97 543.66 L 540 540 Z" fill="#cbced1"></path><path d="M 557.6 582.5 L 543.66 545.97 L 540 540 Z" fill="#e3e5e7"></path><path d="M 557.6 582.5 L 541.63 546.81 L 540 540 Z" fill="#cbced1"></path><path d="M 522.4 582.5 L 538.37 546.81 L 540 540 Z" fill="#e3e5e7"></path><path d="M 522.4 582.5 L 536.34 545.97 L 540 540 Z" fill="#cbced1"></path><path d="M 497.5 557.6 L 534.03 543.66 L 540 540 Z" fill="#e3e5e7"></path><path d="M 497.5 557.6 L 533.19 541.63 L 540 540 Z" fill="#cbced1"></path><path d="M 497.5 522.4 L 533.19 538.37 L 540 540 Z" fill="#e3e5e7"></path><path d="M 497.5 522.4 L 534.03 536.34 L 540 540 Z" fill="#cbced1"></path><path d="M 522.4 497.5 L 536.34 534.03 L 540 540 Z" fill="#e3e5e7"></path><path d="M 522.4 497.5 L 538.37 533.19 L 540 540 Z" fill="#cbced1"></path></g><g id="needle" transform="rotate(195.95 540 540)">
   <!-- South: dark -->
   <path d="M 540 540 L 526 540 L 540 632 L 554 540 Z" fill="#1a1c1f"></path>
   <!-- North: red -->
@@ -1867,6 +2144,7 @@ html,body,#wrap,#stage{background:transparent !important;}
     <button id="btn-en" onclick="setLang(&#39;en&#39;)" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">EN</button>
     <button id="btn-es" onclick="setLang(&#39;es&#39;)" style="background: rgb(224, 28, 36); color: rgb(255, 255, 255);">ES</button>
     <button id="btn-pt" onclick="setLang(&#39;pt&#39;)" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">PT</button>
+    <button id="btn-ja" onclick="setLang(&#39;ja&#39;)" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">JA</button>
   </div>
 
   <div id="compass-title">La Brújula de Ciberseguridad</div>
@@ -1907,6 +2185,16 @@ const T={
     pubLine1:"A Bússola da Cibersegurança:",pubLine2:"Navegando Estrategicamente pelo Tempestuoso Oceano Digital",
     pubUrl:"https://www.researchgate.net/publication/389631493",
     pubDoi:"10.13140/RG.2.2.14022.79687",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.14022.79687"
+  },
+  ja:{
+    crm:"サイバーリスク管理",pap:"プロアクティブかつ予測的",bab:"侵害発生前",
+    dar:"検知と対応",rad:"リアクティブかつ防御的",dub:"侵害発生中",
+    cr:"サイバーレジリエンス",rai:"復旧と改善",aab:"侵害発生後",
+    ppl:"人材",prc:"プロセス",tch:"テクノロジー",
+    title:"サイバーセキュリティ・コンパス",credit:"企画・デザイン：",
+    pubLine1:"サイバーセキュリティ・コンパス：",pubLine2:"荒れ狂うデジタルの海を戦略的に航海する",
+    pubUrl:"https://www.researchgate.net/publication/389628862",
+    pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
   }
 };
 
@@ -1934,6 +2222,14 @@ const TT={
      b:"Em cibersegurança, não é uma questão de se as tempestades vão chegar, mas de quando. A Detecção e Resposta é a sua tripulação no coração da tempestade: olhos em cada sinal, mãos em cada controle. Identifica as ameaças à medida que se desenvolvem, contém a brecha antes que se espalhe e responde com velocidade e precisão. Essencial, mas nunca suficiente sozinha. As organizações que só sabem enfrentar tempestades passarão toda a sua viagem esperando pela próxima. A bússola exige mais."},
     {h:"Ciber Resiliência",s:"Após uma Brecha · Recuperar e Melhorar · Um Resultado",
      b:"A Ciber Resiliência não é uma fase que você entra após um incidente. É o resultado de ter feito tudo o mais certo. Quando o seu norte está definido por uma gestão proativa de riscos e sua equipe responde com precisão durante a tempestade, a resiliência é o que você conquista. Significa restaurar operações mais rápido, aprender com o que falhou, fortalecer o que foi exposto e retroalimentar essa inteligência na sua bússola. As organizações que alcançam a verdadeira Ciber Resiliência não apenas sobrevivem às tempestades. Tornam-se mais difíceis de afundar a cada uma que enfrentam."}
+  ],
+  ja:[
+    {h:"サイバーリスク管理",s:"侵害発生前 · プロアクティブかつ予測的",
+     b:"サイバーセキュリティ・コンパスの真北。これがなければ、組織は危機から危機へと漂流し、反応し、復旧し、リスクを本当に下げることはありません。サイバーリスク管理は、脅威が現実になる前に予見し、最も重要なものに優先順位をつけ、セキュリティ投資を最適化し、経営層が戦略的な意思決定を行うための明快な言語を与える、プロアクティブかつ予測的な規律です。サイバー犯罪者が探しているのは技術的な脆弱性だけではありません。北を持たないことから生まれる不確実さと決断の遅れを狙っています。そのすき間を閉じるのが、これです。"},
+    {h:"検知と対応",s:"侵害発生中 · リアクティブかつ防御的",
+     b:"サイバーセキュリティにおいて、嵐が来るかどうかは問題ではなく、いつ来るかが問題です。検知と対応は、嵐の只中にいる乗組員です。すべての兆候に目を配り、すべての操舵に手をかけています。脅威が展開する最中にそれを見つけ、広がる前に侵害を封じ込め、速度と精度をもって対応します。不可欠ではありますが、それだけでは決して十分ではありません。嵐を乗り切る術しか知らない組織は、航海のすべてを次の嵐を待つことに費やします。コンパスはそれ以上を求めます。"},
+    {h:"サイバーレジリエンス",s:"侵害発生後 · 復旧と改善 · ひとつの成果",
+     b:"サイバーレジリエンスは、インシデントのあとに入る段階ではありません。それ以外のすべてを正しく行った結果として得られる成果です。プロアクティブなリスク管理によって北が定まり、嵐のなかで乗組員が精度をもって対応したとき、レジリエンスは獲得されます。それは、業務をより速く復旧し、失敗から学び、露出していた部分を堅牢にし、その知見をコンパスへ還すことを意味します。真のサイバーレジリエンスに到達した組織は、嵐を生き延びるだけではありません。乗り越えた嵐の数だけ、沈みにくくなっていきます。"}
   ]
 };
 
@@ -1961,6 +2257,14 @@ const TTP={
      b:"O processo é a espinha dorsal operacional que conecta pessoas à tecnologia e estratégia à execução. Sem ele, até as melhores ferramentas geram ruído e o melhor talento opera em silos. No núcleo de uma camada de processo madura estão a disciplina CyberRiskOps e seu centro operacional, o Centro de Operações de Ciber Risco (CROC), onde a inteligência de risco é continuamente medida, priorizada e executada. Security Operations (SecOps) conecta essa inteligência de risco com ação em tempo real, enquanto o Centro de Operações de Segurança (SOC) executa detecção, investigação e resposta com velocidade. Juntos, transformam a cibersegurança de um conjunto de reações isoladas em uma operação contínua, mensurável e em melhoria constante. O processo é o que garante que a bússola continue em movimento."},
     {h:"Tecnologia",s:"O Multiplicador de Força",
      b:"A tecnologia é o multiplicador de força da sua estratégia de cibersegurança, mas apenas quando serve a um propósito claro. A Quantificação do Ciber Risco (CRQ) traduz o risco técnico em linguagem financeira que os executivos podem utilizar. A Gestão de Exposição ao Ciber Risco (CREM) mapeia e prioriza continuamente sua superfície de ataque antes que os adversários possam explorá-la. A Detecção e Resposta Estendida (XDR) unifica a visibilidade em endpoints, redes, nuvem e identidade em uma imagem única e correlacionada. A Inteligência de Ameaças alimenta sua bússola com contexto do adversário, transformando alertas reativos em decisões proativas. A automação elimina o atrito manual que atrasa a resposta e permite que suas equipes operem na velocidade das máquinas. Uma plataforma unificada integra tudo isso, substituindo soluções pontuais fragmentadas por inteligência integrada. A Inteligência Artificial amplia o que as equipes humanas podem fazer em cada camada. A tecnologia não define sua estratégia. Ela a executa."}
+  ],
+  ja:[
+    {h:"人材",s:"人のレイヤー",
+     b:"組織を守るのはテクノロジーではありません。人です。コンパスの人材の次元は、他のあらゆる投資に意味を与える人のレイヤーを表します。兆候を読み解くセキュリティアナリスト、リスクの判断を下す経営層、そして最初の防衛線にも最初の失点にもなり得る従業員です。そして、あらゆる攻撃の向こう側にもまた人がいます。サイバー犯罪者は自動化された自然の力ではありません。彼らは意図と動機と自らの戦略を持つ個人です。標的を研究し、決断の遅れを突き、目的をもって動きます。彼らに立ち向かうには、彼らと同じ人間的な資質、すなわち気づき、判断力、そして先に動く意志が必要です。技能があり、意識が高く、権限を与えられた人がいないコンパスは、誰も読み方を知らない計器にすぎません。文化、教育、説明責任、リーダーシップは、やわらかい要素ではありません。舵を握る手そのものです。"},
+    {h:"プロセス",s:"運用の背骨",
+     b:"プロセスは、人材とテクノロジーを、そして戦略と実行をつなぐ運用の背骨です。これがなければ、最良のツールもノイズを生み、最良の人材もサイロのなかで動くことになります。成熟したプロセス層の中核にあるのが CyberRiskOps という規律と、その運用上の神経中枢である Cyber Risk Operations Center（CROC）です。そこではリスクインテリジェンスが継続的に測定され、優先順位づけされ、実行に移されます。Security Operations（SecOps）はそのリスクインテリジェンスをリアルタイムの行動へと橋渡しし、Security Operations Center（SOC）が検知、調査、対応を速度をもって実行します。両者が揃うことで、サイバーセキュリティは孤立した反応の集まりから、継続的で測定可能で、改善し続けるオペレーションへと変わります。コンパスが動き続けることを保証するのが、プロセスです。"},
+    {h:"テクノロジー",s:"戦力の増幅装置",
+     b:"テクノロジーはサイバーセキュリティ戦略の戦力を増幅させます。ただし、明確な目的に仕える場合にかぎります。サイバーリスクの定量化（CRQ）は、技術的なリスクを経営層が動かせる財務の言語に翻訳します。サイバーリスクエクスポージャー管理（CREM）は、攻撃者に悪用される前に攻撃対象領域を継続的にマッピングし優先順位づけします。拡張検知と対応（XDR）は、エンドポイント、ネットワーク、クラウド、アイデンティティにまたがる可視性を、相関のとれた一枚の像に統合します。脅威インテリジェンスは敵の文脈をコンパスに与え、受動的なアラートを能動的な判断へ変えます。自動化は対応を遅らせる手作業の摩擦を取り除き、チームを燃え尽きさせることなくマシンスピードで動けるようにします。統合プラットフォームはこれらすべてを結びつけ、断片化した個別製品を統合されたインテリジェンスに置き換えます。人工知能は、人のチームができることをあらゆる層で押し広げます。テクノロジーが戦略を定めるのではありません。戦略を実行するのです。"}
   ]
 };
 
@@ -1986,11 +2290,13 @@ function applyLang(l){
       '<span style="display:inline;white-space:nowrap;">'+t.pubLine2+'</span>'+
     '</a>'+
     '<a href="'+t.pubDoiUrl+'" target="_blank" style="color:rgba(255,255,255,.28);text-decoration:none;">DOI: '+t.pubDoi+'</a>';
-  ['en','es','pt'].forEach(c=>{
+  ['en','es','pt','ja'].forEach(c=>{
     const b=document.getElementById('btn-'+c);
+    if(!b) return;
     b.style.background=c===l?'#E01C24':'rgba(255,255,255,0.1)';
     b.style.color=c===l?'#fff':'#888';
   });
+  document.documentElement.lang=l;
 }
 
 function setLang(l){applyLang(l);}
@@ -2268,7 +2574,11 @@ window.addEventListener('message', function(e){
       // ES/PT label positioning adjustments: Potencial/Teórico move 20px up, Exposición/Exposição moves 20px down
       out = out.replace('<text id="potentialLabel" class="hot-label" x="645" y="372" font-size="30">', '<text id="potentialLabel" class="hot-label" x="640" y="352" font-size="25" font-weight="400">');
       out = out.replace('<text id="theoreticalLabel" class="hot-label" x="955" y="372" font-size="30">', '<text id="theoreticalLabel" class="hot-label" x="955" y="352" font-size="25" font-weight="400">');
-      out = out.replace('<text id="exposureLabel" class="hot-label" x="800" y="620" font-size="30">', '<text id="exposureLabel" class="hot-label" x="800" y="640" font-size="25" font-weight="400">');
+      // Exposure label geometry. The Vulnerability ∩ Consequence lens narrows as it
+      // descends, and Japanese sets エクスポージャー as one unbreakable 8-glyph run
+      // (~8em wide), so ja gets a smaller size and tighter leading to stay inside the rings.
+      const _expo = (lang === 'ja') ? { y: 618, size: 20, dy: 27 } : { y: 640, size: 25, dy: 34 };
+      out = out.replace('<text id="exposureLabel" class="hot-label" x="800" y="620" font-size="30">', '<text id="exposureLabel" class="hot-label" x="800" y="' + _expo.y + '" font-size="' + _expo.size + '" font-weight="400">');
       // Apex labels: match the unique pattern >TEXT<animate
       out = out.replace('>Threat<animate', '>' + dict['venn.threat'] + '<animate');
       out = out.replace('>Vulnerability<animate', '>' + dict['venn.vuln'] + '<animate');
@@ -2286,7 +2596,7 @@ window.addEventListener('message', function(e){
       // Exposure block (x="800", contains "Exposure" — replace BEFORE center block, since both start with the same first tspan)
       out = out.replace(
         /<tspan x="800">Cyber<\/tspan>\s*<tspan x="800" dy="34">Risk<\/tspan>\s*<tspan x="800" dy="34">Exposure<\/tspan>/,
-        '<tspan x="800">' + dict['venn.exposure.l1'] + '</tspan>\n            <tspan x="800" dy="34">' + dict['venn.exposure.l2'] + '</tspan>\n            <tspan x="800" dy="34">' + dict['venn.exposure.l3'] + '</tspan>'
+        '<tspan x="800">' + dict['venn.exposure.l1'] + '</tspan>\n            <tspan x="800" dy="' + _expo.dy + '">' + dict['venn.exposure.l2'] + '</tspan>\n            <tspan x="800" dy="' + _expo.dy + '">' + dict['venn.exposure.l3'] + '</tspan>'
       );
       // Center "Cyber Risk" block (x="800" dy="44")
       out = out.replace(
@@ -2297,6 +2607,14 @@ window.addEventListener('message', function(e){
       out = out.replace('Decoding Cyber Risk: A Visual Representation', dict['venn.refTitle']);
       // Credit eyebrow inside the iframe ("Created and designed by")
       out = out.replace('>Created and designed by<', '>' + dict['credit.eyebrow'] + '<');
+      // Ring-stroke masks behind the two lower outer labels are sized for the Latin
+      // words. Japanese sets 脆弱性 / 影響 far shorter, so shrink the gaps to match,
+      // otherwise the black rects leave visible voids in the Vulnerability and
+      // Consequence circles.
+      if (lang === 'ja') {
+        out = out.replace('<rect x="245" y="600" width="350" height="68"></rect>', '<rect x="323" y="600" width="194" height="68"></rect>');
+        out = out.replace('<rect x="1005" y="600" width="350" height="68"></rect>', '<rect x="1109" y="600" width="142" height="68"></rect>');
+      }
       // Translate iframe Venn LABEL_INFO block
       if (lang === 'es') {
         out = out.replace(`const LABEL_INFO = {
@@ -2444,6 +2762,80 @@ window.addEventListener('message', function(e){
         title: 'Ciber Risco',
         color: '#FF5552',
         body:  'Representa o potencial de perdas ou danos que podem ocorrer devido a uma <span style="color:#F19A38">ameaça</span> que explora uma <span style="color:#E63A37">vulnerabilidade</span> e resulta em uma <span style="color:#FF6A2C">consequência</span>. O conceito global que abrange todos os aspectos dos possíveis resultados negativos dos eventos cibernéticos. O ciber risco é <strong style="color:#A5B4FC">dinâmico</strong>, <strong style="color:#38BDF8">compartilhado</strong>, <strong style="color:#3B82F6">contínuo</strong> e <strong style="color:#6366F1">adversarial</strong>: evolui em tempo real, propaga-se através de fornecedores, parceiros, clientes e a cadeia de suprimentos digital, nunca deixa de se expandir, e ao contrário de outros riscos, enfrenta um oponente inteligente que aprende e se adapta a cada defesa.'
+      }
+    };`);
+      } else if (lang === 'ja') {
+        out = out.replace(`const LABEL_INFO = {
+      threatLabel: {
+        title: 'Threat',
+        color: '#F19A38',
+        body:  'Anything that has the potential to cause harm or allow unauthorized access to an information system. This could be malicious actors, state-sponsored groups, cyber criminals or insider <span style="color:#F19A38">threats</span>. In the age of AI, <span style="color:#F19A38">threats</span> now include autonomous <strong style="color:#6366F1">adversarial</strong> agents that scale attacks at machine speed.'
+      },
+      vulnerabilityLabel: {
+        title: 'Vulnerability',
+        color: '#E63A37',
+        body:  'A technical, procedural, or human weakness that can be exploited by a <span style="color:#F19A38">threat</span>. Examples include unpatched software, misconfigured controls and users who may fall victim to social engineering.'
+      },
+      consequenceLabel: {
+        title: 'Consequence',
+        color: '#FF6A2C',
+        body:  'The impact or damage that would occur if a <span style="color:#F19A38">threat</span> successfully exploits a <span style="color:#E63A37">vulnerability</span>. Financial loss, reputational harm, loss of proprietary data, and business disruption are common <span style="color:#FF6A2C">consequences</span>.'
+      },
+      potentialLabel: {
+        title: 'Potential Cyber Risk',
+        color: '#E08050',
+        body:  'The intersection of <span style="color:#F19A38">Threat</span> and <span style="color:#E63A37">Vulnerability</span>, highlighting that there is a risk present if both a <span style="color:#F19A38">threat</span> exists and the system is vulnerable to it, even if a <span style="color:#FF6A2C">consequence</span> has not yet occurred. This zone is <strong style="color:#A5B4FC">dynamic</strong> by nature, with new <span style="color:#F19A38">threats</span> and exposures emerging in real time.'
+      },
+      theoreticalLabel: {
+        title: 'Theoretical Cyber Risk',
+        color: '#F88232',
+        body:  'The intersection of <span style="color:#F19A38">Threat</span> and <span style="color:#FF6A2C">Consequence</span>; there is a theoretical risk when a <span style="color:#F19A38">threat</span> could have serious <span style="color:#FF6A2C">consequences</span>, even if a current <span style="color:#E63A37">vulnerability</span> isn\\u0027t identified. It is also <strong style="color:#6366F1">adversarial</strong>: an intelligent opponent may eventually discover a <span style="color:#E63A37">vulnerability</span> where none is currently visible.'
+      },
+      exposureLabel: {
+        title: 'Cyber Risk Exposure',
+        color: '#E55838',
+        body:  'Where <span style="color:#E63A37">Vulnerability</span> and <span style="color:#FF6A2C">Consequence</span> intersect, indicating that there is exposure to risk when a system is vulnerable and the <span style="color:#FF6A2C">consequences</span> of an exploit are potentially significant, regardless of the current level of <span style="color:#F19A38">threat</span>. This exposure is <strong style="color:#38BDF8">shared</strong> across the digital supply chain, propagating risk regardless of who the <span style="color:#F19A38">threat</span> actor turns out to be.'
+      },
+      cyberRiskLabel: {
+        title: 'Cyber Risk',
+        color: '#FF5552',
+        body:  'Represents the potential for losses or damages that may occur due to a <span style="color:#F19A38">threat</span> exploiting a <span style="color:#E63A37">vulnerability</span> and resulting in a <span style="color:#FF6A2C">consequence</span>. The overarching concept that encompasses all aspects of the potential negative outcomes of cyber events. Cyber risk is <strong style="color:#A5B4FC">dynamic</strong>, <strong style="color:#38BDF8">shared</strong>, <strong style="color:#3B82F6">continuous</strong>, and <strong style="color:#6366F1">adversarial</strong>: it evolves in real time, propagates across vendors, partners, customers, and the digital supply chain, never stops expanding, and unlike other risks, faces an intelligent opponent that learns and adapts to every defense.'
+      }
+    };`, `const LABEL_INFO = {
+      threatLabel: {
+        title: '脅威',
+        color: '#F19A38',
+        body:  '情報システムに害を与えたり、不正なアクセスを可能にしたりする可能性を持つあらゆるもの。悪意ある行為者、国家が支援するグループ、サイバー犯罪者、あるいは内部の<span style="color:#F19A38">脅威</span>が該当します。AI の時代においては、<span style="color:#F19A38">脅威</span>には攻撃をマシンスピードで拡大する自律的な<strong style="color:#6366F1">敵対的</strong>エージェントも含まれます。'
+      },
+      vulnerabilityLabel: {
+        title: '脆弱性',
+        color: '#E63A37',
+        body:  '<span style="color:#F19A38">脅威</span>によって悪用され得る、技術的、手続き的、あるいは人的な弱点。未修正のソフトウェア、設定不備の統制、ソーシャルエンジニアリングの被害者になり得る利用者などが例です。'
+      },
+      consequenceLabel: {
+        title: '影響',
+        color: '#FF6A2C',
+        body:  '<span style="color:#F19A38">脅威</span>が<span style="color:#E63A37">脆弱性</span>の悪用に成功した場合に生じる影響や損害。金銭的損失、レピュテーションの毀損、機密データの流出、事業の停止が代表的な<span style="color:#FF6A2C">影響</span>です。'
+      },
+      potentialLabel: {
+        title: '潜在的なサイバーリスク',
+        color: '#E08050',
+        body:  '<span style="color:#F19A38">脅威</span>と<span style="color:#E63A37">脆弱性</span>の交差。<span style="color:#F19A38">脅威</span>が存在し、かつシステムがそれに対して脆弱であれば、まだ<span style="color:#FF6A2C">影響</span>が生じていなくてもリスクは存在することを示します。この領域は本質的に<strong style="color:#A5B4FC">動的</strong>であり、新たな<span style="color:#F19A38">脅威</span>とエクスポージャーがリアルタイムに現れ続けます。'
+      },
+      theoreticalLabel: {
+        title: '理論上のサイバーリスク',
+        color: '#F88232',
+        body:  '<span style="color:#F19A38">脅威</span>と<span style="color:#FF6A2C">影響</span>の交差。現時点で<span style="color:#E63A37">脆弱性</span>が特定されていなくても、<span style="color:#F19A38">脅威</span>が重大な<span style="color:#FF6A2C">影響</span>をもたらし得るなら、理論上のリスクは存在します。ここは<strong style="color:#6366F1">敵対的</strong>でもあります。知性ある相手は、いまは見えていない<span style="color:#E63A37">脆弱性</span>をいずれ見つけ出すかもしれません。'
+      },
+      exposureLabel: {
+        title: 'サイバーリスクエクスポージャー',
+        color: '#E55838',
+        body:  '<span style="color:#E63A37">脆弱性</span>と<span style="color:#FF6A2C">影響</span>が交差する領域。システムが脆弱で、かつ悪用された場合の<span style="color:#FF6A2C">影響</span>が重大になり得るなら、現在の<span style="color:#F19A38">脅威</span>の水準にかかわらずリスクへの露出があることを意味します。このエクスポージャーはデジタルサプライチェーン全体で<strong style="color:#38BDF8">共有され</strong>、<span style="color:#F19A38">脅威</span>アクターが誰であるかにかかわらずリスクを伝播させます。'
+      },
+      cyberRiskLabel: {
+        title: 'サイバーリスク',
+        color: '#FF5552',
+        body:  '<span style="color:#F19A38">脅威</span>が<span style="color:#E63A37">脆弱性</span>を悪用し、<span style="color:#FF6A2C">影響</span>をもたらすことによって生じ得る損失や損害の可能性を表します。サイバー事象がもたらす負の結果のあらゆる側面を包含する、上位の概念です。サイバーリスクは<strong style="color:#A5B4FC">動的</strong>で、<strong style="color:#38BDF8">共有され</strong>、<strong style="color:#3B82F6">継続的</strong>で、<strong style="color:#6366F1">敵対的</strong>です。リアルタイムに変化し、ベンダー、パートナー、顧客、そしてデジタルサプライチェーンへと伝播し、拡大を止めることがなく、他のリスクと違って、あらゆる防御を学習し適応する知性ある相手と対峙します。'
       }
     };`);
       }
