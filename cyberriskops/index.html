@@ -29,6 +29,7 @@
      CJK glyphs sit on a fixed full-width em, so compressing them wrecks the stroke
      balance; where a label will not fit, the size comes down instead. ---- */
   :root{
+    --spin:16s;   /* one revolution; all three gears share it, being 8-toothed */
     --face-jp:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",YuGothic,
               "Noto Sans JP","Noto Sans CJK JP",Meiryo,sans-serif;
     /* the latin faces only, with no generic terminator: a generic family would
@@ -134,12 +135,21 @@
   .ringIn{transform-origin:800px 450px;transform:scale(.965);
           transition:transform var(--grow) var(--morph),opacity var(--fade) ease}
   .ringIn.on{transform:scale(1)}
-  /* the four phase labels wipe in along their own direction of flow: the top pair
-     left to right, the bottom pair right to left, matching their arrows */
-  .wipe{-webkit-transform-box:fill-box;transform-box:fill-box;transform-origin:left center;transform:scaleX(0);
-        transition:transform .6s cubic-bezier(.3,0,.2,1)}
-  .wipe.r{transform-origin:right center}
-  svg.st8 .wipe{transform:scaleX(1)}
+  /* The four phase labels peek in from behind the chevron they flow out of: the
+     window is a fixed aperture and the lettering slides through it, overshooting
+     a little and settling back. Top pair left to right, bottom pair right to
+     left, each following its own arrow. */
+  .peek{transform:translateX(var(--enter,0px));transition:opacity .12s linear}
+  /* A fixed overshoot rather than a bouncy easing: an easing overshoots a share of
+     the distance, and the distance here is the label's own width, so a long label
+     would fly far past its mark. Keyframes hold the bounce at a constant 11 units
+     whatever the language. */
+  @keyframes peekIn{
+    0%   {transform:translateX(var(--enter,0px))}
+    74%  {transform:translateX(var(--over,0px))}
+    100% {transform:translateX(0px)}
+  }
+  svg.st8 .peek{animation:peekIn .8s cubic-bezier(.33,0,.2,1) both}
   /* the arc lettering sweeps along its own curve, identification then mitigation */
   #sIdf,#sMit{transition:transform .9s cubic-bezier(.3,0,.2,1)}
   #sIdf{transform-origin:510px 450px;transform:rotate(var(--from,-222.7deg))}
@@ -148,10 +158,10 @@
   svg.st6 #sMit{transform:rotate(var(--to,36deg))}
 
   /* one after another, in the order the loop runs */
-  #wCtx .wipe{transition-delay:0s}
-  #wPri .wipe{transition-delay:.45s}
-  #wVer .wipe{transition-delay:.9s}
-  #wMon .wipe{transition-delay:1.35s}
+  svg.st8 .peek[data-i18n="ctx"]{animation-delay:0s}
+  svg.st8 .peek[data-i18n="pri"]{animation-delay:1s}
+  svg.st8 .peek[data-i18n="ver"]{animation-delay:2s}
+  svg.st8 .peek[data-i18n="mon"]{animation-delay:3s}
   /* the three bodies zoom in on arrival. The zoom rides a wrapper, so body and
      teeth scale together and no tooth can peek out of the circle on the way in. */
   .zL,.zR,.zC{transform:scale(.25);transition:transform var(--grow) var(--morph),opacity var(--fade) ease}
@@ -221,7 +231,7 @@
   .spin{transform-origin:580px 450px;will-change:transform}
   .spin.r{transform-origin:1020px 450px}
   .spin.c{transform-origin:800px 450px}
-  svg.running .spin{animation:cw 30s linear infinite}
+  svg.running .spin{animation:cw var(--spin) linear infinite}
   svg.running .spin.c{animation-name:ccw}   /* the middle gear reverses, as a train does */
   @media (prefers-reduced-motion:reduce){svg.running .spin{animation:none}}
 
@@ -336,10 +346,10 @@
     <clipPath id="wMit" clipPathUnits="userSpaceOnUse"><rect id="sMit" x="-2000" y="-2000" width="5000" height="2450"/></clipPath>
 
     <!-- wipe windows: each rect starts at scaleX(0) against its own leading edge -->
-    <clipPath id="wCtx" clipPathUnits="userSpaceOnUse"><rect class="wipe"   x="584" y="286" width="178" height="30"/></clipPath>
-    <clipPath id="wPri" clipPathUnits="userSpaceOnUse"><rect class="wipe"   x="863" y="286" width="137" height="30"/></clipPath>
-    <clipPath id="wMon" clipPathUnits="userSpaceOnUse"><rect class="wipe r" x="610" y="584" width="114" height="30"/></clipPath>
-    <clipPath id="wVer" clipPathUnits="userSpaceOnUse"><rect class="wipe r" x="871" y="584" width="120" height="30"/></clipPath>
+    <clipPath id="wCtx" clipPathUnits="userSpaceOnUse"><rect id="wrCtx" class="wipe"   x="584" y="286" width="178" height="30"/></clipPath>
+    <clipPath id="wPri" clipPathUnits="userSpaceOnUse"><rect id="wrPri" class="wipe"   x="863" y="286" width="137" height="30"/></clipPath>
+    <clipPath id="wMon" clipPathUnits="userSpaceOnUse"><rect id="wrMon" class="wipe r" x="610" y="584" width="114" height="30"/></clipPath>
+    <clipPath id="wVer" clipPathUnits="userSpaceOnUse"><rect id="wrVer" class="wipe r" x="871" y="584" width="120" height="30"/></clipPath>
 
     <!-- a ring split at top and bottom centre by the band's straight chevron -->
     <path id="halfD" d="M0 -176 A176 176 0 0 0 0 176 L-24 147.1 L0 122 A122 122 0 0 1 0 -122 L24 -147.1 Z"/>
@@ -465,10 +475,10 @@
 
   <!-- ===== 8 : the four phases, named ===== -->
   <g>
-    <text class="t t-flow" data-i18n="ctx" data-slot="170" clip-path="url(#wCtx)" data-wipe="wCtx" x="673" y="311.3" text-anchor="middle" textLength="172" lengthAdjust="spacingAndGlyphs">CONTEXTUALIZATION</text>
-    <text class="t t-flow" data-i18n="pri" data-slot="206" clip-path="url(#wPri)" data-wipe="wPri" x="931" y="311.3" text-anchor="middle" textLength="131" lengthAdjust="spacingAndGlyphs">PRIORITIZATION</text>
-    <text class="t t-flow" data-i18n="mon" data-slot="210" clip-path="url(#wMon)" data-wipe="wMon" x="667" y="609.3" text-anchor="middle" textLength="108" lengthAdjust="spacingAndGlyphs">MONITORING</text>
-    <text class="t t-flow" data-i18n="ver" data-slot="156" clip-path="url(#wVer)" data-wipe="wVer" x="931" y="609.3" text-anchor="middle" textLength="114" lengthAdjust="spacingAndGlyphs">VERIFICATION</text>
+    <g clip-path="url(#wCtx)"><text class="t t-flow peek" data-i18n="ctx" data-from="8" data-slot="170" data-wipe="wCtx" x="673" y="311.3" text-anchor="middle" textLength="172" lengthAdjust="spacingAndGlyphs">CONTEXTUALIZATION</text></g>
+    <g clip-path="url(#wPri)"><text class="t t-flow peek" data-i18n="pri" data-from="8" data-slot="206" data-wipe="wPri" x="931" y="311.3" text-anchor="middle" textLength="131" lengthAdjust="spacingAndGlyphs">PRIORITIZATION</text></g>
+    <g clip-path="url(#wMon)"><text class="t t-flow peek" data-i18n="mon" data-from="8" data-slot="210" data-wipe="wMon" x="667" y="609.3" text-anchor="middle" textLength="108" lengthAdjust="spacingAndGlyphs">MONITORING</text></g>
+    <g clip-path="url(#wVer)"><text class="t t-flow peek" data-i18n="ver" data-from="8" data-slot="156" data-wipe="wVer" x="931" y="609.3" text-anchor="middle" textLength="114" lengthAdjust="spacingAndGlyphs">VERIFICATION</text></g>
   </g>
 
   <!-- ======================= inspect mode =======================
@@ -698,6 +708,12 @@ const I18N = {"en": {"lang": "en", "doc": "CyberRiskOps · Cyber Risk Operations
     'cyber risk exposure management (crem)',    // 10
     'cyber risk operations center (croc)'];     // 11       // 11
   const LAST = 11, GAP = 2000;
+  /* Step 8 has to outlast its own contents: the four phase labels are staggered a
+     second apart and each takes .8s to land, so the step holds until monitoring has
+     arrived rather than handing over on the usual beat. Kept in step with the CSS
+     delays above. */
+  const PEEK_LAST = 3000, PEEK_RUN = 800;
+  const DWELL = { 8: PEEK_LAST + PEEK_RUN + 400 };
   let stage = 0, timer = null;
 
   function render(){
@@ -724,7 +740,7 @@ const I18N = {"en": {"lang": "en", "doc": "CyberRiskOps · Cyber Risk Operations
     (function tick(){
       if (stage >= LAST) { timer = null; return; }
       go(stage + 1);
-      timer = setTimeout(tick, GAP);
+      timer = setTimeout(tick, DWELL[stage] || GAP);
     })();
   }
   /* Clear on the spot, hold the empty canvas for one beat, then rebuild. */
@@ -812,12 +828,20 @@ const I18N = {"en": {"lang": "en", "doc": "CyberRiskOps · Cyber Risk Operations
   let L = I18N.en;
   function fitWipe(key){
     const t = svg.querySelector('[data-i18n="' + key + '"][data-wipe]');
-    const r = document.getElementById(t.dataset.wipe);
+    const r = document.getElementById('wr' + t.dataset.wipe.slice(1));
     const b = t.getBBox();
-    r.setAttribute('x', (b.x - 4).toFixed(1));
-    r.setAttribute('y', (b.y - 4).toFixed(1));
-    r.setAttribute('width', (b.width + 8).toFixed(1));
-    r.setAttribute('height', (b.height + 8).toFixed(1));
+    /* The aperture is a fixed window in user units, widened on the side the label
+       travels toward so the bounce is not clipped. The label starts offset by the
+       whole aperture, which puts it out of sight behind the chevron. */
+    const fromRight = r.classList.contains('r'), lead = 22, over = 11;
+    const x = b.x - 4 - (fromRight ? lead : 0), y = b.y - 4;
+    const w = b.width + 8 + lead, h = b.height + 8;
+    r.setAttribute('x', x.toFixed(1));
+    r.setAttribute('y', y.toFixed(1));
+    r.setAttribute('width', w.toFixed(1));
+    r.setAttribute('height', h.toFixed(1));
+    t.style.setProperty('--enter', (fromRight ? w : -w).toFixed(1) + 'px');
+    t.style.setProperty('--over',  (fromRight ? -over : over).toFixed(1) + 'px');
   }
   function fitSweep(rectId, arcId, left){
     const tp = svg.querySelector('[data-arc="' + arcId + '"]');
