@@ -80,12 +80,17 @@
   .page-title .main{font-size:clamp(24px,2.8vw,36px);font-weight:400;color:#FFFFFF;line-height:1.12;
                     letter-spacing:-.005em;margin-bottom:16px;pointer-events:auto}
   .page-title .main em{font-style:normal;color:var(--accent);font-weight:500}
+  /* tight chip: line-height 1 removes the line-box slack above and below the caps,
+     and the right padding is lighter than the left because the .34em tracking leaves
+     its own trailing space after the last letter */
+  .acronyms{display:flex;gap:7px;align-items:center;pointer-events:auto}
   .page-title .acronym{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;
-                       letter-spacing:.34em;color:var(--accent);padding:5px 12px 4px 14px;
+                       letter-spacing:.34em;line-height:1;color:var(--accent);padding:4px 5px 3px 9px;
                        border:1px solid rgba(196,50,43,.4);border-radius:3px}
-  .compass-link{cursor:pointer;transition:color .15s ease;color:inherit;
-                border-bottom:1px dotted rgba(255,255,255,.25);text-decoration:none}
-  .compass-link:hover{color:var(--accent);border-bottom-color:var(--accent)}
+  a.acronym{text-decoration:none;transition:color .15s ease,border-color .15s ease}
+  a.acronym:hover{color:#FFFFFF;border-color:rgba(196,50,43,.85)}
+  .compass-link{cursor:pointer;transition:color .15s ease;color:inherit;text-decoration:none}
+  .compass-link:hover{color:var(--accent)}
 
   .credit{position:fixed;bottom:18px;left:22px;font-size:12px;line-height:1.5;color:#666;user-select:none}
   .credit .label{display:block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;
@@ -281,7 +286,10 @@
 <div class="page-title">
   <div class="eyebrow"><a class="compass-link" href="https://cybersecuritycompass.github.io/" target="_blank" rel="noopener">Cybersecurity Compass</a> &middot; Before a Breach</div>
   <div class="main">The <em>Operationalization</em> of Cyber Risk</div>
-  <div class="acronym">CyberRiskOps</div>
+  <div class="acronyms">
+    <span class="acronym">CyberRiskOps</span>
+    <a class="acronym" href="https://cybersecuritycompass.github.io/crml/" target="_blank" rel="noopener">CRML</a>
+  </div>
 </div>
 
 <div class="stage" id="stage">
