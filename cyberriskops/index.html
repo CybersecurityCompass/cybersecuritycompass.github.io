@@ -83,7 +83,8 @@
   /* tight chip: line-height 1 removes the line-box slack above and below the caps,
      and the right padding is lighter than the left because the .34em tracking leaves
      its own trailing space after the last letter */
-  .acronyms{display:flex;gap:7px;align-items:center;pointer-events:auto}
+  .acronyms{display:flex;flex-wrap:nowrap;gap:7px;align-items:center;
+             width:max-content;pointer-events:auto}
   .page-title .acronym{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;
                        letter-spacing:.34em;line-height:1;color:var(--accent);padding:4px 5px 3px 9px;
                        border:1px solid rgba(196,50,43,.4);border-radius:3px}
@@ -289,6 +290,8 @@
   <div class="acronyms">
     <span class="acronym">CyberRiskOps</span>
     <a class="acronym" href="https://cybersecuritycompass.github.io/crml/" target="_blank" rel="noopener">CRML</a>
+    <a class="acronym" href="https://cybersecuritycompass.github.io/crq/" target="_blank" rel="noopener">CRQ</a>
+    <a class="acronym" href="https://cybersecuritycompass.github.io/cyberrisk/" target="_blank" rel="noopener">Cyber Risk</a>
   </div>
 </div>
 
@@ -317,12 +320,9 @@
     <path id="sec-mit" clip-path="url(#bandClip)" d="M1053 268 L1085 301 L1053 334 L1062 566 L1031 599 L1062 632 L1420 632 L1420 268 Z"/>
     <path id="sec-ver" clip-path="url(#bandClip)" d="M823 632 L794 599 L823 566 L1050 566 L1023 599 L1050 632 Z"/>
     <path id="sec-mon" clip-path="url(#bandClip)" d="M555 566 L526 599 L555 632 L815 632 L786 599 L815 566 Z"/>
-    <path id="sec-croc" fill-rule="evenodd" d="M510 191.5 H1090 A258.5 258.5 0 0 1 1090 708.5 H510 A258.5 258.5 0 0 1 510 191.5 Z
-             M510 211.5 H1090 A238.5 238.5 0 0 1 1090 688.5 H510 A238.5 238.5 0 0 1 510 211.5 Z"/>
-    <path id="sec-crem" fill-rule="evenodd" d="M510 214.5 H1090 A235.5 235.5 0 0 1 1090 685.5 H510 A235.5 235.5 0 0 1 510 214.5 Z
-             M510 241.5 H1090 A208.5 208.5 0 0 1 1090 658.5 H510 A208.5 208.5 0 0 1 510 241.5 Z"/>
-    <path id="sec-score" fill-rule="evenodd" d="M510 244.5 H1090 A205.5 205.5 0 0 1 1090 655.5 H510 A205.5 205.5 0 0 1 510 244.5 Z
-             M510 272.5 H1090 A177.5 177.5 0 0 1 1090 627.5 H510 A177.5 177.5 0 0 1 510 272.5 Z"/>
+    <path id="sec-croc" fill-rule="evenodd" d="M510 191.5 H1090 A258.5 258.5 0 0 1 1348.5 450 A258.5 258.5 0 0 1 1090 708.5 H510 A258.5 258.5 0 0 1 251.5 450 A258.5 258.5 0 0 1 510 191.5 Z M510 211.5 H1090 A238.5 238.5 0 0 1 1328.5 450 A238.5 238.5 0 0 1 1090 688.5 H510 A238.5 238.5 0 0 1 271.5 450 A238.5 238.5 0 0 1 510 211.5 Z"/>
+    <path id="sec-crem" fill-rule="evenodd" d="M510 214.5 H1090 A235.5 235.5 0 0 1 1325.5 450 A235.5 235.5 0 0 1 1090 685.5 H510 A235.5 235.5 0 0 1 274.5 450 A235.5 235.5 0 0 1 510 214.5 Z M510 241.5 H1090 A208.5 208.5 0 0 1 1298.5 450 A208.5 208.5 0 0 1 1090 658.5 H510 A208.5 208.5 0 0 1 301.5 450 A208.5 208.5 0 0 1 510 241.5 Z"/>
+    <path id="sec-score" fill-rule="evenodd" d="M510 244.5 H1090 A205.5 205.5 0 0 1 1295.5 450 A205.5 205.5 0 0 1 1090 655.5 H510 A205.5 205.5 0 0 1 304.5 450 A205.5 205.5 0 0 1 510 244.5 Z M510 272.5 H1090 A177.5 177.5 0 0 1 1267.5 450 A177.5 177.5 0 0 1 1090 627.5 H510 A177.5 177.5 0 0 1 332.5 450 A177.5 177.5 0 0 1 510 272.5 Z"/>
     <circle id="sec-assess" cx="580" cy="450" r="106"/>
     <circle id="sec-reduce" cx="1020" cy="450" r="106"/>
     <circle id="sec-core" cx="800" cy="450" r="62"/>
