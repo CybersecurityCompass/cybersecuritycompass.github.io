@@ -50,9 +50,10 @@
   }
   h1{
     font-family:"Space Grotesk",sans-serif;
-    font-weight:700;font-size:clamp(30px,4.4vw,52px);
-    line-height:1.02;letter-spacing:-.02em;margin:0 0 14px;
+    font-weight:700;font-size:clamp(19px,2.2vw,27px);
+    line-height:1.1;letter-spacing:-.01em;margin:0 0 14px;
   }
+  .title-accent{color:var(--accent)}
   .compass-links{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
   .compass-badge{
     font-family:"JetBrains Mono",monospace;font-size:9px;font-weight:600;
@@ -266,7 +267,7 @@
       <a class="compass-badge" href="https://cybersecuritycompass.github.io/cyberriskops/" target="_blank" rel="noopener">Cyber Risk Ops</a>
       <a class="compass-badge" href="https://cybersecuritycompass.github.io/crml/" target="_blank" rel="noopener">CRML</a>
     </div>
-    <h1 id="ui-title">Cuantificación del Ciber Riesgo (CRQ) Explicada</h1>
+    <h1 id="ui-title">Cuantificación del Ciber Riesgo (CRQ) <span class="title-accent">Explicada</span></h1>
     <div class="lede-row">
       <p class="lede" id="ui-lede">La Cuantificación del Ciber Riesgo pone un número al riesgo cibernético: qué tan probable es que ocurra una amenaza, cuánto costaría si sucede, y si vale la pena invertir en los controles para evitarla.</p>
       <p class="lede-action" id="ui-lede-action">Selecciona un nodo para ver qué hace y hacia dónde fluye. Hay un <a href="https://cybersecuritycompass.github.io/crq/#glossary" id="ui-glossary-link">glosario</a> completo disponible al final de la página.</p>
@@ -510,7 +511,7 @@
 const UI = {
   en:{
     eyebrow:"Cyber Risk Quantification · Reference Model",
-    title:"Cyber Risk Quantification (CRQ) Explained",
+    title:'Cyber Risk Quantification (CRQ) <span class="title-accent">Explained</span>',
     lede:"Cyber Risk Quantification puts a number on cyber risk: how likely a threat is to happen, what it would cost if it did, and whether the controls to stop it are worth the investment.",
     ledeAction:'Select any node to see what it does and where it flows. A full <a href="#glossary" id="ui-glossary-link">glossary</a> is available at the bottom of the page.',
     hint:"click a node →",
@@ -525,7 +526,7 @@ const UI = {
   },
   es:{
     eyebrow:"Cuantificación del Ciber Riesgo · Modelo de Referencia",
-    title:"Cuantificación del Ciber Riesgo (CRQ) Explicada",
+    title:'Cuantificación del Ciber Riesgo (CRQ) <span class="title-accent">Explicada</span>',
     lede:"La Cuantificación del Ciber Riesgo pone un número al riesgo cibernético: qué tan probable es que ocurra una amenaza, cuánto costaría si sucede, y si vale la pena invertir en los controles para evitarla.",
     ledeAction:'Selecciona un nodo para ver qué hace y hacia dónde fluye. Hay un <a href="#glossary" id="ui-glossary-link">glosario</a> completo disponible al final de la página.',
     hint:"haz clic en un nodo →",
@@ -540,7 +541,7 @@ const UI = {
   },
   pt:{
     eyebrow:"Quantificação do Ciber Risco · Modelo de Referência",
-    title:"Quantificação do Ciber Risco (CRQ) Explicada",
+    title:'Quantificação do Ciber Risco (CRQ) <span class="title-accent">Explicada</span>',
     lede:"A Quantificação do Ciber Risco coloca um número no risco cibernético: qual a probabilidade de uma ameaça ocorrer, quanto custaria se acontecesse, e se vale a pena investir nos controles para evitá-la.",
     ledeAction:'Selecione um nó para ver o que ele faz e para onde flui. Há um <a href="#glossary" id="ui-glossary-link">glossário</a> completo disponível no final da página.',
     hint:"clique em um nó →",
@@ -555,7 +556,7 @@ const UI = {
   },
   ja:{
     eyebrow:"サイバーリスク定量化・リファレンスモデル",
-    title:"サイバーリスク定量化(CRQ)の解説",
+    title:'サイバーリスク定量化(CRQ)の<span class="title-accent">解説</span>',
     lede:"サイバーリスク定量化は、脅威が発生する可能性、発生した場合の損失額、そしてそれを防ぐための対策コストが見合うかどうかを、サイバーリスクに数値で示します。",
     ledeAction:'ノードを選択すると、その役割と関連するフローを確認できます。ページ下部には完全な<a href="#glossary" id="ui-glossary-link">用語集</a>があります。',
     hint:"ノードをクリック →",
@@ -667,7 +668,7 @@ function detectLang(){
 function applyLang(lang){
   currentLang = lang;
   const u = UI[lang];
-  document.getElementById('ui-title').textContent = u.title;
+  document.getElementById('ui-title').innerHTML = u.title;
   document.getElementById('ui-lede').textContent = u.lede;
   document.getElementById('ui-lede-action').innerHTML = u.ledeAction;
   document.getElementById('eq-risk').textContent = u.eqRisk;
