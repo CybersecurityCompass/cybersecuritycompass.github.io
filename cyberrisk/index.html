@@ -13,7 +13,7 @@
       height: 100%;
       background: #000;
       color: #fff;
-      font-family: 'Helvetica Neue', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Helvetica Neue', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic UI', 'Yu Gothic', 'Noto Sans JP', Meiryo, sans-serif;
       overflow: hidden;
     }
 
@@ -77,6 +77,13 @@
       color: #FFFFFF;
       border-color: #C4322B;
       background-color: #C4322B;
+    }
+    /* Row holding the framework badges (CRML, CyberRiskOps) */
+    .page-title .acronym-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
     }
 
     .svg-wrap {
@@ -171,10 +178,11 @@
       transition: fill 0.35s ease;
     }
 
-    /* Outer labels turn white while the cursor is on them, so they stay legible against the wash that lights up beneath */
-    #cyberRiskSvg #threatLabel:hover,
-    #cyberRiskSvg #vulnerabilityLabel:hover,
-    #cyberRiskSvg #consequenceLabel:hover {
+    /* Outer labels turn white while the cursor is on their section (driven by JS via .label-hover,
+       since the actual pointer target is now the invisible hit-region shape, not the text itself) */
+    #cyberRiskSvg #threatLabel.label-hover,
+    #cyberRiskSvg #vulnerabilityLabel.label-hover,
+    #cyberRiskSvg #consequenceLabel.label-hover {
       fill: #FFFFFF;
     }
 
@@ -190,14 +198,23 @@
       animation: cyberRiskPulse 1.5s ease-in-out infinite;
     }
 
-    /* Hover/tap target on the labels is only live once the intro animation finishes (the script adds .active after the timeline ends, and removes it again whenever Replay is pressed) */
+    /* Labels are purely visual now; the invisible .hit-region shapes beneath them own all pointer interaction */
     .hot-label {
       cursor: default;
       pointer-events: none;
     }
-    .hot-label.active {
+
+    /* Hit regions cover each full section (circle / lens / centre) so hovering or tapping anywhere
+       in that area — not just on the text — triggers the tooltip and wash. Inert until the intro
+       animation finishes (the script adds .active after the timeline ends, and removes it again
+       whenever Replay is pressed). */
+    .hit-region {
+      fill: transparent;
+      pointer-events: none;
+    }
+    .hit-region.active {
       cursor: pointer;
-      pointer-events: bounding-box;
+      pointer-events: all;
     }
 
     .controls {
@@ -288,36 +305,99 @@
     .reference-title { font-size: 11px; }
     .reference-doi   { font-size: 10px; color: #6e6e6e !important; margin-top: 1px; }
 
-    /* Language selector (top-right) */
+    /* Language selector (top-right) — dropdown menu */
     .lang-selector {
       position: fixed;
       top: 22px;
       right: 28px;
       z-index: 30;
+      font-family: inherit;
+      user-select: none;
+    }
+    .lang-trigger {
       display: flex;
-      gap: 0;
       align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 4px;
+      color: #b0b0b0;
+      padding: 6px 10px 5px 11px;
+      cursor: pointer;
       font-family: inherit;
       font-size: 10.5px;
       font-weight: 600;
       letter-spacing: 0.12em;
-      user-select: none;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      transition: color 0.15s ease, border-color 0.15s ease;
     }
-    .lang-selector button {
+    .lang-trigger:hover { color: #FFFFFF; border-color: rgba(255, 255, 255, 0.38); }
+    .lang-trigger .caret {
+      font-size: 8px;
+      line-height: 1;
+      color: #777;
+      transition: transform 0.2s ease, color 0.15s ease;
+    }
+    .lang-selector.open .lang-trigger { color: #FFFFFF; border-color: #C4322B; }
+    .lang-selector.open .lang-trigger .caret { transform: rotate(180deg); color: #C4322B; }
+
+    .lang-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      min-width: 152px;
+      background: rgba(10, 10, 10, 0.97);
+      border: 1px solid #333;
+      border-radius: 5px;
+      padding: 4px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.7);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+    .lang-selector.open .lang-menu {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .lang-menu button {
+      display: flex;
+      width: 100%;
+      align-items: baseline;
+      gap: 10px;
       background: none;
       border: none;
-      color: #888;
-      padding: 4px 10px;
+      color: #9a9a9a;
+      padding: 7px 9px;
+      border-radius: 3px;
       cursor: pointer;
       font-family: inherit;
-      font-size: inherit;
-      font-weight: inherit;
-      letter-spacing: inherit;
-      transition: color 0.15s ease;
+      text-align: left;
+      transition: color 0.15s ease, background-color 0.15s ease;
     }
-    .lang-selector button:hover { color: #FFFFFF; }
-    .lang-selector button.active { color: #C4322B; }
-    .lang-selector .sep { color: #444; font-weight: 400; }
+    .lang-menu button .code {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      min-width: 22px;
+    }
+    .lang-menu button .name {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      opacity: 0.72;
+    }
+    .lang-menu button:hover { background: rgba(255, 255, 255, 0.07); color: #FFFFFF; }
+    .lang-menu button.active { color: #C4322B; }
+    .lang-menu button.active .name { opacity: 0.9; }
+
+    /* Japanese runs tighter than the Latin scripts: relax the wide tracking */
+    html[lang="ja"] .page-title .main { letter-spacing: 0; }
+    html[lang="ja"] .info-panel h3 { letter-spacing: 1.5px; }
 
     @media (max-width: 640px) {
       .page-title { top: 18px; left: 20px; max-width: calc(100vw - 40px); }
@@ -328,8 +408,9 @@
       .reference { display: none; }
       .controls { bottom: 22px; }
       button.replay { font-size: 10px; padding: 9px 18px; letter-spacing: 2px; }
-      .lang-selector { top: 14px; right: 16px; font-size: 9.5px; }
-      .lang-selector button { padding: 4px 7px; }
+      .lang-selector { top: 14px; right: 16px; }
+      .lang-trigger { font-size: 9.5px; padding: 6px 9px 5px 10px; }
+      .lang-menu { min-width: 140px; }
     }
   
   /* ===== Cybersecurity Compass modal (mirrors the Cyber Risk modal pattern) ===== */
@@ -405,24 +486,32 @@
 </style>
 </head>
 <body>
-  <div class="lang-selector" role="group" aria-label="Language selector">
-    <button type="button" data-lang="en" class="active">EN</button>
-    <span class="sep">·</span>
-    <button type="button" data-lang="es">ES</button>
-    <span class="sep">·</span>
-    <button type="button" data-lang="pt">PT</button>
+  <div class="lang-selector" id="langSelector">
+    <button type="button" class="lang-trigger" id="langTrigger"
+            aria-haspopup="listbox" aria-expanded="false" aria-label="Language">
+      <span id="langCurrentLabel">EN</span><span class="caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="lang-menu" id="langMenu" role="listbox" aria-label="Language selector">
+      <button type="button" data-lang="en" role="option" aria-selected="true" class="active"><span class="code">EN</span><span class="name">English</span></button>
+      <button type="button" data-lang="es" role="option" aria-selected="false"><span class="code">ES</span><span class="name">Español</span></button>
+      <button type="button" data-lang="pt" role="option" aria-selected="false"><span class="code">PT</span><span class="name">Português</span></button>
+      <button type="button" data-lang="ja" role="option" aria-selected="false"><span class="code">JA</span><span class="name">日本語</span></button>
+    </div>
   </div>
 
   <div class="stage">
     <div class="page-title">
       <div class="eyebrow" data-i18n-html="page.eyebrow"><span id="compass-trigger" class="compass-link" role="button" tabindex="0" onclick="openCompass()">Cybersecurity Compass</span> · Before a Breach</div>
       <div class="main" data-i18n-html="page.main">Cyber Risk:<br><em>A Visual Representation</em></div>
-      <a class="acronym" href="https://cybersecuritycompass.github.io/crml/" target="_blank" rel="noopener">CRML</a>
+      <div class="acronym-row">
+        <a class="acronym" href="https://cybersecuritycompass.github.io/crml/" target="_blank" rel="noopener">CRML</a>
+        <a class="acronym" href="https://cybersecuritycompass.github.io/cyberriskops/" target="_blank" rel="noopener">CyberRiskOps</a>
+      </div>
     </div>
 
     <div class="svg-wrap">
       <svg id="cyberRiskSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"
-           font-family="'Helvetica Neue', 'Arial Black', Arial, sans-serif"
+           font-family="'Helvetica Neue', 'Arial Black', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic UI', 'Yu Gothic', 'Noto Sans JP', Meiryo, sans-serif"
            role="img" aria-label="Cyber Risk Venn diagram" aria-describedby="svg-desc">
         <desc id="svg-desc">A Venn diagram showing Cyber Risk as the intersection of Threat, Vulnerability, and Consequence, with pairwise overlaps labelled Potential Cyber Risk, Theoretical Cyber Risk, and Cyber Risk Exposure.</desc>
 
@@ -549,6 +638,29 @@
             <tspan x="800" data-i18n="venn.cyberrisk.l1">Cyber</tspan>
             <tspan x="800" dy="44" data-i18n="venn.cyberrisk.l2">Risk</tspan>
           </text>
+        </g>
+
+        <!-- Hit regions: invisible shapes covering each FULL section (not just the label text) so
+             hover/tap works anywhere in Threat, Vulnerability, Consequence, the three pairwise
+             overlaps, or the centre. Stacking order matters: the three base circles sit at the
+             bottom, the pairwise lenses above them, and the centre on top — so a point inside an
+             overlap always resolves to the more specific (topmost) region instead of the plain
+             circle beneath it. -->
+        <g id="hitRegions" fill="transparent" stroke="none">
+          <circle id="threatHit"        class="hit-region" cx="800" cy="303" r="270"/>
+          <circle id="vulnerabilityHit" class="hit-region" cx="655" cy="554" r="270"/>
+          <circle id="consequenceHit"   class="hit-region" cx="945" cy="554" r="270"/>
+          <path id="potentialHit" class="hit-region"
+                d="M 530.2,314.6 A 270,270 0 0,0 924.8,542.4 A 270,270 0 0,0 530.2,314.6 Z"/>
+          <path id="theoreticalHit" class="hit-region"
+                d="M 1069.8,314.6 A 270,270 0 0,1 675.2,542.4 A 270,270 0 0,1 1069.8,314.6 Z"/>
+          <path id="exposureHit" class="hit-region"
+                d="M 800,326.2 A 270,270 0 0,1 800,781.8 A 270,270 0 0,1 800,326.2 Z"/>
+          <path id="cyberRiskHit" class="hit-region"
+                d="M 800,326.2
+                   A 270,270 0 0,1 924.8,542.4
+                   A 270,270 0 0,1 675.2,542.4
+                   A 270,270 0 0,1 800,326.2 Z"/>
         </g>
       
           <!-- ============================================================
@@ -680,6 +792,28 @@
         'venn.exposure.l3':       'Risco',
         'venn.cyberrisk.l1':      'Ciber',
         'venn.cyberrisk.l2':      'Risco'
+      },
+      ja: {
+        'page.eyebrow':       '<span id="compass-trigger" class="compass-link" role="button" tabindex="0" onclick="openCompass()">Cybersecurity Compass</span> · 侵害発生前',
+        'page.main':          'サイバーリスク：<br><em>視覚的表現</em>',
+        'replay':             'リプレイ',
+        'credit.eyebrow':     '作成・デザイン',
+        'reference.title':    'サイバーリスクの解読：視覚的表現',
+        'cta.compass':        'クリックして Cybersecurity Compass を見る →',
+        'venn.threat':            '脅威',
+        'venn.vuln':              '脆弱性',
+        'venn.consequence':       '結果',
+        'venn.potential.l1':      '潜在的',
+        'venn.potential.l2':      'サイバー',
+        'venn.potential.l3':      'リスク',
+        'venn.theoretical.l1':    '理論的',
+        'venn.theoretical.l2':    'サイバー',
+        'venn.theoretical.l3':    'リスク',
+        'venn.exposure.l1':       '',
+        'venn.exposure.l2':       'サイバーリスク',
+        'venn.exposure.l3':       'エクスポージャー',
+        'venn.cyberrisk.l1':      'サイバー',
+        'venn.cyberrisk.l2':      'リスク'
       }
     };
 
@@ -796,6 +930,43 @@
           color: '#FF5552',
           body:  'Representa o potencial de perdas ou danos que podem ocorrer devido a uma <span style="color:#F19A38">ameaça</span> que explora uma <span style="color:#E63A37">vulnerabilidade</span> e resulta em uma <span style="color:#FF6A2C">consequência</span>. O conceito geral que engloba todos os aspectos dos possíveis resultados negativos dos eventos cibernéticos. O ciber risco é <strong style="color:#A5B4FC">dinâmico</strong>, <strong style="color:#38BDF8">compartilhado</strong>, <strong style="color:#3B82F6">contínuo</strong> e <strong style="color:#6366F1">adversarial</strong>: evolui em tempo real, propaga-se através de fornecedores, parceiros, clientes e a cadeia de suprimentos digital, nunca deixa de se expandir, e ao contrário de outros riscos, enfrenta um oponente inteligente que aprende e se adapta a cada defesa.'
         }
+      },
+      ja: {
+        threatLabel: {
+          title: '脅威',
+          color: '#F19A38',
+          body:  '情報システムに損害を与え、または不正アクセスを可能にする潜在的な要因のすべてを指します。悪意のある攻撃者、国家支援型グループ、サイバー犯罪者、内部からの<span style="color:#F19A38">脅威</span>などが含まれます。AI の時代において、<span style="color:#F19A38">脅威</span>には、機械の速度で攻撃を拡大する自律型の<strong style="color:#6366F1">敵対的</strong>エージェントも含まれるようになりました。'
+        },
+        vulnerabilityLabel: {
+          title: '脆弱性',
+          color: '#E63A37',
+          body:  '<span style="color:#F19A38">脅威</span>によって悪用され得る、技術的・手続き的・人的な弱点です。未修正のソフトウェア、設定不備の管理策、ソーシャルエンジニアリングの被害者となり得る利用者などが例として挙げられます。'
+        },
+        consequenceLabel: {
+          title: '結果',
+          color: '#FF6A2C',
+          body:  '<span style="color:#F19A38">脅威</span>が<span style="color:#E63A37">脆弱性</span>の悪用に成功した場合に生じる影響や損害です。金銭的損失、レピュテーションの毀損、機密データの喪失、事業の停止などが一般的な<span style="color:#FF6A2C">結果</span>です。'
+        },
+        potentialLabel: {
+          title: '潜在的サイバーリスク',
+          color: '#E08050',
+          body:  '<span style="color:#F19A38">脅威</span>と<span style="color:#E63A37">脆弱性</span>が交差する領域です。<span style="color:#FF6A2C">結果</span>がまだ発生していなくても、<span style="color:#F19A38">脅威</span>が存在し、システムがそれに対して脆弱であれば、リスクはすでに存在することを示します。この領域は本質的に<strong style="color:#A5B4FC">動的</strong>であり、新たな<span style="color:#F19A38">脅威</span>とエクスポージャーがリアルタイムで生まれ続けます。'
+        },
+        theoreticalLabel: {
+          title: '理論的サイバーリスク',
+          color: '#F88232',
+          body:  '<span style="color:#F19A38">脅威</span>と<span style="color:#FF6A2C">結果</span>が交差する領域です。現時点で<span style="color:#E63A37">脆弱性</span>が特定されていなくても、<span style="color:#F19A38">脅威</span>が深刻な<span style="color:#FF6A2C">結果</span>をもたらし得る場合、理論的なリスクが存在します。これは<strong style="color:#6366F1">敵対的</strong>でもあります。知性を持つ攻撃者は、現在は見えていない<span style="color:#E63A37">脆弱性</span>をいずれ発見する可能性があるからです。'
+        },
+        exposureLabel: {
+          title: 'サイバーリスク・エクスポージャー',
+          color: '#E55838',
+          body:  '<span style="color:#E63A37">脆弱性</span>と<span style="color:#FF6A2C">結果</span>が交差する領域です。現在の<span style="color:#F19A38">脅威</span>の水準にかかわらず、システムが脆弱であり、悪用された場合の<span style="color:#FF6A2C">結果</span>が重大であれば、リスクへのエクスポージャーが存在することを意味します。このエクスポージャーはデジタルサプライチェーン全体で<strong style="color:#38BDF8">共有</strong>され、<span style="color:#F19A38">脅威</span>アクターが誰であるかにかかわらずリスクを伝播させます。'
+        },
+        cyberRiskLabel: {
+          title: 'サイバーリスク',
+          color: '#FF5552',
+          body:  '<span style="color:#F19A38">脅威</span>が<span style="color:#E63A37">脆弱性</span>を悪用し、<span style="color:#FF6A2C">結果</span>を招くことで生じ得る損失や損害の可能性を表します。サイバー事象がもたらす負の帰結のあらゆる側面を包含する上位概念です。サイバーリスクは<strong style="color:#A5B4FC">動的</strong>、<strong style="color:#38BDF8">共有</strong>、<strong style="color:#3B82F6">継続的</strong>、そして<strong style="color:#6366F1">敵対的</strong>です。リアルタイムに変化し、ベンダー、パートナー、顧客、デジタルサプライチェーン全体へ広がり、拡大が止まることはなく、他のリスクと異なり、あらゆる防御を学習し適応する知性を持つ相手と対峙します。'
+        }
       }
     };
 
@@ -835,6 +1006,7 @@ html,body{background:#000;height:100%;}
 #hits path{pointer-events:all;cursor:pointer;fill:transparent;}
 
 /* injected overrides for embedded use */
+svg text,#tt,#tt-h,#tt-s,#tt-b,#compass-title,#credit,#pub-link{font-family:Inter,Arial,'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic UI','Yu Gothic','Noto Sans JP',Meiryo,sans-serif;}
 html,body,#wrap,#stage{background:transparent !important;}
 #stage{box-shadow:none !important;}
 .bg1,.bg2,.bg3,.bg4,.bg5{display:none !important;}
@@ -871,6 +1043,7 @@ html,body,#wrap,#stage{background:transparent !important;}
     <button id="btn-en" onclick="setLang(&#39;en&#39;)" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">EN</button>
     <button id="btn-es" onclick="setLang(&#39;es&#39;)" style="background: rgb(224, 28, 36); color: rgb(255, 255, 255);">ES</button>
     <button id="btn-pt" onclick="setLang(&#39;pt&#39;)" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">PT</button>
+    <button id="btn-ja" onclick="setLang(&#39;ja&#39;)" style="background: rgba(255, 255, 255, 0.1); color: rgb(136, 136, 136);">JA</button>
   </div>
 
   <div id="compass-title">La Brújula de Ciberseguridad</div>
@@ -911,6 +1084,16 @@ const T={
     pubLine1:"A Bússola da Cibersegurança:",pubLine2:"Navegando Estrategicamente pelo Tempestuoso Oceano Digital",
     pubUrl:"https://www.researchgate.net/publication/389631493",
     pubDoi:"10.13140/RG.2.2.14022.79687",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.14022.79687"
+  },
+  ja:{
+    crm:"サイバーリスク管理",pap:"予防的かつ予測的",bab:"侵害発生前",
+    dar:"検知と対応",rad:"事後対応的かつ防御的",dub:"侵害発生中",
+    cr:"サイバーレジリエンス",rai:"復旧と改善",aab:"侵害発生後",
+    ppl:"人材",prc:"プロセス",tch:"テクノロジー",
+    title:"サイバーセキュリティ・コンパス",credit:"作成・デザイン：",
+    pubLine1:"サイバーセキュリティ・コンパス：",pubLine2:"荒れ狂うデジタルの海を戦略的に航海する",
+    pubUrl:"https://www.researchgate.net/publication/389628862",
+    pubDoi:"10.13140/RG.2.2.15582.55366",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.15582.55366"
   }
 };
 
@@ -938,6 +1121,14 @@ const TT={
      b:"Em cibersegurança, não é uma questão de se as tempestades vão chegar, mas de quando. A Detecção e Resposta é a sua tripulação no coração da tempestade: olhos em cada sinal, mãos em cada controle. Identifica as ameaças à medida que se desenvolvem, contém a brecha antes que se espalhe e responde com velocidade e precisão. Essencial, mas nunca suficiente sozinha. As organizações que só sabem enfrentar tempestades passarão toda a sua viagem esperando pela próxima. A bússola exige mais."},
     {h:"Ciber Resiliência",s:"Após uma Brecha · Recuperar e Melhorar · Um Resultado",
      b:"A Ciber Resiliência não é uma fase que você entra após um incidente. É o resultado de ter feito tudo o mais certo. Quando o seu norte está definido por uma gestão proativa de riscos e sua equipe responde com precisão durante a tempestade, a resiliência é o que você conquista. Significa restaurar operações mais rápido, aprender com o que falhou, fortalecer o que foi exposto e retroalimentar essa inteligência na sua bússola. As organizações que alcançam a verdadeira Ciber Resiliência não apenas sobrevivem às tempestades. Tornam-se mais difíceis de afundar a cada uma que enfrentam."}
+  ],
+  ja:[
+    {h:"サイバーリスク管理",s:"侵害発生前 · 予防的かつ予測的",
+     b:"サイバーセキュリティのコンパスが指し示す真北です。これがなければ、組織は危機から危機へと漂流し、対応と復旧を繰り返すだけで、リスクを実際に低減することはできません。サイバーリスク管理とは、脅威が現実化する前に予測し、最も重要なものに優先順位を付け、セキュリティ投資を最適化し、経営層が戦略的な意思決定を行うための明確な言語を与える、予防的かつ予測的な規律です。サイバー犯罪者が探しているのは技術的な脆弱性だけではありません。進むべき方向を持たない組織に生じる不確実性と決断の遅れを狙っています。その隙を埋めるのがサイバーリスク管理です。"},
+    {h:"検知と対応",s:"侵害発生中 · 事後対応的かつ防御的",
+     b:"サイバーセキュリティにおいて、嵐が来るかどうかは問題ではありません。いつ来るかが問題です。検知と対応は、嵐の中心にいる乗組員です。あらゆる兆候に目を向け、あらゆる制御に手を掛けます。脅威が展開するその瞬間に特定し、侵害が広がる前に封じ込め、迅速かつ的確に対応します。不可欠ですが、それだけでは決して十分ではありません。嵐を乗り切る方法しか知らない組織は、航海のすべてを次の嵐を待つことに費やすことになります。コンパスはそれ以上を求めます。"},
+    {h:"サイバーレジリエンス",s:"侵害発生後 · 復旧と改善 · 成果",
+     b:"サイバーレジリエンスは、インシデントの後に入る段階ではありません。それ以外のすべてを正しく行った結果として得られる成果です。予防的なリスク管理によって真北が定まり、嵐の最中に乗組員が的確に対応したとき、レジリエンスは獲得されます。それは、業務をより速く復旧し、失敗から学び、露呈した弱点を強化し、その知見をコンパスへ還元することを意味します。真のサイバーレジリエンスを実現する組織は、単に嵐を生き延びるだけではありません。乗り切るたびに、沈みにくくなっていきます。"}
   ]
 };
 
@@ -965,6 +1156,14 @@ const TTP={
      b:"O processo é a espinha dorsal operacional que conecta pessoas à tecnologia e estratégia à execução. Sem ele, até as melhores ferramentas geram ruído e o melhor talento opera em silos. No núcleo de uma camada de processo madura estão a disciplina CyberRiskOps e seu centro operacional, o Centro de Operações de Ciber Risco (CROC), onde a inteligência de risco é continuamente medida, priorizada e executada. Security Operations (SecOps) conecta essa inteligência de risco com ação em tempo real, enquanto o Centro de Operações de Segurança (SOC) executa detecção, investigação e resposta com velocidade. Juntos, transformam a cibersegurança de um conjunto de reações isoladas em uma operação contínua, mensurável e em melhoria constante. O processo é o que garante que a bússola continue em movimento."},
     {h:"Tecnologia",s:"O Multiplicador de Força",
      b:"A tecnologia é o multiplicador de força da sua estratégia de cibersegurança, mas apenas quando serve a um propósito claro. A Quantificação do Ciber Risco (CRQ) traduz o risco técnico em linguagem financeira que os executivos podem utilizar. A Gestão de Exposição ao Ciber Risco (CREM) mapeia e prioriza continuamente sua superfície de ataque antes que os adversários possam explorá-la. A Detecção e Resposta Estendida (XDR) unifica a visibilidade em endpoints, redes, nuvem e identidade em uma imagem única e correlacionada. A Inteligência de Ameaças alimenta sua bússola com contexto do adversário, transformando alertas reativos em decisões proativas. A automação elimina o atrito manual que atrasa a resposta e permite que suas equipes operem na velocidade das máquinas. Uma plataforma unificada integra tudo isso, substituindo soluções pontuais fragmentadas por inteligência integrada. A Inteligência Artificial amplia o que as equipes humanas podem fazer em cada camada. A tecnologia não define sua estratégia. Ela a executa."}
+  ],
+  ja:[
+    {h:"人材",s:"ヒューマンレイヤー",
+     b:"組織を守るのはテクノロジーではありません。人です。コンパスにおける「人材」の次元は、他のあらゆる投資に意味を与えるヒューマンレイヤーを表します。兆候を読み解くセキュリティアナリスト、リスクに関する判断を下す経営層、そして最初の防衛線にも最初の弱点にもなり得る従業員です。そして、あらゆる攻撃の向こう側にも人がいます。サイバー犯罪者は自動化された自然の力ではありません。独自の意図、動機、戦略を持つ個人です。標的を研究し、決断の遅れを突き、目的を持って動きます。彼らに対抗するには、彼らが備えているものと同じ人間的な資質が求められます。認識力、判断力、そして先に動く意志です。熟練し、意識が高く、権限を与えられた人がいないコンパスは、誰も読み方を知らない計器にすぎません。文化、教育、説明責任、リーダーシップは副次的な要素ではありません。舵を握る手そのものです。"},
+    {h:"プロセス",s:"運用の基盤",
+     b:"プロセスは、人とテクノロジー、戦略と実行を結ぶ運用の基盤です。これがなければ、最良のツールもノイズを生み、最良の人材もサイロの中で働くことになります。成熟したプロセス層の中核にあるのが CyberRiskOps という規律と、その運用上の中枢であるサイバーリスク運用センター（CROC）です。ここではリスクインテリジェンスが継続的に測定され、優先順位付けされ、実行に移されます。セキュリティ運用（SecOps）はそのリスクインテリジェンスをリアルタイムの行動へと橋渡しし、セキュリティオペレーションセンター（SOC）は検知、調査、対応を高速で実行します。両者が組み合わさることで、サイバーセキュリティは孤立した反応の集まりから、継続的で測定可能かつ改善し続ける運用へと変わります。コンパスを動かし続けるのがプロセスです。"},
+    {h:"テクノロジー",s:"戦力の増幅装置",
+     b:"テクノロジーはサイバーセキュリティ戦略の戦力を増幅させますが、それは明確な目的に沿って使われる場合に限られます。サイバーリスク定量化（CRQ）は、技術的なリスクを経営層が行動に移せる財務の言語へと翻訳します。サイバーリスクエクスポージャー管理（CREM）は、攻撃者に悪用される前にアタックサーフェスを継続的に可視化し、優先順位を付けます。Extended Detection and Response（XDR）は、エンドポイント、ネットワーク、クラウド、アイデンティティにまたがる可視性を、相関付けられた一つの全体像に統合します。脅威インテリジェンスは攻撃者の文脈をコンパスに与え、受動的なアラートを能動的な意思決定へと変えます。自動化は対応を遅らせる手作業の摩擦を取り除き、チームが疲弊することなく機械の速度で動けるようにします。統合プラットフォームはこれらすべてを結び付け、断片化した個別製品を統合されたインテリジェンスに置き換えます。人工知能は、あらゆる層で人のチームができることを拡張します。テクノロジーは戦略を定義するものではありません。戦略を実行するものです。"}
   ]
 };
 
@@ -990,8 +1189,9 @@ function applyLang(l){
       '<span style="display:inline;white-space:nowrap;">'+t.pubLine2+'</span>'+
     '</a>'+
     '<a href="'+t.pubDoiUrl+'" target="_blank" style="color:rgba(255,255,255,.28);text-decoration:none;">DOI: '+t.pubDoi+'</a>';
-  ['en','es','pt'].forEach(c=>{
+  Object.keys(T).forEach(c=>{
     const b=document.getElementById('btn-'+c);
+    if(!b) return;
     b.style.background=c===l?'#E01C24':'rgba(255,255,255,0.1)';
     b.style.color=c===l?'#fff':'#888';
   });
@@ -1399,10 +1599,14 @@ window.addEventListener('message', function(e){
         if (dict[key] !== undefined) el.innerHTML = dict[key];
       });
 
-      // Update active state on selector buttons
+      // Update active state on selector buttons and mirror the choice on the dropdown trigger
       document.querySelectorAll('.lang-selector button[data-lang]').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+        const isActive = btn.getAttribute('data-lang') === lang;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
       });
+      const _langLabel = document.getElementById('langCurrentLabel');
+      if (_langLabel) _langLabel.textContent = LANG_CODES[lang] || lang.toUpperCase();
 
       document.documentElement.lang = lang;
 
@@ -1421,17 +1625,20 @@ window.addEventListener('message', function(e){
       potentialLabel: {
         en: { x: 645, y: 372, fontSize: 30, fontWeight: null },
         es: { x: 640, y: 352, fontSize: 25, fontWeight: '400' },
-        pt: { x: 640, y: 352, fontSize: 25, fontWeight: '400' }
+        pt: { x: 640, y: 352, fontSize: 25, fontWeight: '400' },
+        ja: { x: 645, y: 358, fontSize: 26, fontWeight: '500' }
       },
       theoreticalLabel: {
         en: { x: 955, y: 372, fontSize: 30, fontWeight: null },
         es: { x: 955, y: 352, fontSize: 25, fontWeight: '400' },
-        pt: { x: 955, y: 352, fontSize: 25, fontWeight: '400' }
+        pt: { x: 955, y: 352, fontSize: 25, fontWeight: '400' },
+        ja: { x: 955, y: 358, fontSize: 26, fontWeight: '500' }
       },
       exposureLabel: {
         en: { x: 800, y: 620, fontSize: 30, fontWeight: null },
         es: { x: 800, y: 640, fontSize: 25, fontWeight: '400' },
-        pt: { x: 800, y: 640, fontSize: 25, fontWeight: '400' }
+        pt: { x: 800, y: 640, fontSize: 25, fontWeight: '400' },
+        ja: { x: 800, y: 580, fontSize: 23, fontWeight: '500' }
       }
     };
 
@@ -1519,14 +1726,43 @@ window.addEventListener('message', function(e){
       activeLabelId = labelId;
     }
 
+    // Short code shown on the dropdown trigger for each supported language
+    const LANG_CODES = { en: 'EN', es: 'ES', pt: 'PT', ja: 'JA' };
+
+    // Language dropdown: trigger toggles the menu; picking an option applies the
+    // language and closes it. Click-outside and Escape also close it.
+    const closeLangMenu = (function setupLangDropdown() {
+      const selector = document.getElementById('langSelector');
+      const trigger  = document.getElementById('langTrigger');
+      if (!selector || !trigger) return function () {};
+
+      function close() {
+        selector.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+      function toggle() {
+        const open = !selector.classList.contains('open');
+        selector.classList.toggle('open', open);
+        trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+
+      trigger.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
+      document.addEventListener('click', (e) => { if (!selector.contains(e.target)) close(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+      return close;
+    })();
+
     // Wire up language selector buttons
     document.querySelectorAll('.lang-selector button[data-lang]').forEach(btn => {
-      btn.addEventListener('click', () => setLanguage(btn.getAttribute('data-lang')));
+      btn.addEventListener('click', () => {
+        setLanguage(btn.getAttribute('data-lang'));
+        closeLangMenu();
+      });
     });
 
     // Auto-detect browser language. Walk navigator.languages in preference order and pick the first one that maps to a supported language; otherwise default to EN.
     (function autoDetectLanguage() {
-      const supported = new Set(['en', 'es', 'pt']);
+      const supported = new Set(['en', 'es', 'pt', 'ja']);
       const prefs = (navigator.languages && navigator.languages.length)
         ? navigator.languages
         : [navigator.language || navigator.userLanguage || 'en'];
@@ -1541,10 +1777,10 @@ window.addEventListener('message', function(e){
       setLanguage('en');
     })();
 
-    // Tap anywhere outside a label or the panel closes it (mobile)
+    // Tap anywhere outside a hit region or the panel closes it (mobile)
     document.addEventListener('click', (e) => {
       if (e.target.closest('.info-panel')) return;
-      if (e.target.closest('.hot-label')) return;
+      if (e.target.closest('.hit-region')) return;
       hideInfo();
     });
 
@@ -1552,26 +1788,30 @@ window.addEventListener('message', function(e){
     // Length of the intro timeline, in ms. Matches the last SMIL animation end (pairwise labels fade-in: begin 7.4s + dur 1.2s = 8.6s). 100ms cushion so the activation can never beat the final frame.
     const INTRO_MS = 8700;
 
-    // Hover: light up each circle/lens (or pulse the centre) while the cursor is on its label. Hover/click is only armed once the intro animation finishes; pressing Replay re-arms it.
+    // Hover: light up each circle/lens (or pulse the centre) while the cursor is anywhere over its
+    // FULL section — the invisible .hit-region shape, not just the text label. The label itself is
+    // now purely visual (its 'label-hover' class is toggled here so the outer labels can still turn
+    // white on hover). Hover/tap is only armed once the intro animation finishes; pressing Replay re-arms it.
     const restartHovers = (function setupHovers() {
       const entries = [
-        { labelId: 'threatLabel',        targetId: 'threatCircle',        kind: 'fill'  },
-        { labelId: 'vulnerabilityLabel', targetId: 'vulnerabilityCircle', kind: 'fill'  },
-        { labelId: 'consequenceLabel',   targetId: 'consequenceCircle',   kind: 'fill'  },
-        { labelId: 'potentialLabel',     targetId: 'potentialLens',       kind: 'fill'  },
-        { labelId: 'theoreticalLabel',   targetId: 'theoreticalLens',     kind: 'fill'  },
-        { labelId: 'exposureLabel',      targetId: 'exposureLens',        kind: 'fill'  },
-        { labelId: 'cyberRiskLabel',     targetId: 'cyberRiskPulse',      kind: 'pulse' }
+        { labelId: 'threatLabel',        hitId: 'threatHit',        targetId: 'threatCircle',        kind: 'fill'  },
+        { labelId: 'vulnerabilityLabel', hitId: 'vulnerabilityHit', targetId: 'vulnerabilityCircle', kind: 'fill'  },
+        { labelId: 'consequenceLabel',   hitId: 'consequenceHit',   targetId: 'consequenceCircle',   kind: 'fill'  },
+        { labelId: 'potentialLabel',     hitId: 'potentialHit',     targetId: 'potentialLens',       kind: 'fill'  },
+        { labelId: 'theoreticalLabel',   hitId: 'theoreticalHit',   targetId: 'theoreticalLens',     kind: 'fill'  },
+        { labelId: 'exposureLabel',      hitId: 'exposureHit',      targetId: 'exposureLens',        kind: 'fill'  },
+        { labelId: 'cyberRiskLabel',     hitId: 'cyberRiskHit',     targetId: 'cyberRiskPulse',      kind: 'pulse' }
       ];
 
       const wired = entries
         .map(e => ({
+          hit:     document.getElementById(e.hitId),
           label:   document.getElementById(e.labelId),
           labelId: e.labelId,
           target:  document.getElementById(e.targetId),
           kind:    e.kind
         }))
-        .filter(p => p.label && p.target);
+        .filter(p => p.hit && p.target);
 
       const showOf = ({ target, kind }) => kind === 'pulse'
         ? () => target.classList.add('pulsing')
@@ -1585,37 +1825,40 @@ window.addEventListener('message', function(e){
         const show = showOf(p);
         const hide = hideOf(p);
 
-        // Hover shows the wash/pulse AND populates the info panel.
-        p.label.addEventListener('mouseenter', () => {
+        // Hover anywhere in the section shows the wash/pulse, lights up the label, and populates the info panel.
+        p.hit.addEventListener('mouseenter', () => {
           show();
+          if (p.label) p.label.classList.add('label-hover');
           cancelInfoHide();
           showInfo(p.labelId);
         });
-        p.label.addEventListener('mouseleave', () => {
+        p.hit.addEventListener('mouseleave', () => {
           hide();
+          if (p.label) p.label.classList.remove('label-hover');
           queueInfoHide();
         });
 
-        // Mobile: tap behaves like hover. The synthetic click fires too, but the document click handler ignores label targets, so nothing bad happens.
-        p.label.addEventListener('touchstart', (e) => {
+        // Mobile: tap behaves like hover. The synthetic click fires too, but the document click handler ignores hit-region targets, so nothing bad happens.
+        p.hit.addEventListener('touchstart', (e) => {
           e.preventDefault();
-          if (p.label.classList.contains('active')) {
+          if (p.hit.classList.contains('active')) {
             show();
+            if (p.label) p.label.classList.add('label-hover');
             cancelInfoHide();
             showInfo(p.labelId);
           }
         }, { passive: false });
       });
 
-      // Touch devices: tapping anywhere outside a label clears hover effects (tooltip itself handles its own dismissal via close-on-outside-click).
+      // Touch devices: tapping anywhere outside a hit region clears hover effects (tooltip itself handles its own dismissal via close-on-outside-click).
       document.addEventListener('touchstart', (e) => {
-        const onLabel = wired.some(({ label }) => label.contains(e.target));
-        if (!onLabel) wired.forEach(p => hideOf(p)());
+        const onHit = wired.some(({ hit }) => hit.contains(e.target));
+        if (!onHit) wired.forEach(p => { hideOf(p)(); if (p.label) p.label.classList.remove('label-hover'); });
       });
 
       const setArmed = (armed) => {
-        wired.forEach(({ label }) => label.classList.toggle('active', armed));
-        if (!armed) wired.forEach(p => hideOf(p)());
+        wired.forEach(({ hit }) => hit.classList.toggle('active', armed));
+        if (!armed) wired.forEach(p => { hideOf(p)(); if (p.label) p.label.classList.remove('label-hover'); });
       };
 
       let armTimer = setTimeout(() => setArmed(true), INTRO_MS);
