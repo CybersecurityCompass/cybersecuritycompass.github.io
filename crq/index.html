@@ -127,9 +127,9 @@
   .node:hover .ring{opacity:.5}
   .nlabel{font-family:"Space Grotesk",sans-serif;font-weight:600;pointer-events:none}
   .nsub{font-family:"Inter",sans-serif;font-weight:500;pointer-events:none}
-  .edge{fill:none;stroke:var(--line);stroke-width:1.6}
+  .edge{fill:none;stroke:var(--line);stroke-width:1.6;pointer-events:none}
   .edge.flow{stroke:#3a3a48;stroke-width:1.5}
-  .tree{fill:none;stroke:#7a7a88;stroke-width:1.7}
+  .tree{fill:none;stroke:#7a7a88;stroke-width:1.7;pointer-events:none}
   @keyframes dash-flow{
     from{stroke-dashoffset:24}
     to{stroke-dashoffset:0}
@@ -282,17 +282,17 @@
     <div class="canvas">
       <svg id="map" viewBox="0 0 1280 660" role="img" aria-label="Cyber risk quantification assessment model diagram">
         <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" fill="#c9c7d4"></path>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse" overflow="visible">
+            <path d="M0,0 L10,5 L0,10 z" fill="#c9c7d4" stroke="#E7E6EC" stroke-width="1" stroke-linejoin="round"></path>
           </marker>
-          <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" fill="#F19A38"></path>
+          <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse" overflow="visible">
+            <path d="M0,0 L10,5 L0,10 z" fill="#F19A38" stroke="#F9D2A5" stroke-width="1" stroke-linejoin="round"></path>
           </marker>
-          <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" fill="#FF6A2C"></path>
+          <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse" overflow="visible">
+            <path d="M0,0 L10,5 L0,10 z" fill="#FF6A2C" stroke="#FFBCA0" stroke-width="1" stroke-linejoin="round"></path>
           </marker>
-          <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" fill="#E63A37"></path>
+          <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse" overflow="visible">
+            <path d="M0,0 L10,5 L0,10 z" fill="#E63A37" stroke="#F4A6A5" stroke-width="1" stroke-linejoin="round"></path>
           </marker>
         </defs>
 
@@ -722,6 +722,12 @@ const nodes = document.querySelectorAll('.node');
 (function(){
   const svg = document.getElementById('map');
   if(!svg) return;
+
+  // Connector paths were authored before the node boxes in the markup, so by default they'd
+  // paint underneath the boxes wherever they overlap (e.g. an arrowhead touching a box edge).
+  // Move them after the boxes instead, so arrows and arrowheads always render on top.
+  // (pointer-events is none on these paths, so this doesn't affect box click/hover interaction.)
+  Array.from(svg.children).filter(c => c.tagName === 'path').forEach(p => svg.appendChild(p));
   const stepEls = {};
   svg.querySelectorAll('[data-step]').forEach(el=>{
     const s = el.getAttribute('data-step');
@@ -743,13 +749,19 @@ const nodes = document.querySelectorAll('.node');
   // ---- build a reveal mask for every colored arrow, so it stays visibly dashed while it "draws" ----
   const defs = svg.querySelector('defs');
   const maskPathFor = new WeakMap();
+  const pathLenByOverlay = new WeakMap();
   let maskCounter = 0;
+
   svg.querySelectorAll('[data-step]').forEach(el=>{
     if(el.tagName !== 'path' || !isFlowOverlay(el)) return;
     const id = 'reveal-mask-' + (maskCounter++);
     const maskEl = document.createElementNS(SVGNS, 'mask');
     maskEl.setAttribute('id', id);
     maskEl.setAttribute('maskUnits', 'userSpaceOnUse');
+    maskEl.setAttribute('x', '-2000');
+    maskEl.setAttribute('y', '-2000');
+    maskEl.setAttribute('width', '5000');
+    maskEl.setAttribute('height', '5000');
     const maskPath = document.createElementNS(SVGNS, 'path');
     maskPath.setAttribute('d', el.getAttribute('d'));
     maskPath.setAttribute('stroke', '#fff');
@@ -761,7 +773,82 @@ const nodes = document.querySelectorAll('.node');
     defs.appendChild(maskEl);
     el.setAttribute('mask', 'url(#' + id + ')');
     maskPathFor.set(el, maskPath);
+    // Measure length from the real, visibly-rendered arrow rather than its mask clone:
+    // Safari/WebKit can return an unreliable getTotalLength() for paths that only ever
+    // exist inside a <mask> and are never actually painted in the visible tree.
+    let measuredLen = el.getTotalLength();
+    if(!isFinite(measuredLen) || measuredLen <= 0) measuredLen = 2000; // safe fallback: keeps the mask fully closed rather than exposed
+    pathLenByOverlay.set(el, measuredLen);
   });
+
+  // ---- give every arrowhead usage its own private marker clone, so it can "peek in" independently ----
+  // (the 4 marker defs are shared by several arrows each; animating the shared def directly
+  // would flash every arrow using that color, not just the one that just finished drawing)
+  let markerCloneCounter = 0;
+  svg.querySelectorAll('[data-step]').forEach(el=>{
+    if(el.tagName !== 'path' || !el.hasAttribute('marker-end')) return;
+    const ref = el.getAttribute('marker-end'); // e.g. "url(#arrow-red)"
+    const hashIdx = ref.indexOf('#');
+    if(hashIdx === -1) return;
+    const origId = ref.slice(hashIdx + 1, -1);
+    const origMarker = document.getElementById(origId);
+    if(!origMarker) return;
+    const cloneId = origId + '-inst-' + (markerCloneCounter++);
+    const clone = origMarker.cloneNode(true);
+    clone.id = cloneId;
+    const tip = clone.querySelector('path');
+    if(tip) tip.setAttribute('transform', 'scale(.15,1)'); // start "closed" toward the back edge
+    defs.appendChild(clone);
+    el.setAttribute('marker-end', 'url(#' + cloneId + ')');
+  });
+
+  // rAF-driven marker peek-in: scales the arrowhead tip out from its back edge (x=0 in its own
+  // viewBox) toward the point, in the direction the arrow is already traveling. Uses setAttribute
+  // every frame rather than a CSS transition, for the same Safari-reliability reasons as the dash reveal.
+  function peekInMarker(markerRefAttr, durationMs){
+    if(!markerRefAttr) return;
+    const hashIdx = markerRefAttr.indexOf('#');
+    if(hashIdx === -1) return;
+    const id = markerRefAttr.slice(hashIdx + 1, -1);
+    const markerDef = document.getElementById(id);
+    const tip = markerDef && markerDef.querySelector('path');
+    if(!tip) return;
+    const from = 0.15, to = 1;
+    const start = performance.now();
+    function step(now){
+      const t = Math.min(1, (now - start) / durationMs);
+      const eased = 1 - Math.pow(1 - t, 3);
+      tip.setAttribute('transform', 'scale(' + (from + (to - from) * eased) + ',1)');
+      if(t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // rAF-driven marker bounce: a continuous back-and-forth nudge along the arrowhead's own
+  // pointing direction (positive x in its 10x10 viewBox), started once the box the arrow feeds
+  // into appears, and running forever until the next replay resets it via bounceGeneration.
+  let bounceGeneration = 0;
+  function bounceMarker(markerRefAttr){
+    if(!markerRefAttr) return;
+    const hashIdx = markerRefAttr.indexOf('#');
+    if(hashIdx === -1) return;
+    const id = markerRefAttr.slice(hashIdx + 1, -1);
+    const markerDef = document.getElementById(id);
+    const tip = markerDef && markerDef.querySelector('path');
+    if(!tip) return;
+    const myGen = bounceGeneration;
+    const period = 900; // ms per full back-and-forth cycle
+    const amplitude = 1.3; // translate units within the marker's own viewBox
+    const start = performance.now();
+    function step(now){
+      if(bounceGeneration !== myGen) return; // superseded by a reset - stop looping
+      const phase = ((now - start) % period) / period;
+      const offset = amplitude * Math.sin(phase * 2 * Math.PI);
+      tip.setAttribute('transform', 'translate(' + offset + ',0)');
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
 
   // ---- manual rAF-driven animation (avoids Safari's unreliable CSS-transition-on-SVG-attribute-in-mask rendering) ----
   function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
@@ -790,15 +877,19 @@ const nodes = document.querySelectorAll('.node');
     if(isFlowOverlay(el)){
       // colored arrow: never touch its own dash pattern/animation - reveal it through a growing mask instead
       const maskPath = maskPathFor.get(el);
-      let len = pathLen.get(maskPath);
-      if(len === undefined){ len = maskPath.getTotalLength(); pathLen.set(maskPath, len); }
+      let len = pathLenByOverlay.get(el);
+      if(len === undefined || !isFinite(len) || len <= 0) len = 2000; // safe fallback
       rafTokens.set(maskPath, {}); // cancel any in-flight animation
       maskPath.setAttribute('stroke-dasharray', len + ' ' + len);
       maskPath.setAttribute('stroke-dashoffset', String(len));
       return;
     }
     let len = pathLen.get(el);
-    if(len === undefined){ len = el.getTotalLength(); pathLen.set(el, len); }
+    if(len === undefined){
+      len = el.getTotalLength();
+      if(!isFinite(len) || len <= 0) len = 2000; // safe fallback: keeps it fully hidden rather than exposed
+      pathLen.set(el, len);
+    }
     rafTokens.set(el, {}); // cancel any in-flight animation
     el.setAttribute('stroke-dasharray', len + ' ' + len);
     el.setAttribute('stroke-dashoffset', String(len));
@@ -811,17 +902,24 @@ const nodes = document.querySelectorAll('.node');
   function drawPath(el, durationMs){
     if(isFlowOverlay(el)){
       const maskPath = maskPathFor.get(el);
-      const len = pathLen.get(maskPath);
+      let len = pathLenByOverlay.get(el);
+      if(len === undefined || !isFinite(len) || len <= 0) len = 2000;
       const reversed = el.classList.contains('aflow-rev');
       // "aflow" flows start->end, so reveal offset goes len->0 (grows from the start).
       // "aflow-rev" flows end->start, so reveal offset goes len->2*len (grows from the end, backing toward the start).
       animateDashoffset(maskPath, len, reversed ? len * 2 : 0, durationMs);
       return;
     }
-    const len = pathLen.get(el);
+    let len = pathLen.get(el);
+    if(len === undefined || !isFinite(len) || len <= 0) len = 2000;
     const baseReversed = reversedDSet.has(el.getAttribute('d'));
     animateDashoffset(el, len, baseReversed ? len * 2 : 0, durationMs, ()=>{
-      if(el.dataset.markerEnd){ el.setAttribute('marker-end', el.dataset.markerEnd); }
+      if(el.dataset.markerEnd){
+        el.setAttribute('marker-end', el.dataset.markerEnd);
+        peekInMarker(el.dataset.markerEnd, 220);
+        const ref = el.dataset.markerEnd, myGen = bounceGeneration;
+        setTimeout(()=>{ if(bounceGeneration === myGen) bounceMarker(ref); }, 220);
+      }
       el.setAttribute('stroke-dasharray', '');
       el.setAttribute('stroke-dashoffset', '');
       el.style.animation = '';
@@ -831,6 +929,7 @@ const nodes = document.querySelectorAll('.node');
   const allEls = Object.values(stepEls).flat();
 
   function resetAll(){
+    bounceGeneration++; // stop any bounce loops still running from a previous play-through
     allEls.forEach(el=>{
       if(el.tagName === 'path'){ hidePath(el); }
       else { el.classList.remove('seq-in','seq-slow'); }
@@ -870,8 +969,13 @@ const nodes = document.querySelectorAll('.node');
         }, delay + pathDuration));
       }
 
-      t += dramatic ? 1700 : 700;
-      if(trunkEls.length) t += pathDuration;
+      // Wait for this step's arrows to fully finish - including the arrowhead peek-in that
+      // plays after the line itself is done drawing - before the next step (often a box) begins.
+      const PEEK_MS = 220;
+      const hasPaths = els.some(el => el.tagName === 'path');
+      const arrowSpan = trunkEls.length ? pathDuration * 2 : pathDuration;
+      const pause = dramatic ? 700 : 300;
+      t += hasPaths ? (arrowSpan + PEEK_MS + pause) : pause;
     }
   }
 
