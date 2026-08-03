@@ -99,6 +99,7 @@ html,body{background:#000;height:100%;}
   <div id="compass-title-badges">
     <a id="compass-title-badge" class="title-badge-link" href="https://doi.org/10.13140/RG.2.2.14718.96325" target="_blank" rel="noopener noreferrer">FRAMEWORK</a>
     <a id="compass-blog-badge" class="title-badge-link" href="https://cybersecuritycompass.org/" target="_blank" rel="noopener noreferrer">BLOG</a>
+    <a id="compass-croc-badge" class="title-badge-link" href="https://cybersecuritycompass.github.io/cyberriskops/" target="_blank" rel="noopener noreferrer">CYBER RISK OPS</a>
   </div>
   <div id="credit"></div>
   <div id="pub-link"></div>
@@ -462,7 +463,7 @@ function applyLang(l){
   // only (not the whole layout) and drop letter-spacing, which breaks
   // Arabic's cursive letter-joining if left on.
   const isRTL = (l === 'ar');
-  ['tt-h','tt-s','tt-b','compass-title','compass-title-badge','compass-blog-badge','credit','pub-link'].forEach(id=>{
+  ['tt-h','tt-s','tt-b','compass-title','compass-title-badge','compass-blog-badge','compass-croc-badge','credit','pub-link'].forEach(id=>{
     const el=document.getElementById(id);
     if(!el) return;
     el.dir = isRTL ? 'rtl' : 'ltr';
