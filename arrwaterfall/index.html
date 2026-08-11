@@ -14,6 +14,8 @@
     --red-border:#c96a65;
     --green:#a4d0a0;
     --green-border:#7fb87a;
+    --blue:#a8c5e8;
+    --blue-border:#5f92cf;
     --committed:#4472c4;
     --committed-fill:rgba(68,114,196,0.16);
     --likely:#c77dd2;
@@ -39,6 +41,8 @@
     --red-border:#a34a52;
     --green:#2f5641;
     --green-border:#4a8562;
+    --blue:#2f4a66;
+    --blue-border:#4a7bab;
     --committed:#6ea3f7;
     --committed-fill:rgba(110,163,247,0.20);
     --likely:#d9a6f0;
@@ -291,6 +295,12 @@
   }
   .group-green .group-header{background:rgba(58,140,58,0.08);}
   .group-green .group-label{color:#2f7a2f;}
+  .group-blue{
+    background:rgba(47,111,214,0.06);
+    border-color:rgba(47,111,214,0.4);
+  }
+  .group-blue .group-header{background:rgba(47,111,214,0.08);}
+  .group-blue .group-label{color:#2f6fd6;}
   [data-theme="dark"] .group-gray{ background:rgba(61,98,145,0.20); border-color:rgba(61,98,145,0.5); }
   [data-theme="dark"] .group-gray .group-header{ background:rgba(61,98,145,0.28); }
   [data-theme="dark"] .group-gray .group-label{ color:#9dc3fb; }
@@ -300,6 +310,9 @@
   [data-theme="dark"] .group-green{ background:rgba(90,170,90,0.16); border-color:rgba(90,170,90,0.45); }
   [data-theme="dark"] .group-green .group-header{ background:rgba(90,170,90,0.22); }
   [data-theme="dark"] .group-green .group-label{ color:#8fce8f; }
+  [data-theme="dark"] .group-blue{ background:rgba(90,150,230,0.18); border-color:rgba(90,150,230,0.5); }
+  [data-theme="dark"] .group-blue .group-header{ background:rgba(90,150,230,0.24); }
+  [data-theme="dark"] .group-blue .group-label{ color:#9dc8f7; }
   .columns{
     position:absolute;
     top:0;left:0;right:0;bottom:0;
@@ -343,8 +356,10 @@
   }
   .bar.red{background:var(--red);border:1px solid var(--red-border);color:#5c2b28;}
   .bar.green{background:var(--green);border:1px solid var(--green-border);color:#274d24;}
+  .bar.blue{background:var(--blue);border:1px solid var(--blue-border);color:#1a3358;}
   [data-theme="dark"] .bar.red{ color:#f5d5d2; }
   [data-theme="dark"] .bar.green{ color:#d2f0d0; }
+  [data-theme="dark"] .bar.blue{ color:#d2e4f5; }
 
   .bar.extra{
     width:66%;
@@ -376,6 +391,17 @@
     border:2px dashed #1f9e8e;
     color:#125f55;
   }
+  /* CSTA Expansion (Expansion recolored blue): Committed in navy, Most likely in sky blue */
+  .bar.extra-committed-blue{
+    background:repeating-linear-gradient(135deg, rgba(47,79,158,0.24) 0 6px, rgba(47,79,158,0.1) 6px 12px);
+    border:2px dashed #2f4f9e;
+    color:#1c2f5c;
+  }
+  .bar.extra-likely-blue{
+    background:repeating-linear-gradient(135deg, rgba(63,169,220,0.24) 0 6px, rgba(63,169,220,0.1) 6px 12px);
+    border:2px dashed #3fa9dc;
+    color:#1f5f78;
+  }
   [data-theme="dark"] .bar.extra-committed-red{
     background:repeating-linear-gradient(135deg, rgba(210,90,84,0.30) 0 6px, rgba(210,90,84,0.16) 6px 12px);
     color:#f0b8b4;
@@ -391,6 +417,14 @@
   [data-theme="dark"] .bar.extra-likely-green{
     background:repeating-linear-gradient(135deg, rgba(70,190,175,0.30) 0 6px, rgba(70,190,175,0.16) 6px 12px);
     color:#bdeee6;
+  }
+  [data-theme="dark"] .bar.extra-committed-blue{
+    background:repeating-linear-gradient(135deg, rgba(90,130,220,0.30) 0 6px, rgba(90,130,220,0.16) 6px 12px);
+    color:#c8d8f5;
+  }
+  [data-theme="dark"] .bar.extra-likely-blue{
+    background:repeating-linear-gradient(135deg, rgba(110,210,235,0.30) 0 6px, rgba(110,210,235,0.16) 6px 12px);
+    color:#c8eef5;
   }
   .bar.phantom-target{
     width:80%;
@@ -582,9 +616,11 @@
   }
   .category-card.red{ border-color:#c4322b; background:rgba(196,50,43,0.03); }
   .category-card.green{ border-color:#4a934a; background:rgba(74,147,74,0.03); }
+  .category-card.blue{ border-color:#2f6fd6; background:rgba(47,111,214,0.03); }
   .category-card.gray{ border-color:#9aa0a6; background:rgba(120,128,140,0.04); }
   [data-theme="dark"] .category-card.red{ border-color:#c4322b; background:rgba(196,50,43,0.12); }
   [data-theme="dark"] .category-card.green{ border-color:#4a934a; background:rgba(74,147,74,0.12); }
+  [data-theme="dark"] .category-card.blue{ border-color:#6fa8e0; background:rgba(47,111,214,0.16); }
   [data-theme="dark"] .category-card.gray{ border-color:#3d6291; background:rgba(61,98,145,0.16); }
   .controls .scenario-block{
     display:flex;
@@ -609,6 +645,8 @@
   .controls .cb-likely.cb-red{color:#8e44ad;}
   .controls .cb-committed.cb-green{color:#2f7a4f;}
   .controls .cb-likely.cb-green{color:#1f9e8e;}
+  .controls .cb-committed.cb-blue{color:#2f4f9e;}
+  .controls .cb-likely.cb-blue{color:#3fa9dc;}
   .footnote{
     text-align:center;
     font-size:11px;
@@ -680,8 +718,10 @@
   }
   .acct-modal-box.red{ background:#fdf4f3; }
   .acct-modal-box.green{ background:#f4faf4; }
+  .acct-modal-box.blue{ background:#f2f6fc; }
   [data-theme="dark"] .acct-modal-box.red{ background:#2a1e1e; }
   [data-theme="dark"] .acct-modal-box.green{ background:#1e2a1f; }
+  [data-theme="dark"] .acct-modal-box.blue{ background:#1c2430; }
   .acct-modal-header{
     font-size:14px;
     font-weight:700;
@@ -818,7 +858,8 @@
     background:var(--btn-bg) !important;
   }
   [data-theme="dark"] #toggleGroupsBtn,
-  [data-theme="dark"] #toggleTargetBtn{
+  [data-theme="dark"] #toggleTargetBtn,
+  [data-theme="dark"] #cstaExpansionBtn{
     background:var(--btn-bg) !important;
     color:var(--ink) !important;
     border-color:var(--input-border) !important;
@@ -874,17 +915,18 @@
   <div class="legend">
     <span><i class="swatch" style="background:var(--red);border:1px solid var(--red-border);"></i><span data-i18n="actualLoss">Actual loss</span></span>
     <span><i class="swatch" style="background:var(--green);border:1px solid var(--green-border);"></i><span data-i18n="actualGain">Actual gain</span></span>
-    <span><i class="swatch" style="background:repeating-linear-gradient(135deg, rgba(178,58,58,0.28) 0 4px, rgba(178,58,58,0.1) 4px 8px);border:2px dashed #b23a3a;"></i><span data-i18n="confirmed">Confirmed</span></span>
-    <span><i class="swatch" style="background:repeating-linear-gradient(135deg, rgba(142,68,173,0.28) 0 4px, rgba(142,68,173,0.1) 4px 8px);border:2px dashed #8e44ad;"></i><span data-i18n="atRisk">At risk</span></span>
-    <span><i class="swatch" style="background:repeating-linear-gradient(135deg, rgba(47,122,79,0.28) 0 4px, rgba(47,122,79,0.1) 4px 8px);border:2px dashed #2f7a4f;"></i><span data-i18n="committed">Committed</span></span>
-    <span><i class="swatch" style="background:repeating-linear-gradient(135deg, rgba(31,158,142,0.28) 0 4px, rgba(31,158,142,0.1) 4px 8px);border:2px dashed #1f9e8e;"></i><span data-i18n="mostLikely">Most likely</span></span>
+    <span><i class="swatch" style="background:repeating-linear-gradient(135deg, rgba(178,58,58,0.28) 0 4px, rgba(178,58,58,0.1) 4px 8px);border:2px dashed #b23a3a;"></i><span data-i18n="legendConfirmed">Confirmed Loss</span></span>
+    <span><i class="swatch" style="background:repeating-linear-gradient(135deg, rgba(142,68,173,0.28) 0 4px, rgba(142,68,173,0.1) 4px 8px);border:2px dashed #8e44ad;"></i><span data-i18n="legendAtRisk">At Risk Loss</span></span>
+    <span><i class="swatch" style="background:repeating-linear-gradient(135deg, rgba(47,122,79,0.28) 0 4px, rgba(47,122,79,0.1) 4px 8px);border:2px dashed #2f7a4f;"></i><span data-i18n="legendCommitted">Committed Gain</span></span>
+    <span><i class="swatch" style="background:repeating-linear-gradient(135deg, rgba(31,158,142,0.28) 0 4px, rgba(31,158,142,0.1) 4px 8px);border:2px dashed #1f9e8e;"></i><span data-i18n="legendMostLikely">Most Likely Gain</span></span>
   </div>
   <div style="text-align:center;margin-bottom:8px;">
-    <button id="toggleGroupsBtn" type="button" style="font-size:12px;padding:4px 10px;border:1px solid #d7d9dc;border-radius:4px;background:#fff;cursor:pointer;color:#2a2a2a;" data-i18n="hideSquadImpact">Hide Squad Impact</button>
-    <button id="toggleTargetBtn" type="button" style="font-size:12px;padding:4px 10px;border:1px solid #d7d9dc;border-radius:4px;background:#fff;cursor:pointer;color:#2a2a2a;margin-left:8px;" data-i18n="hideTarget">Hide Target</button>
-    <button id="howToBtn" type="button" style="font-size:12px;padding:4px 10px;border:1px solid #c4322b;border-radius:4px;background:#fff;cursor:pointer;color:#c4322b;font-weight:600;margin-left:8px;" data-i18n="howToBtn">How to Use</button>
+    <button id="howToBtn" type="button" style="font-size:12px;padding:4px 10px;border:1px solid #c4322b;border-radius:4px;background:#fff;cursor:pointer;color:#c4322b;font-weight:600;" data-i18n="howToBtn">How to Use</button>
     <button id="exportBtn" type="button" style="font-size:12px;padding:4px 10px;border:1px solid #2f7a4f;border-radius:4px;background:#fff;cursor:pointer;color:#2f7a4f;font-weight:600;margin-left:8px;" data-i18n="exportBtn">Export Data</button>
     <button id="importBtn" type="button" style="font-size:12px;padding:4px 10px;border:1px solid #2f6fd6;border-radius:4px;background:#fff;cursor:pointer;color:#2f6fd6;font-weight:600;margin-left:8px;" data-i18n="importBtn">Import Data</button>
+    <button id="toggleGroupsBtn" type="button" style="font-size:12px;padding:4px 10px;border:1px solid #d7d9dc;border-radius:4px;background:#fff;cursor:pointer;color:#2a2a2a;margin-left:8px;" data-i18n="hideSquadImpact">Hide Squad Impact</button>
+    <button id="toggleTargetBtn" type="button" style="font-size:12px;padding:4px 10px;border:1px solid #d7d9dc;border-radius:4px;background:#fff;cursor:pointer;color:#2a2a2a;margin-left:8px;" data-i18n="hideTarget">Hide Target</button>
+    <button id="cstaExpansionBtn" type="button" style="font-size:12px;padding:4px 10px;border:1px solid #d7d9dc;border-radius:4px;background:#fff;cursor:pointer;color:#2a2a2a;margin-left:8px;" data-i18n="showCstaExpansion">Show CSTA Expansion</button>
     <input type="file" id="importFileInput" accept="application/json,.json" style="display:none;">
   </div>
 
@@ -926,17 +968,29 @@
 </div>
 
 <script>
+// ---- Dynamic period labels: "<last year>-12" for the starting column,
+// "<current year>-YTD" for the ending column — derived from today's date
+// so the dashboard never needs a manual year bump.
+const TODAY = new Date();
+const CURRENT_YEAR = TODAY.getFullYear();
+const START_LABEL = `${CURRENT_YEAR-1}-12`;
+const YTD_LABEL = `${CURRENT_YEAR}-YTD`;
+
 // ---- Internationalization (EN / JA) ----
 let lang = 'en';
 const I18N = {
   en: {
     pageTitle: 'ARR Waterfall Scenario Simulation for SQUAD',
-    actualLoss: 'Actual loss',
-    actualGain: 'Actual gain',
+    actualLoss: 'Actual Loss',
+    actualGain: 'Actual Gain',
     confirmed: 'Confirmed',
-    atRisk: 'At risk',
+    atRisk: 'At Risk',
     committed: 'Committed',
-    mostLikely: 'Most likely',
+    mostLikely: 'Most Likely',
+    legendConfirmed: 'Confirmed Loss',
+    legendAtRisk: 'At Risk Loss',
+    legendCommitted: 'Committed Gain',
+    legendMostLikely: 'Most Likely Gain',
     hideSquadImpact: 'Hide Squad Impact',
     showSquadImpact: 'Show Squad Impact',
     hideTarget: 'Hide Target',
@@ -975,8 +1029,11 @@ const I18N = {
     projectedWithScenarios: 'Projected (with scenarios)',
     squadStart: 'SQUAD START<br>(AM+SE+CSTA)',
     cstaPerformance: 'CSTA<br>PERFORMANCE',
+    amseCstaPerformance: 'AM+SE+CSTA<br>PERFORMANCE',
     amsePerformance: 'AM+SE<br>PERFORMANCE',
     squadPerformance: 'SQUAD PERFORMANCE<br>(AM+SE+CSTA)',
+    showCstaExpansion: 'Show CSTA Expansion',
+    hideCstaExpansion: 'Hide CSTA Expansion',
     howToBtn: 'How to Use',
     exportBtn: 'Export Data',
     importBtn: 'Import Data',
@@ -1016,12 +1073,16 @@ const I18N = {
   },
   es: {
     pageTitle: 'Simulación de escenarios ARR Waterfall para el SQUAD',
-    actualLoss: 'Pérdida real',
-    actualGain: 'Ganancia real',
+    actualLoss: 'Pérdida Actual',
+    actualGain: 'Ganancia Actual',
     confirmed: 'Confirmado',
-    atRisk: 'En riesgo',
+    atRisk: 'En Riesgo',
     committed: 'Comprometido',
-    mostLikely: 'Más probable',
+    mostLikely: 'Más Probable',
+    legendConfirmed: 'Pérdida Confirmada',
+    legendAtRisk: 'Pérdida en Riesgo',
+    legendCommitted: 'Ganancia Comprometida',
+    legendMostLikely: 'Ganancia Más Probable',
     hideSquadImpact: 'Ocultar impacto del squad',
     showSquadImpact: 'Mostrar impacto del squad',
     hideTarget: 'Ocultar objetivo',
@@ -1032,14 +1093,14 @@ const I18N = {
     expansion: 'Expansión',
     newlogo: 'Nuevos clientes',
     startArrK: 'ARR inicial (K)',
-    actualK: 'Real (K)',
+    actualK: 'Actual (K)',
     reportedYtdK: 'YTD reportado (K)',
     targetGrowthPct: 'Crecimiento de ARR',
     startArr: 'ARR inicial',
     growthArrLabel: 'ARR Crecimiento',
     targetArrLabel: 'ARR Objetivo',
     targetWithPct: (pct)=>`Objetivo (inicial +${pct}%)`,
-    actualGroup: 'Real',
+    actualGroup: 'Actual',
     projectedGroup: 'Proyectado',
     arrGroup: 'ARR',
     grr: 'GRR',
@@ -1049,7 +1110,7 @@ const I18N = {
     gapSmall: 'BRECHA',
     gapToTarget: 'Brecha al Objetivo',
     surplusVsTarget: 'Superávit vs Objetivo',
-    actualStatus: 'Real',
+    actualStatus: 'Actual',
     upside: 'Alza',
     downside: 'Baja',
     reportedGrowth: 'Crecimiento reportado',
@@ -1060,8 +1121,11 @@ const I18N = {
     projectedWithScenarios: 'Proyectado (con escenarios)',
     squadStart: 'INICIO DEL SQUAD<br>(AM+SE+CSTA)',
     cstaPerformance: 'CSTA<br>PERFORMANCE',
+    amseCstaPerformance: 'AM+SE+CSTA<br>PERFORMANCE',
     amsePerformance: 'AM+SE<br>PERFORMANCE',
     squadPerformance: 'SQUAD PERFORMANCE<br>(AM+SE+CSTA)',
+    showCstaExpansion: 'Mostrar CSTA Expansión',
+    hideCstaExpansion: 'Ocultar CSTA Expansión',
     howToBtn: 'Cómo usarlo',
     exportBtn: 'Exportar datos',
     importBtn: 'Importar datos',
@@ -1107,6 +1171,10 @@ const I18N = {
     atRisk: 'リスクあり',
     committed: 'コミット済み',
     mostLikely: '有力見込み',
+    legendConfirmed: '確定損失',
+    legendAtRisk: 'リスク損失',
+    legendCommitted: 'コミット増加',
+    legendMostLikely: '有力増加',
     hideSquadImpact: 'スクワッド影響を非表示',
     showSquadImpact: 'スクワッド影響を表示',
     hideTarget: '目標を非表示',
@@ -1145,8 +1213,11 @@ const I18N = {
     projectedWithScenarios: '予測（シナリオ反映後）',
     squadStart: 'SQUAD開始<br>（AM+SE+CSTA）',
     cstaPerformance: 'CSTA<br>実績',
+    amseCstaPerformance: 'AM+SE+CSTA<br>実績',
     amsePerformance: 'AM+SE<br>実績',
     squadPerformance: 'SQUAD実績<br>（AM+SE+CSTA）',
+    showCstaExpansion: 'CSTA エクスパンションを表示',
+    hideCstaExpansion: 'CSTA エクスパンションを非表示',
     howToBtn: '使い方',
     exportBtn: 'データ書き出し',
     importBtn: 'データ読み込み',
@@ -1186,12 +1257,16 @@ const I18N = {
   },
   pt: {
     pageTitle: 'Simulação de cenários ARR Waterfall para o SQUAD',
-    actualLoss: 'Perda real',
-    actualGain: 'Ganho real',
+    actualLoss: 'Perda Actual',
+    actualGain: 'Ganho Actual',
     confirmed: 'Confirmado',
-    atRisk: 'Em risco',
+    atRisk: 'Em Risco',
     committed: 'Comprometido',
-    mostLikely: 'Mais provável',
+    mostLikely: 'Mais Provável',
+    legendConfirmed: 'Perda Confirmada',
+    legendAtRisk: 'Perda em Risco',
+    legendCommitted: 'Ganho Comprometido',
+    legendMostLikely: 'Ganho Mais Provável',
     hideSquadImpact: 'Ocultar impacto do squad',
     showSquadImpact: 'Mostrar impacto do squad',
     hideTarget: 'Ocultar meta',
@@ -1202,14 +1277,14 @@ const I18N = {
     expansion: 'Expansão',
     newlogo: 'Novos clientes',
     startArrK: 'ARR inicial (K)',
-    actualK: 'Real (K)',
+    actualK: 'Actual (K)',
     reportedYtdK: 'YTD reportado (K)',
     targetGrowthPct: 'Crescimento de ARR',
     startArr: 'ARR inicial',
     growthArrLabel: 'ARR Crescimento',
     targetArrLabel: 'ARR Meta',
     targetWithPct: (pct)=>`Meta (inicial +${pct}%)`,
-    actualGroup: 'Real',
+    actualGroup: 'Actual',
     projectedGroup: 'Projetado',
     arrGroup: 'ARR',
     grr: 'GRR',
@@ -1219,7 +1294,7 @@ const I18N = {
     gapSmall: 'GAP',
     gapToTarget: 'Gap para a Meta',
     surplusVsTarget: 'Superávit vs Meta',
-    actualStatus: 'Real',
+    actualStatus: 'Actual',
     upside: 'Alta',
     downside: 'Baixa',
     reportedGrowth: 'Crescimento reportado',
@@ -1230,8 +1305,11 @@ const I18N = {
     projectedWithScenarios: 'Projetado (com cenários)',
     squadStart: 'INÍCIO DO SQUAD<br>(AM+SE+CSTA)',
     cstaPerformance: 'CSTA<br>PERFORMANCE',
+    amseCstaPerformance: 'AM+SE+CSTA<br>PERFORMANCE',
     amsePerformance: 'AM+SE<br>PERFORMANCE',
     squadPerformance: 'SQUAD PERFORMANCE<br>(AM+SE+CSTA)',
+    showCstaExpansion: 'Mostrar CSTA Expansão',
+    hideCstaExpansion: 'Ocultar CSTA Expansão',
     howToBtn: 'Como usar',
     exportBtn: 'Exportar dados',
     importBtn: 'Importar dados',
@@ -1358,11 +1436,17 @@ function tip(category, status, amountStr, pctStr){
 function accountsCountLabel(n){
   return n===1 ? t('accountsLabelSingular') : t('accountsLabel');
 }
+// A row added via "+ Add account" but never filled in (blank name AND
+// zero amount) isn't a real account yet — never let it inflate any
+// account count shown to the user (badges, tooltips, etc).
+function meaningfulAccountRows(segKey){
+  return (accountData[segKey]||[]).filter(r=>(r.name && r.name.trim()!=='') || Math.abs(r.amount||0) > 1e-9);
+}
 function escapeHtml(str){
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 function tipWithAccounts(baseTip, segKey, totalValueM){
-  const rows = accountData[segKey];
+  const rows = meaningfulAccountRows(segKey);
   if(!rows || rows.length===0) return `${escapeHtml(baseTip)}<br><span style="color:#e5766c;">${escapeHtml(t('clickToAddAccounts'))}</span>`;
   const catStep = getCatStepForSegKey(segKey);
   const isNegative = catStep && catStep.color==='red';
@@ -1457,7 +1541,7 @@ for(let i=0;i<NUM_COLS;i++){
 function buildXAxis(){
   const startXcol = document.createElement('div');
   startXcol.className='xcol';
-  startXcol.innerHTML = `<div>2025-12</div>`;
+  startXcol.innerHTML = `<div>${START_LABEL}</div>`;
   const startCard = document.createElement('div');
   startCard.className = 'category-card gray';
   const startWrap = document.createElement('div');
@@ -1661,7 +1745,7 @@ function buildXAxis(){
     rowL.appendChild(Object.assign(document.createElement('span'),{className:'pct-suffix',textContent:'%'}));
     blockL.appendChild(rowL);
 
-    scenarioInputs[s.key] = { pctC, dollarC, pctL, dollarL, cbC, cbL, actualInput, countBadgeC, countBadgeL };
+    scenarioInputs[s.key] = { pctC, dollarC, pctL, dollarL, cbC, cbL, actualInput, countBadgeC, countBadgeL, card, labelC, labelL };
 
     controls.appendChild(blockC);
     controls.appendChild(blockL);
@@ -1672,7 +1756,7 @@ function buildXAxis(){
 
   const endXcol = document.createElement('div');
   endXcol.className='xcol';
-  endXcol.innerHTML = `<div id="end-col-label">2026-YTD</div>`;
+  endXcol.innerHTML = `<div id="end-col-label">${YTD_LABEL}</div>`;
   endColLabelRef = endXcol.querySelector('#end-col-label');
   const endCard = document.createElement('div');
   endCard.className = 'category-card gray';
@@ -1793,16 +1877,16 @@ function render(){
       if(document.activeElement !== si.dollarL){
         si.dollarL.value = mToK(s.likelyExtra).toFixed(1);
       }
-      const committedAccts = accountData[s.key+'__committed'];
-      if(committedAccts && committedAccts.length>0){
+      const committedAccts = meaningfulAccountRows(s.key+'__committed');
+      if(committedAccts.length>0){
         si.countBadgeC.textContent = ` - ${committedAccts.length} ${accountsCountLabel(committedAccts.length)}`;
         si.countBadgeC.style.cursor = 'pointer';
       } else {
         si.countBadgeC.textContent = '';
         si.countBadgeC.style.cursor = '';
       }
-      const likelyAccts = accountData[s.key+'__likely'];
-      if(likelyAccts && likelyAccts.length>0){
+      const likelyAccts = meaningfulAccountRows(s.key+'__likely');
+      if(likelyAccts.length>0){
         si.countBadgeL.textContent = ` - ${likelyAccts.length} ${accountsCountLabel(likelyAccts.length)}`;
         si.countBadgeL.style.cursor = 'pointer';
       } else {
@@ -1930,12 +2014,18 @@ function render(){
   `;
 
   // 2. Draw start total bar
-  drawTotalBar(colEls[0], start, start, tip('2025-12', t('startArr'), fmtAbs(start)));
+  drawTotalBar(colEls[0], start, start, tip(START_LABEL, t('startArr'), fmtAbs(start)));
 
   // 3. Draw each step's stacked bar
   steps.forEach((s, i)=>{
     const col = colEls[i+1];
     col.innerHTML = '';
+
+    // CSTA Expansion recolors the Expansion category blue everywhere
+    // (bar, card, checkboxes, account modal) without touching its
+    // underlying sign logic — s.color still drives gain/loss math;
+    // dc only drives what's painted.
+    const dc = getDisplayColor(s);
 
     s.segments.forEach(seg=>{
       const lo = Math.min(seg.from, seg.to);
@@ -1945,18 +2035,18 @@ function render(){
       bar.style.height = Math.max(1, yFromValue(lo)-yFromValue(hi))+'px';
 
       if(seg.kind==='actual'){
-        bar.className = 'bar actual ' + s.color;
+        bar.className = 'bar actual ' + dc;
         bar.innerHTML = `<div>${fmt(s.actualDelta)} (${pctOfStart(s.actualDelta)})</div>`;
         bar.dataset.tooltip = tip(t(s.labelKey), t('actualStatus'), fmt(s.actualDelta), pctOfStart(s.actualDelta));
       } else if(seg.kind==='committed'){
-        bar.className = 'bar extra extra-committed-' + s.color;
+        bar.className = 'bar extra extra-committed-' + dc;
         const committedPctDisplay = Math.round(state[s.key].committedPct*10)/10;
         bar.innerHTML = `<div>${fmt(s.committedExtra)} ${t(s.committedLabelKey).toLowerCase()}<br>+${committedPctDisplay}%</div>`;
         bar.dataset.tooltip = tipWithAccounts(tip(t(s.labelKey), t(s.committedLabelKey), fmt(s.committedExtra), `+${committedPctDisplay}%`), s.key+'__committed', s.committedExtra);
         bar.style.cursor = 'pointer';
         bar.addEventListener('click', ()=> openAccountModal(s.key+'__committed', t(s.labelKey), t(s.committedLabelKey), s.committedExtra));
       } else {
-        bar.className = 'bar extra extra-likely-' + s.color;
+        bar.className = 'bar extra extra-likely-' + dc;
         const likelyPctDisplay = Math.round(state[s.key].likelyPct*10)/10;
         bar.innerHTML = `<div>${fmt(s.likelyExtra)} ${t(s.likelyLabelKey).toLowerCase()}<br>+${likelyPctDisplay}%</div>`;
         bar.dataset.tooltip = tipWithAccounts(tip(t(s.labelKey), t(s.likelyLabelKey), fmt(s.likelyExtra), `+${likelyPctDisplay}%`), s.key+'__likely', s.likelyExtra);
@@ -1987,7 +2077,7 @@ function render(){
     repBox.style.top = yFromValue(repHi)+'px';
     repBox.style.height = Math.max(1, yFromValue(repLo)-yFromValue(repHi))+'px';
     repBox.innerHTML = `<div>${repDiff>=0?t('reportedGrowth'):t('reportedShortfall')}<br>${fmt(repDiff)}</div>`;
-    repBox.dataset.tooltip = tip('2026-YTD', repDiff>=0?t('reportedGrowth'):t('reportedShortfall'), fmt(repDiff), `${repPct>=0?'+':''}${repPct.toFixed(1)}%`);
+    repBox.dataset.tooltip = tip(YTD_LABEL, repDiff>=0?t('reportedGrowth'):t('reportedShortfall'), fmt(repDiff), `${repPct>=0?'+':''}${repPct.toFixed(1)}%`);
     lastCol.appendChild(repBox);
   }
 
@@ -2004,11 +2094,11 @@ function render(){
     scenBox.style.top = yFromValue(scenHi)+'px';
     scenBox.style.height = Math.max(1, yFromValue(scenLo)-yFromValue(scenHi))+'px';
     scenBox.innerHTML = `<div>${scenDiff>=0?t('upside'):t('downside')}<br>${fmt(scenDiff)} (${scenPct>=0?'+':''}${scenPct.toFixed(1)}%)</div>`;
-    scenBox.dataset.tooltip = tip('2026-YTD', scenDiff>=0?t('upside'):t('downside'), fmt(scenDiff), `${scenPct>=0?'+':''}${scenPct.toFixed(1)}%`);
+    scenBox.dataset.tooltip = tip(YTD_LABEL, scenDiff>=0?t('upside'):t('downside'), fmt(scenDiff), `${scenPct>=0?'+':''}${scenPct.toFixed(1)}%`);
     lastCol.appendChild(scenBox);
-    if(endColLabelRef) endColLabelRef.textContent = '2026-YTD & ' + t('projectedGroup');
+    if(endColLabelRef) endColLabelRef.textContent = YTD_LABEL + ' & ' + t('projectedGroup');
   } else if(endColLabelRef){
-    endColLabelRef.textContent = '2026-YTD';
+    endColLabelRef.textContent = YTD_LABEL;
   }
 
   // Phantom bar: the gap between the projected total (actual + any checked
@@ -2023,7 +2113,7 @@ function render(){
     phantom.style.top = yFromValue(gapHi)+'px';
     phantom.style.height = Math.max(1, yFromValue(gapLo)-yFromValue(gapHi))+'px';
     phantom.innerHTML = `<div>${gap>=0?t('surplusVsTargetLower'):t('deltaToTarget')}<br>${fmt(gap)} (${gapPct>=0?'+':''}${gapPct.toFixed(1)}%)</div>`;
-    phantom.dataset.tooltip = tip('2026-YTD', gap>=0?t('surplusVsTargetLower'):t('gapToTarget'), fmt(gap), `${gapPct>=0?'+':''}${gapPct.toFixed(1)}%`);
+    phantom.dataset.tooltip = tip(YTD_LABEL, gap>=0?t('surplusVsTargetLower'):t('gapToTarget'), fmt(gap), `${gapPct>=0?'+':''}${gapPct.toFixed(1)}%`);
     lastCol.appendChild(phantom);
   }
 
@@ -2083,8 +2173,8 @@ function drawEndTotalBar(col, pureVal, finalVal){
   }
   bar.innerHTML = `<div>${html}</div>`;
   bar.dataset.tooltip = (Math.abs(finalVal-pureVal) > 1e-6)
-    ? tip('2026-YTD', t('actualStatus'), fmtAbs(pureVal)) + ' | ' + tip('2026-YTD', t('projectedWithScenarios'), fmtAbs(finalVal))
-    : tip('2026-YTD', t('actualStatus'), fmtAbs(pureVal));
+    ? tip(YTD_LABEL, t('actualStatus'), fmtAbs(pureVal)) + ' | ' + tip(YTD_LABEL, t('projectedWithScenarios'), fmtAbs(finalVal))
+    : tip(YTD_LABEL, t('actualStatus'), fmtAbs(pureVal));
   col.appendChild(bar);
 }
 
@@ -2096,17 +2186,31 @@ const colType = ['total', ...steps.map(()=>'step'), 'total'];
 
 // Section groupings (business-team view): Squad Start / CSTA / AM+SE / Squad Performance
 const groupsEl = document.getElementById('groups');
-const groupDefs = [
-  { labelKey:'squadStart',       start:0, end:0, kind:'gray'  },
-  { labelKey:'cstaPerformance',  start:1, end:2, kind:'red'   },
-  { labelKey:'amsePerformance',  start:3, end:4, kind:'green' },
-  { labelKey:'squadPerformance', start:5, end:5, kind:'gray' }
-];
+// When CSTA Expansion is toggled on, the Expansion column is pulled out of
+// the plain AM+SE band into its own AM+SE+CSTA band (blue), reflecting
+// CSTA's credit on expansion — New Logo stays under AM+SE only.
+function getGroupDefs(){
+  if(cstaExpansionOn){
+    return [
+      { labelKey:'squadStart',          start:0, end:0, kind:'gray'  },
+      { labelKey:'cstaPerformance',     start:1, end:2, kind:'red'   },
+      { labelKey:'amseCstaPerformance', start:3, end:3, kind:'blue'  },
+      { labelKey:'amsePerformance',     start:4, end:4, kind:'green' },
+      { labelKey:'squadPerformance',    start:5, end:5, kind:'gray'  }
+    ];
+  }
+  return [
+    { labelKey:'squadStart',       start:0, end:0, kind:'gray'  },
+    { labelKey:'cstaPerformance',  start:1, end:2, kind:'red'   },
+    { labelKey:'amsePerformance',  start:3, end:4, kind:'green' },
+    { labelKey:'squadPerformance', start:5, end:5, kind:'gray' }
+  ];
+}
 function drawGroups(){
   if(!groupsVisible){ groupsEl.innerHTML=''; return; }
   groupsEl.innerHTML = '';
   const plotRect = plot.getBoundingClientRect();
-  groupDefs.forEach(d=>{
+  getGroupDefs().forEach(d=>{
     const rectA = colEls[d.start].getBoundingClientRect();
     const rectB = colEls[d.end].getBoundingClientRect();
     const left = rectA.left - plotRect.left;
@@ -2127,12 +2231,58 @@ function drawGroups(){
 }
 
 let groupsVisible = true;
+let cstaExpansionOn = false;
+// Single source of truth for "what color should this category paint as" —
+// used by the waterfall bar, the category card, the checkbox labels, and
+// the account breakdown modal, so CSTA Expansion never desyncs between them.
+function getDisplayColor(step){
+  if(!step) return 'green';
+  return (step.key==='expansion' && cstaExpansionOn) ? 'blue' : step.color;
+}
 const toggleGroupsBtn = document.getElementById('toggleGroupsBtn');
+const cstaExpansionBtn = document.getElementById('cstaExpansionBtn');
+// The CSTA Expansion toggle only makes sense while the Squad Impact bands
+// are on screen — keep it disabled/dimmed whenever they're hidden.
+function syncCstaExpansionAvailability(){
+  cstaExpansionBtn.disabled = !groupsVisible;
+  cstaExpansionBtn.style.opacity = groupsVisible ? '1' : '0.45';
+  cstaExpansionBtn.style.cursor = groupsVisible ? 'pointer' : 'default';
+}
 toggleGroupsBtn.addEventListener('click', ()=>{
   groupsVisible = !groupsVisible;
   toggleGroupsBtn.textContent = groupsVisible ? t('hideSquadImpact') : t('showSquadImpact');
+  syncCstaExpansionAvailability();
   drawGroups();
 });
+// Recolors the Expansion category card + its Committed/Most likely
+// checkbox labels blue (or back to green) to match the CSTA Expansion
+// toggle. The waterfall bar itself is recolored inside render().
+function updateCstaExpansionColors(){
+  const exp = scenarioInputs['expansion'];
+  if(!exp) return;
+  const dc = cstaExpansionOn ? 'blue' : 'green';
+  exp.card.className = 'category-card ' + dc;
+  exp.labelC.className = 'cb-committed cb-' + dc;
+  exp.labelL.className = 'cb-likely cb-' + dc;
+}
+cstaExpansionBtn.addEventListener('click', ()=>{
+  if(cstaExpansionBtn.disabled) return;
+  cstaExpansionOn = !cstaExpansionOn;
+  cstaExpansionBtn.textContent = cstaExpansionOn ? t('hideCstaExpansion') : t('showCstaExpansion');
+  updateCstaExpansionColors();
+  drawGroups();
+  render();
+  // If the account breakdown modal happens to be open on the Expansion
+  // segment while this is toggled, recolor it in place too.
+  if(acctOverlay.classList.contains('open') && currentAcctSegKey && currentAcctSegKey.startsWith('expansion__')){
+    const modalBox = acctOverlay.querySelector('.acct-modal-box');
+    const catStep = getCatStepForSegKey(currentAcctSegKey);
+    modalBox.classList.remove('red','green','blue');
+    if(catStep) modalBox.classList.add(getDisplayColor(catStep));
+    renderAcctVisualBar();
+  }
+});
+syncCstaExpansionAvailability();
 
 // Dotted target line, scoped to the Squad Performance (final) column
 const targetLineEl = document.getElementById('targetLineEl');
@@ -2213,13 +2363,14 @@ function drawConnectors(){
 function applyStaticI18n(){
   document.title = t('pageTitle');
   document.querySelectorAll('[data-i18n]').forEach(el=>{
-    // The two toggle buttons carry their own visible/hidden state text,
+    // These toggle buttons carry their own visible/hidden state text,
     // which is handled separately below — skip them here.
-    if(el.id==='toggleGroupsBtn' || el.id==='toggleTargetBtn') return;
+    if(el.id==='toggleGroupsBtn' || el.id==='toggleTargetBtn' || el.id==='cstaExpansionBtn') return;
     el.innerHTML = t(el.dataset.i18n);
   });
   toggleGroupsBtn.textContent = groupsVisible ? t('hideSquadImpact') : t('showSquadImpact');
   toggleTargetBtn.textContent = targetLineVisible ? t('hideTarget') : t('showTarget');
+  cstaExpansionBtn.textContent = cstaExpansionOn ? t('hideCstaExpansion') : t('showCstaExpansion');
 }
 
 const langEnBtn = document.getElementById('langEnBtn');
@@ -2437,8 +2588,8 @@ function openAccountModal(segKey, categoryLabel, statusLabel, totalValueM){
   const catKey = segKey.slice(0, segKey.lastIndexOf('__'));
   const catStep = steps.find(x=>x.key===catKey);
   const modalBox = acctOverlay.querySelector('.acct-modal-box');
-  modalBox.classList.remove('red','green');
-  if(catStep) modalBox.classList.add(catStep.color);
+  modalBox.classList.remove('red','green','blue');
+  if(catStep) modalBox.classList.add(getDisplayColor(catStep));
   renderAcctModalList();
   updateAcctHeaderPending();
   acctOverlay.classList.add('open');
@@ -2614,7 +2765,9 @@ const SEG_TEXTURE = {
   'committed-red': { rgb:[178,58,58], border:'#b23a3a', text:'#7a2727', textDark:'#f5cac8' },
   'likely-red':    { rgb:[142,68,173], border:'#8e44ad', text:'#5e3370', textDark:'#eeccf3' },
   'committed-green': { rgb:[47,122,79], border:'#2f7a4f', text:'#1f5233', textDark:'#c8f0cd' },
-  'likely-green':  { rgb:[31,158,142], border:'#1f9e8e', text:'#125f55', textDark:'#c2f2ec' }
+  'likely-green':  { rgb:[31,158,142], border:'#1f9e8e', text:'#125f55', textDark:'#c2f2ec' },
+  'committed-blue': { rgb:[47,79,158], border:'#2f4f9e', text:'#1c2f5c', textDark:'#c8d8f5' },
+  'likely-blue': { rgb:[63,169,220], border:'#3fa9dc', text:'#1f5f78', textDark:'#c8eef5' }
 };
 const UNASSIGNED_TEXTURE = { rgb:[184,134,11], border:'#b8860b', text:'#5a4200', textDark:'#f5dfa0' };
 function isDarkModeActive(){
@@ -2642,7 +2795,7 @@ function renderAcctVisualBar(){
   const rows = [...(accountData[currentAcctSegKey] || [])].sort((a,b)=>Math.abs(b.amount)-Math.abs(a.amount));
   const catStep = getCatStepForSegKey(currentAcctSegKey);
   const segType = currentAcctSegKey.slice(currentAcctSegKey.lastIndexOf('__')+2);
-  const texture = SEG_TEXTURE[`${segType}-${catStep ? catStep.color : 'green'}`] || SEG_TEXTURE['committed-green'];
+  const texture = SEG_TEXTURE[`${segType}-${getDisplayColor(catStep)}`] || SEG_TEXTURE['committed-green'];
 
   // Use the live pending total (not the stale value captured when the
   // modal opened) so that if accounts have been added/edited past the
