@@ -35,8 +35,8 @@
     --ink:#e6edf3;
     --muted:#8b949e;
     --grid:#21262d;
-    --gray-bar:#28405f;
-    --gray-bar-border:#3d6291;
+    --gray-bar:#4a3560;
+    --gray-bar-border:#8a5cad;
     --red:#6e3a3f;
     --red-border:#a34a52;
     --green:#2f5641;
@@ -301,9 +301,9 @@
   }
   .group-blue .group-header{background:rgba(47,111,214,0.08);}
   .group-blue .group-label{color:#2f6fd6;}
-  [data-theme="dark"] .group-gray{ background:rgba(61,98,145,0.20); border-color:rgba(61,98,145,0.5); }
-  [data-theme="dark"] .group-gray .group-header{ background:rgba(61,98,145,0.28); }
-  [data-theme="dark"] .group-gray .group-label{ color:#9dc3fb; }
+  [data-theme="dark"] .group-gray{ background:rgba(155,92,199,0.20); border-color:rgba(155,92,199,0.55); }
+  [data-theme="dark"] .group-gray .group-header{ background:rgba(155,92,199,0.30); }
+  [data-theme="dark"] .group-gray .group-label{ color:#d8b8f0; }
   [data-theme="dark"] .group-red{ background:rgba(210,90,84,0.16); border-color:rgba(210,90,84,0.45); }
   [data-theme="dark"] .group-red .group-header{ background:rgba(210,90,84,0.22); }
   [data-theme="dark"] .group-red .group-label{ color:#e08b85; }
@@ -591,6 +591,7 @@
     font-weight:600;
     margin-top:2px;
   }
+  .input-error{ border-color:#c4322b !important; color:#c4322b !important; box-shadow:0 0 0 1px #c4322b; }
   .no-spinner{ -moz-appearance:textfield; }
   .no-spinner::-webkit-outer-spin-button,
   .no-spinner::-webkit-inner-spin-button{
@@ -621,7 +622,7 @@
   [data-theme="dark"] .category-card.red{ border-color:#c4322b; background:rgba(196,50,43,0.12); }
   [data-theme="dark"] .category-card.green{ border-color:#4a934a; background:rgba(74,147,74,0.12); }
   [data-theme="dark"] .category-card.blue{ border-color:#6fa8e0; background:rgba(47,111,214,0.16); }
-  [data-theme="dark"] .category-card.gray{ border-color:#3d6291; background:rgba(61,98,145,0.16); }
+  [data-theme="dark"] .category-card.gray{ border-color:#9b5cc7; background:rgba(155,92,199,0.18); }
   .controls .scenario-block{
     display:flex;
     flex-direction:column;
@@ -968,14 +969,6 @@
 </div>
 
 <script>
-// ---- Dynamic period labels: "<last year>-12" for the starting column,
-// "<current year>-YTD" for the ending column — derived from today's date
-// so the dashboard never needs a manual year bump.
-const TODAY = new Date();
-const CURRENT_YEAR = TODAY.getFullYear();
-const START_LABEL = `${CURRENT_YEAR-1}-12`;
-const YTD_LABEL = `${CURRENT_YEAR}-YTD`;
-
 // ---- Internationalization (EN / JA) ----
 let lang = 'en';
 const I18N = {
@@ -1003,6 +996,8 @@ const I18N = {
     startArrK: 'Start ARR (K)',
     actualK: 'Actual (K)',
     reportedYtdK: 'Reported YTD (K)',
+    targetTotalK: 'ARR Target Total (K)',
+    reportedArrLabel: 'Reported ARR',
     targetGrowthPct: 'ARR Target Growth',
     startArr: 'Start ARR',
     growthArrLabel: 'Growth ARR',
@@ -1052,7 +1047,7 @@ const I18N = {
 
       <h2>Step-by-step usage dynamic</h2>
       <ol>
-        <li><strong>Load the current situation.</strong> The squad loads their real values: Start ARR, and the Actual for Churn, Erosion, Expansion, and New Logo. As soon as they do, the target (Start ARR plus the growth percentage they're chasing) is calculated automatically and becomes visible to everyone.</li>
+        <li><strong>Load the current situation.</strong> The squad loads their real values: Start ARR, and the Actual for Churn, Erosion, Expansion, and New Logo. They then set the ARR Target Total directly (the absolute ARR they're chasing) — the growth still needed to get there, in both dollars and percent, is calculated automatically from the current reported ARR and becomes visible to everyone.</li>
         <li><strong>Load Confirmed and At risk churn/erosion.</strong> Before discussing anything else, they load what CSTA already knows: what revenue is confirmed to be lost, and what revenue is at risk of being lost. This immediately shows how that loss alone moves the needle toward, or away from, the target, before expansion or new logo has even been discussed.</li>
         <li><strong>Load the Committed and Most likely opportunities.</strong> Now they load the Expansion and New Logo opportunities that AM/SE have: what's committed (high probability of closing) and what's most likely (more speculative pipeline). This shows how much business already generated is helping close the gap.</li>
         <li><strong>See the real gap to target.</strong> With everything loaded, the squad sees the real "Gap to Target," in dollars and in percentage. It's no longer a guess or a number each person calculates differently, it's one concrete number everyone is looking at at the same time.</li>
@@ -1095,6 +1090,8 @@ const I18N = {
     startArrK: 'ARR inicial (K)',
     actualK: 'Actual (K)',
     reportedYtdK: 'YTD reportado (K)',
+    targetTotalK: 'ARR Objetivo Total (K)',
+    reportedArrLabel: 'ARR Reportado',
     targetGrowthPct: 'Crecimiento de ARR',
     startArr: 'ARR inicial',
     growthArrLabel: 'ARR Crecimiento',
@@ -1144,7 +1141,7 @@ const I18N = {
 
       <h2>Dinámica de uso paso a paso</h2>
       <ol>
-        <li><strong>Cargar la situación actual.</strong> El squad carga sus valores reales: ARR inicial, y el Real de Churn, Erosión, Expansión y Nuevos clientes. En cuanto lo hacen, el objetivo (ARR inicial más el porcentaje de crecimiento que persiguen) se calcula automáticamente y queda visible para todos.</li>
+        <li><strong>Cargar la situación actual.</strong> El squad carga sus valores reales: ARR inicial, y el Real de Churn, Erosión, Expansión y Nuevos clientes. Luego define el ARR Objetivo Total directamente (el ARR absoluto que persiguen): el crecimiento que aún falta para llegar ahí, en dólares y en porcentaje, se calcula automáticamente a partir del ARR reportado actual y queda visible para todos.</li>
         <li><strong>Cargar el Churn/Erosión Confirmado y En riesgo.</strong> Antes de discutir cualquier otra cosa, cargan lo que CSTA ya sabe: qué revenue está confirmado que se va a perder, y qué revenue está en riesgo de perderse. Esto muestra de inmediato cómo esa pérdida, por sí sola, mueve la aguja hacia, o lejos, del objetivo, antes de siquiera haber hablado de expansión o nuevos clientes.</li>
         <li><strong>Cargar las oportunidades Comprometidas y Más probables.</strong> Ahora cargan las oportunidades de Expansión y Nuevos clientes que AM/SE tienen: lo que está comprometido (alta probabilidad de cierre) y lo que es más probable (pipeline más especulativo). Esto muestra cuánto negocio ya generado está ayudando a cerrar la brecha.</li>
         <li><strong>Ver la brecha real al objetivo.</strong> Con todo cargado, el squad ve la "Brecha al Objetivo" real, en dólares y en porcentaje. Ya no es una suposición ni un número que cada persona calcula distinto, es un número concreto que todos están viendo al mismo tiempo.</li>
@@ -1187,6 +1184,8 @@ const I18N = {
     startArrK: '期首ARR（千）',
     actualK: '実績（千）',
     reportedYtdK: '報告実績・年初来（千）',
+    targetTotalK: '目標ARR合計（千）',
+    reportedArrLabel: '報告ARR',
     targetGrowthPct: '目標ARR成長率',
     startArr: '期首ARR',
     growthArrLabel: '成長ARR',
@@ -1236,7 +1235,7 @@ const I18N = {
 
       <h2>使い方のステップ</h2>
       <ol>
-        <li><strong>現状を入力する。</strong>SQUADは実際の数値を入力します。期首ARR、そしてチャーン・コントラクション・エクスパンション・新規獲得の実績です。入力すると同時に、目標（期首ARR ＋ 追いかけている成長率）が自動的に計算され、全員に表示されます。</li>
+        <li><strong>現状を入力する。</strong>SQUADは実際の数値を入力します。期首ARR、そしてチャーン・コントラクション・エクスパンション・新規獲得の実績です。続いて、目指す絶対的なARRの数値である目標ARR合計を直接入力します。そこに到達するために必要な残りの成長額・成長率は、現在の報告ARRから自動的に計算され、全員に表示されます。</li>
         <li><strong>確定・リスクありのチャーン/コントラクションを入力する。</strong>他の議論を始める前に、CSTAがすでに把握している情報を入力します。どの売上が確実に失われるか、そしてどの売上が失われるリスクがあるかです。これにより、エクスパンションや新規獲得の話をする前に、その損失だけで目標にどれだけ近づく、あるいは遠ざかるかがすぐに分かります。</li>
         <li><strong>コミット済み・有力見込みの商談を入力する。</strong>次に、AM/SEが持っているエクスパンションと新規獲得の商談を入力します。確約されているもの（成約確度が高い）と、有力見込みのもの（よりスペキュラティブなパイプライン）です。これにより、すでに生み出されているビジネスがギャップをどれだけ埋めているかが分かります。</li>
         <li><strong>目標との実際のギャップを確認する。</strong>すべてを入力した後、SQUADは実際の「目標とのギャップ」を金額とパーセンテージの両方で確認します。もはや推測でも、人によって計算方法が異なる数字でもありません。全員が同時に見ている具体的な一つの数字です。</li>
@@ -1279,6 +1278,8 @@ const I18N = {
     startArrK: 'ARR inicial (K)',
     actualK: 'Actual (K)',
     reportedYtdK: 'YTD reportado (K)',
+    targetTotalK: 'ARR Meta Total (K)',
+    reportedArrLabel: 'ARR Reportado',
     targetGrowthPct: 'Crescimento de ARR',
     startArr: 'ARR inicial',
     growthArrLabel: 'ARR Crescimento',
@@ -1328,7 +1329,7 @@ const I18N = {
 
       <h2>Dinâmica de uso passo a passo</h2>
       <ol>
-        <li><strong>Carregar a situação atual.</strong> O squad carrega seus valores reais: ARR inicial, e o Real de Churn, Erosão, Expansão e Novos clientes. Assim que fazem isso, a meta (ARR inicial mais a porcentagem de crescimento que estão buscando) é calculada automaticamente e fica visível para todos.</li>
+        <li><strong>Carregar a situação atual.</strong> O squad carrega seus valores reais: ARR inicial, e o Real de Churn, Erosão, Expansão e Novos clientes. Em seguida, define o ARR Meta Total diretamente (o ARR absoluto que estão buscando): o crescimento que ainda falta para chegar lá, em valor e em percentual, é calculado automaticamente a partir do ARR reportado atual e fica visível para todos.</li>
         <li><strong>Carregar o Churn/Erosão Confirmado e Em risco.</strong> Antes de discutir qualquer outra coisa, eles carregam o que o CSTA já sabe: qual receita está confirmada como perdida, e qual receita está em risco de ser perdida. Isso mostra imediatamente como essa perda, sozinha, move o ponteiro em direção, ou para longe, da meta, antes mesmo de se falar sobre expansão ou novos clientes.</li>
         <li><strong>Carregar as oportunidades Comprometidas e Mais prováveis.</strong> Agora eles carregam as oportunidades de Expansão e Novos clientes que AM/SE têm: o que está comprometido (alta probabilidade de fechamento) e o que é mais provável (pipeline mais especulativo). Isso mostra quanto negócio já gerado está ajudando a fechar o gap.</li>
         <li><strong>Ver o gap real para a meta.</strong> Com tudo carregado, o squad vê o "Gap para a Meta" real, em dólares e em porcentagem. Não é mais um palpite nem um número que cada pessoa calcula de forma diferente, é um número concreto que todos estão vendo ao mesmo tempo.</li>
@@ -1359,14 +1360,22 @@ function yFromValue(v){ return PLOT_H - (v - DOMAIN_MIN) * pxPerM; } // px from 
 // ---- Data (values in $M) ----
 let start = 1.4;
 const TOTAL_CUSTOMERS_START = 3970; // 3.97K
-let TARGET_GROWTH_PCT = 0.20; // Target = start ARR + this %, editable via the Target % input
+let TARGET_GROWTH_PCT = 0.20; // legacy field, kept only so old exported JSON files still import correctly
 const DEFAULT_TARGET_GROWTH_PCT = 0.20;
+// The target is now entered directly as an absolute ARR Total (not a %
+// growth over Start ARR) — always clamped to zero or above, since a total
+// ARR figure can never be negative.
+let TARGET_TOTAL_M = Math.max(0, start * (1 + TARGET_GROWTH_PCT));
+function computePureActualFinal(){
+  // Baseline actual only (Start ARR + each category's Actual delta) —
+  // never affected by checked Committed/Most likely scenario boxes.
+  return start + steps.reduce((sum,s)=>sum+s.actualDelta, 0);
+}
 function fmtTargetDollarK(){
-  // No decimals while still at the default percentage; one decimal once
-  // the user has actually moved it.
-  const val = mToK(start * TARGET_GROWTH_PCT);
-  const atDefault = Math.abs(TARGET_GROWTH_PCT - DEFAULT_TARGET_GROWTH_PCT) < 1e-9;
-  return atDefault ? val.toFixed(0) : val.toFixed(1);
+  // Growth still needed ($K) to go from the current reported ARR to the
+  // target total — floored at 0 once the target has already been reached.
+  const growthM = Math.max(0, TARGET_TOTAL_M - computePureActualFinal());
+  return trimZeroDecimal(mToK(growthM).toFixed(1));
 }
 let reportedYTDOverride = null; // null = show the computed/projected total
 
@@ -1403,6 +1412,7 @@ let endCardRef = null;
 let startInputRef = null;
 let repInputRef = null;
 let targetPctInputRef = null;
+let targetTotalInputRef = null;
 
 function mToK(m){ return Math.round(m*1000*100)/100; } // $M -> $K, for input boxes
 function kToM(k){ return k/1000; } // $K -> $M, internal storage stays in $M
@@ -1541,7 +1551,7 @@ for(let i=0;i<NUM_COLS;i++){
 function buildXAxis(){
   const startXcol = document.createElement('div');
   startXcol.className='xcol';
-  startXcol.innerHTML = `<div>${START_LABEL}</div>`;
+  startXcol.innerHTML = `<div>2025-12</div>`;
   const startCard = document.createElement('div');
   startCard.className = 'category-card gray';
   const startWrap = document.createElement('div');
@@ -1634,7 +1644,7 @@ function buildXAxis(){
     dollarC.type='number';
     dollarC.className='pct-input dollar-input';
     dollarC.step='10';
-    dollarC.value = mToK(s.actualDelta*state[s.key].committedPct/100).toFixed(1);
+    dollarC.value = trimZeroDecimal(mToK(s.actualDelta*state[s.key].committedPct/100).toFixed(1));
     pctC.addEventListener('input', ()=>{
       let typedPct = parseFloat(pctC.value)||0;
       const assignedK = getAssignedMagnitudeForSegKey(s.key+'__committed');
@@ -1644,7 +1654,7 @@ function buildXAxis(){
       }
       if(typedPct !== parseFloat(pctC.value)) pctC.value = typedPct;
       state[s.key].committedPct = typedPct;
-      dollarC.value = mToK(s.actualDelta*state[s.key].committedPct/100).toFixed(1);
+      dollarC.value = trimZeroDecimal(mToK(s.actualDelta*state[s.key].committedPct/100).toFixed(1));
       render();
     });
     dollarC.addEventListener('input', ()=>{
@@ -1709,7 +1719,7 @@ function buildXAxis(){
     dollarL.type='number';
     dollarL.className='pct-input dollar-input';
     dollarL.step='10';
-    dollarL.value = mToK(s.actualDelta*state[s.key].likelyPct/100).toFixed(1);
+    dollarL.value = trimZeroDecimal(mToK(s.actualDelta*state[s.key].likelyPct/100).toFixed(1));
     pctL.addEventListener('input', ()=>{
       let typedPct = parseFloat(pctL.value)||0;
       const assignedK = getAssignedMagnitudeForSegKey(s.key+'__likely');
@@ -1719,7 +1729,7 @@ function buildXAxis(){
       }
       if(typedPct !== parseFloat(pctL.value)) pctL.value = typedPct;
       state[s.key].likelyPct = typedPct;
-      dollarL.value = mToK(s.actualDelta*state[s.key].likelyPct/100).toFixed(1);
+      dollarL.value = trimZeroDecimal(mToK(s.actualDelta*state[s.key].likelyPct/100).toFixed(1));
       render();
     });
     dollarL.addEventListener('input', ()=>{
@@ -1756,26 +1766,50 @@ function buildXAxis(){
 
   const endXcol = document.createElement('div');
   endXcol.className='xcol';
-  endXcol.innerHTML = `<div id="end-col-label">${YTD_LABEL}</div>`;
+  endXcol.innerHTML = `<div id="end-col-label">2026-YTD</div>`;
   endColLabelRef = endXcol.querySelector('#end-col-label');
   const endCard = document.createElement('div');
   endCard.className = 'category-card gray';
-  const repWrap = document.createElement('div');
-  repWrap.style.marginTop='0';
-  repWrap.innerHTML = `<div class="base-label" data-i18n="reportedYtdK">${t('reportedYtdK')}</div>`;
-  const repInput = document.createElement('input');
-  repInput.type='number';
-  repInput.className='base-input no-spinner';
-  repInput.step='10';
-  repInput.placeholder='auto';
-  repInput.addEventListener('input', ()=>{
-    const v = parseFloat(repInput.value);
-    reportedYTDOverride = isNaN(v) ? null : kToM(v);
+  // ARR Target Total: the user enters the absolute total ARR they want to
+  // reach (not a growth %) — this replaces the old manual "Reported YTD"
+  // override box entirely. Always clamped to zero or above.
+  const targetTotalWrap = document.createElement('div');
+  targetTotalWrap.style.marginTop='0';
+  targetTotalWrap.innerHTML = `<div class="base-label" data-i18n="targetTotalK">${t('targetTotalK')}</div>`;
+  const targetTotalInput = document.createElement('input');
+  targetTotalInput.type='number';
+  targetTotalInput.className='base-input';
+  targetTotalInput.step='10';
+  targetTotalInput.min = mToK(computePureActualFinal()); // keeps the up/down spinner from going below the reported ARR
+  targetTotalInput.value = mToK(TARGET_TOTAL_M); // same as Start/Actual (K) boxes — no forced decimals
+  // The target total can never imply negative growth (below the current
+  // reported ARR) — but we never rewrite what the user is typing
+  // mid-keystroke (that would make it impossible to type "2000" one
+  // digit at a time). Instead: accept the raw input as-is, flag it red
+  // while it's below the reported ARR, and only feed it into the actual
+  // target calculation once it's valid. On blur, snap an invalid value
+  // up to the reported ARR so nothing invalid is left behind.
+  targetTotalInput.addEventListener('input', ()=>{
+    const v = parseFloat(targetTotalInput.value);
+    const reported = computePureActualFinal();
+    const valid = !isNaN(v) && kToM(v) >= reported - 1e-9;
+    targetTotalInput.classList.toggle('input-error', !valid);
+    TARGET_TOTAL_M = valid ? kToM(v) : reported;
     render();
   });
-  repWrap.appendChild(repInput);
-  repInputRef = repInput;
-  endCard.appendChild(repWrap);
+  targetTotalInput.addEventListener('blur', ()=>{
+    const v = parseFloat(targetTotalInput.value);
+    const reported = computePureActualFinal();
+    if(isNaN(v) || kToM(v) < reported - 1e-9){
+      targetTotalInput.value = mToK(reported);
+      targetTotalInput.classList.remove('input-error');
+      TARGET_TOTAL_M = reported;
+      render();
+    }
+  });
+  targetTotalWrap.appendChild(targetTotalInput);
+  targetTotalInputRef = targetTotalInput;
+  endCard.appendChild(targetTotalWrap);
 
   const targetWrap = document.createElement('div');
   targetWrap.style.marginTop='8px';
@@ -1785,11 +1819,20 @@ function buildXAxis(){
   targetRow.className='value-row';
   targetRow.style.justifyContent='center';
 
+  // Both fields below now express the growth still needed FROM the current
+  // reported ARR TO the target total above — editing either one solves
+  // back for a new (always-positive) target total. Growth itself is never
+  // allowed to go negative: once the target total is at or below the
+  // current reported ARR, growth just floors at 0 (nothing more needed).
+  const initialReported = computePureActualFinal();
+  const initialGrowthPct = initialReported ? (Math.max(0, TARGET_TOTAL_M-initialReported)/initialReported*100) : 0;
+
   const targetPctInput = document.createElement('input');
   targetPctInput.type='number';
   targetPctInput.className='pct-input';
   targetPctInput.step='10';
-  targetPctInput.value = TARGET_GROWTH_PCT*100;
+  targetPctInput.min='0';
+  targetPctInput.value = Math.round(initialGrowthPct*10)/10;
 
   const targetEq = document.createElement('span');
   targetEq.className='pct-suffix';
@@ -1799,18 +1842,29 @@ function buildXAxis(){
   targetDollarInput.type='number';
   targetDollarInput.className='pct-input dollar-input';
   targetDollarInput.step='10';
+  targetDollarInput.min='0';
   targetDollarInput.value = fmtTargetDollarK();
 
   targetPctInput.addEventListener('input', ()=>{
-    const v = parseFloat(targetPctInput.value);
-    if(!isNaN(v)) TARGET_GROWTH_PCT = v/100;
+    const typed = parseFloat(targetPctInput.value);
+    const v = Math.max(0, isNaN(typed) ? 0 : typed);
+    if(v !== typed) targetPctInput.value = v;
+    const reported = computePureActualFinal();
+    TARGET_TOTAL_M = Math.max(0, reported + reported*(v/100));
     targetDollarInput.value = fmtTargetDollarK();
+    targetTotalInput.value = mToK(TARGET_TOTAL_M);
     render();
   });
   targetDollarInput.addEventListener('input', ()=>{
-    const dollarValM = kToM(parseFloat(targetDollarInput.value)||0);
-    TARGET_GROWTH_PCT = start ? (dollarValM/start) : 0;
-    targetPctInput.value = Math.round(TARGET_GROWTH_PCT*1000)/10;
+    const typedK = parseFloat(targetDollarInput.value)||0;
+    const correctedK = Math.max(0, typedK);
+    if(correctedK !== typedK) targetDollarInput.value = correctedK;
+    const growthM = kToM(correctedK);
+    const reported = computePureActualFinal();
+    TARGET_TOTAL_M = Math.max(0, reported + growthM);
+    const gp = reported ? ((TARGET_TOTAL_M-reported)/reported*100) : 0;
+    targetPctInput.value = Math.round(gp*10)/10;
+    targetTotalInput.value = mToK(TARGET_TOTAL_M);
     render();
   });
 
@@ -1872,10 +1926,10 @@ function render(){
     const si = scenarioInputs[s.key];
     if(si){
       if(document.activeElement !== si.dollarC){
-        si.dollarC.value = mToK(s.committedExtra).toFixed(1);
+        si.dollarC.value = trimZeroDecimal(mToK(s.committedExtra).toFixed(1));
       }
       if(document.activeElement !== si.dollarL){
-        si.dollarL.value = mToK(s.likelyExtra).toFixed(1);
+        si.dollarL.value = trimZeroDecimal(mToK(s.likelyExtra).toFixed(1));
       }
       const committedAccts = meaningfulAccountRows(s.key+'__committed');
       if(committedAccts.length>0){
@@ -1921,16 +1975,35 @@ function render(){
   });
   const finalARR = cumARR;      // cascaded total: actual + any checked Committed/Most likely extras
   const finalCust = cumCust;
-  const pureActualFinal = start + steps.reduce((sum,s)=>sum+s.actualDelta, 0); // baseline actual only — never changes with scenarios
-  const targetValue = start * (1 + TARGET_GROWTH_PCT);
+  const pureActualFinal = computePureActualFinal(); // baseline actual only — never changes with scenarios
+  // The target total can never sit below the current reported ARR — that
+  // would imply negative growth, which isn't allowed. Clamp here too in
+  // case pureActualFinal itself moved (e.g. an Actual box was edited)
+  // since the target total was last set.
+  if(TARGET_TOTAL_M < pureActualFinal - 1e-9) TARGET_TOTAL_M = pureActualFinal;
+  const targetValue = TARGET_TOTAL_M;
+  if(targetTotalInputRef){
+    targetTotalInputRef.min = mToK(pureActualFinal); // keeps the spinner's floor in sync as the reported ARR moves
+    if(document.activeElement !== targetTotalInputRef){
+      targetTotalInputRef.value = mToK(targetValue); // same as Start/Actual (K) boxes — no forced decimals
+    }
+  }
   if(targetDollarInputRef && document.activeElement !== targetDollarInputRef){
     targetDollarInputRef.value = fmtTargetDollarK();
   }
+  if(targetPctInputRef && document.activeElement !== targetPctInputRef){
+    const gp = pureActualFinal ? (Math.max(0, targetValue-pureActualFinal)/pureActualFinal*100) : 0;
+    targetPctInputRef.value = Math.round(gp*10)/10;
+  }
   if(targetFormulaBoxRef){
-    const growthValue = start * TARGET_GROWTH_PCT;
+    // Growth is always shown as a positive "how much more is needed" figure
+    // — once the target total is at or below the reported ARR, it floors at 0.
+    const growthValue = Math.max(0, targetValue - pureActualFinal);
+    const growthPctDisplay = pureActualFinal ? (growthValue/pureActualFinal*100) : 0;
     targetFormulaBoxRef.innerHTML =
       `${t('startArr')} = ${fmtAbs(start)}<br>` +
-      `${t('growthArrLabel')} = ${fmtAbs(growthValue)} (${(TARGET_GROWTH_PCT*100).toFixed(0)}%)<br>` +
+      `${t('reportedArrLabel')} = ${fmtAbs(pureActualFinal)}<br>` +
+      `${t('growthArrLabel')} = ${fmtAbs(growthValue)} (${growthPctDisplay.toFixed(0)}%)<br>` +
       `${t('targetArrLabel')} = ${fmtAbs(targetValue)}`;
   }
 
@@ -2014,7 +2087,7 @@ function render(){
   `;
 
   // 2. Draw start total bar
-  drawTotalBar(colEls[0], start, start, tip(START_LABEL, t('startArr'), fmtAbs(start)));
+  drawTotalBar(colEls[0], start, start, tip('2025-12', t('startArr'), fmtAbs(start)));
 
   // 3. Draw each step's stacked bar
   steps.forEach((s, i)=>{
@@ -2077,7 +2150,7 @@ function render(){
     repBox.style.top = yFromValue(repHi)+'px';
     repBox.style.height = Math.max(1, yFromValue(repLo)-yFromValue(repHi))+'px';
     repBox.innerHTML = `<div>${repDiff>=0?t('reportedGrowth'):t('reportedShortfall')}<br>${fmt(repDiff)}</div>`;
-    repBox.dataset.tooltip = tip(YTD_LABEL, repDiff>=0?t('reportedGrowth'):t('reportedShortfall'), fmt(repDiff), `${repPct>=0?'+':''}${repPct.toFixed(1)}%`);
+    repBox.dataset.tooltip = tip('2026-YTD', repDiff>=0?t('reportedGrowth'):t('reportedShortfall'), fmt(repDiff), `${repPct>=0?'+':''}${repPct.toFixed(1)}%`);
     lastCol.appendChild(repBox);
   }
 
@@ -2094,18 +2167,20 @@ function render(){
     scenBox.style.top = yFromValue(scenHi)+'px';
     scenBox.style.height = Math.max(1, yFromValue(scenLo)-yFromValue(scenHi))+'px';
     scenBox.innerHTML = `<div>${scenDiff>=0?t('upside'):t('downside')}<br>${fmt(scenDiff)} (${scenPct>=0?'+':''}${scenPct.toFixed(1)}%)</div>`;
-    scenBox.dataset.tooltip = tip(YTD_LABEL, scenDiff>=0?t('upside'):t('downside'), fmt(scenDiff), `${scenPct>=0?'+':''}${scenPct.toFixed(1)}%`);
+    scenBox.dataset.tooltip = tip('2026-YTD', scenDiff>=0?t('upside'):t('downside'), fmt(scenDiff), `${scenPct>=0?'+':''}${scenPct.toFixed(1)}%`);
     lastCol.appendChild(scenBox);
-    if(endColLabelRef) endColLabelRef.textContent = YTD_LABEL + ' & ' + t('projectedGroup');
+    if(endColLabelRef) endColLabelRef.textContent = '2026-YTD & ' + t('projectedGroup');
   } else if(endColLabelRef){
-    endColLabelRef.textContent = YTD_LABEL;
+    endColLabelRef.textContent = '2026-YTD';
   }
 
   // Phantom bar: the gap between the projected total (actual + any checked
   // scenarios) and the target, stacked as an extension toward the target
   // line. Hidden together with the target label via the Show/Hide Target
   // toggle.
-  if(targetLineVisible){
+  // Only draw the gap-to-target box when there's an actual, meaningful gap
+  // — at exactly (or effectively) on-target, there's nothing to show.
+  if(targetLineVisible && Math.abs(gap) > 1e-6){
     const gapLo = Math.min(finalARR, targetValue);
     const gapHi = Math.max(finalARR, targetValue);
     const phantom = document.createElement('div');
@@ -2113,7 +2188,7 @@ function render(){
     phantom.style.top = yFromValue(gapHi)+'px';
     phantom.style.height = Math.max(1, yFromValue(gapLo)-yFromValue(gapHi))+'px';
     phantom.innerHTML = `<div>${gap>=0?t('surplusVsTargetLower'):t('deltaToTarget')}<br>${fmt(gap)} (${gapPct>=0?'+':''}${gapPct.toFixed(1)}%)</div>`;
-    phantom.dataset.tooltip = tip(YTD_LABEL, gap>=0?t('surplusVsTargetLower'):t('gapToTarget'), fmt(gap), `${gapPct>=0?'+':''}${gapPct.toFixed(1)}%`);
+    phantom.dataset.tooltip = tip('2026-YTD', gap>=0?t('surplusVsTargetLower'):t('gapToTarget'), fmt(gap), `${gapPct>=0?'+':''}${gapPct.toFixed(1)}%`);
     lastCol.appendChild(phantom);
   }
 
@@ -2121,6 +2196,9 @@ function render(){
   drawConnectors();
   drawGroups();
   lastTargetValue = targetValue;
+  // If there's no growth left to chase (target total == reported ARR),
+  // the target label has nothing useful to add — hide it too.
+  lastTargetHasGrowth = (targetValue - pureActualFinal) > 1e-6;
   drawTargetLine();
   requestAnimationFrame(syncCardHeights);
 }
@@ -2173,8 +2251,8 @@ function drawEndTotalBar(col, pureVal, finalVal){
   }
   bar.innerHTML = `<div>${html}</div>`;
   bar.dataset.tooltip = (Math.abs(finalVal-pureVal) > 1e-6)
-    ? tip(YTD_LABEL, t('actualStatus'), fmtAbs(pureVal)) + ' | ' + tip(YTD_LABEL, t('projectedWithScenarios'), fmtAbs(finalVal))
-    : tip(YTD_LABEL, t('actualStatus'), fmtAbs(pureVal));
+    ? tip('2026-YTD', t('actualStatus'), fmtAbs(pureVal)) + ' | ' + tip('2026-YTD', t('projectedWithScenarios'), fmtAbs(finalVal))
+    : tip('2026-YTD', t('actualStatus'), fmtAbs(pureVal));
   col.appendChild(bar);
 }
 
@@ -2288,9 +2366,10 @@ syncCstaExpansionAvailability();
 const targetLineEl = document.getElementById('targetLineEl');
 let targetLineVisible = true;
 let lastTargetValue = null; // set by render() each time
+let lastTargetHasGrowth = true; // false once target total == reported ARR (nothing left to chase)
 function drawTargetLine(){
   targetLineEl.innerHTML = '';
-  if(!targetLineVisible || lastTargetValue===null) return;
+  if(!targetLineVisible || lastTargetValue===null || !lastTargetHasGrowth) return;
   const plotRect = plot.getBoundingClientRect();
   const lastCol = colEls[colEls.length-1];
   const rect = lastCol.getBoundingClientRect();
@@ -2407,10 +2486,11 @@ document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeHowTo(); }
 // ---- Export / Import scenario data as JSON ----
 function collectExportData(){
   return {
-    version: 2,
+    version: 3,
     lang,
     start,
-    targetGrowthPct: TARGET_GROWTH_PCT,
+    targetTotalM: TARGET_TOTAL_M,
+    targetGrowthPct: TARGET_GROWTH_PCT, // legacy, kept for older-file compatibility only
     reportedYTDOverride,
     steps: steps.map(s => ({
       key: s.key,
@@ -2447,15 +2527,21 @@ function applyImportedData(data){
     start = data.start;
     startInputRef.value = mToK(start);
   }
-  if(typeof data.targetGrowthPct === 'number' && targetPctInputRef){
-    TARGET_GROWTH_PCT = data.targetGrowthPct;
-    targetPctInputRef.value = TARGET_GROWTH_PCT*100;
-    if(targetDollarInputRef) targetDollarInputRef.value = fmtTargetDollarK();
+  if(typeof data.targetTotalM === 'number'){
+    // Current format — the absolute target total was saved directly.
+    TARGET_TOTAL_M = Math.max(0, data.targetTotalM);
+  } else if(typeof data.targetGrowthPct === 'number'){
+    // Older export (pre "ARR Target Total") — it only stored a % of Start
+    // ARR, so rebuild an equivalent absolute total from that.
+    TARGET_TOTAL_M = Math.max(0, start * (1 + data.targetGrowthPct));
   }
-  if('reportedYTDOverride' in data && repInputRef){
-    reportedYTDOverride = (typeof data.reportedYTDOverride === 'number') ? data.reportedYTDOverride : null;
-    repInputRef.value = reportedYTDOverride!==null ? mToK(reportedYTDOverride) : '';
+  if(targetTotalInputRef) targetTotalInputRef.value = mToK(TARGET_TOTAL_M);
+  if(targetPctInputRef){
+    const reported = computePureActualFinal();
+    const gp = reported ? (Math.max(0, TARGET_TOTAL_M-reported)/reported*100) : 0;
+    targetPctInputRef.value = Math.round(gp*10)/10;
   }
+  if(targetDollarInputRef) targetDollarInputRef.value = fmtTargetDollarK();
   if(Array.isArray(data.steps)){
     data.steps.forEach(sd=>{
       const s = steps.find(x=>x.key===sd.key);
@@ -2680,25 +2766,25 @@ function applyAccountTotalToEngine(segKey, assignedMagnitudeK){
   } else if(segType==='committed'){
     if(Math.abs(s.actualDelta) < 1e-9){
       state[catKey].committedAbs = signedM;
-      if(si) si.dollarC.value = mToK(signedM).toFixed(1);
+      if(si) si.dollarC.value = trimZeroDecimal(mToK(signedM).toFixed(1));
     } else {
       const rawPct = signedM/s.actualDelta*100;
       state[catKey].committedPct = rawPct; // full precision — no drift when read back
       if(si){
         si.pctC.value = Math.round(rawPct*10)/10; // rounded for display only
-        si.dollarC.value = mToK(signedM).toFixed(1); // exact assigned total, not recomputed from a rounded %
+        si.dollarC.value = trimZeroDecimal(mToK(signedM).toFixed(1)); // exact assigned total, not recomputed from a rounded %
       }
     }
   } else if(segType==='likely'){
     if(Math.abs(s.actualDelta) < 1e-9){
       state[catKey].likelyAbs = signedM;
-      if(si) si.dollarL.value = mToK(signedM).toFixed(1);
+      if(si) si.dollarL.value = trimZeroDecimal(mToK(signedM).toFixed(1));
     } else {
       const rawPct = signedM/s.actualDelta*100;
       state[catKey].likelyPct = rawPct; // full precision — no drift when read back
       if(si){
         si.pctL.value = Math.round(rawPct*10)/10; // rounded for display only
-        si.dollarL.value = mToK(signedM).toFixed(1); // exact assigned total, not recomputed from a rounded %
+        si.dollarL.value = trimZeroDecimal(mToK(signedM).toFixed(1)); // exact assigned total, not recomputed from a rounded %
       }
     }
   }
