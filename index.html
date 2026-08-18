@@ -87,7 +87,10 @@ html,body{background:#000;height:100%;}
       <button id="btn-de" onclick="setLang('de')">DE</button>
       <button id="btn-ja" onclick="setLang('ja')">JA</button>
       <button id="btn-ar" onclick="setLang('ar')">AR</button>
-      <button id="btn-zh" onclick="setLang('zh')">ZH</button>
+      <button id="btn-zh-tw" onclick="setLang('zh-tw')">TW</button>
+      <button id="btn-zh-cn" onclick="setLang('zh-cn')">CN</button>
+      <button id="btn-zh-hk" onclick="setLang('zh-hk')">HK</button>
+      <button id="btn-zh-sg" onclick="setLang('zh-sg')">SG</button>
       <button id="btn-ko" onclick="setLang('ko')">KO</button>
       <button id="btn-hi" onclick="setLang('hi')">HI</button>
       <button id="btn-it" onclick="setLang('it')">IT</button>
@@ -124,7 +127,7 @@ const T={
     dar:"Detección y Respuesta",rad:"Reactivo y Defensivo",dub:"Durante una Brecha",
     cr:"Ciber Resiliencia",rai:"Recuperar y Mejorar",aab:"Después de una Brecha",
     ppl:"Personas",prc:"Procesos",tch:"Tecnología",
-    title:"La Brújula de Ciberseguridad",titlePre:"La ",titleWord:"Brújula",titlePost:" de Ciberseguridad",badge:"FRAMEWORK",credit:"Creado y Diseñado por:",
+    title:"La Brújula de la Ciberseguridad",titlePre:"La ",titleWord:"Brújula",titlePost:" de la Ciberseguridad",badge:"FRAMEWORK",credit:"Creado y Diseñado por:",
     pubLine1:"La Misma Brújula, un Océano Diferente,",pubLine2:"Diferentes Tormentas",
     pubUrl:"https://www.researchgate.net/publication/409261097",
     pubDoi:"10.13140/RG.2.2.19705.63843",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.19705.63843"
@@ -179,7 +182,37 @@ const T={
     pubUrl:"https://www.researchgate.net/publication/409261097",
     pubDoi:"10.13140/RG.2.2.19705.63843",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.19705.63843"
   },
-  zh:{
+  "zh-tw":{
+    crm:"網路風險管理",pap:"主動預測",bab:"入侵前",
+    dar:"偵測與應變",rad:"被動防禦",dub:"入侵中",
+    cr:"網路韌性",rai:"復原與改善",aab:"入侵後",
+    ppl:"人員",prc:"流程",tch:"技術",
+    title:"網路安全指南針",titlePre:"網路安全",titleWord:"指南針",titlePost:"",badge:"框架",credit:"創作與設計：",
+    pubLine1:"同一個指南針，不同的海洋，",pubLine2:"不同的風暴",
+    pubUrl:"https://www.researchgate.net/publication/409261097",
+    pubDoi:"10.13140/RG.2.2.19705.63843",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.19705.63843"
+  },
+  "zh-cn":{
+    crm:"网络风险管理",pap:"主动预测",bab:"入侵前",
+    dar:"检测与响应",rad:"被动防御",dub:"入侵中",
+    cr:"网络韧性",rai:"恢复与改进",aab:"入侵后",
+    ppl:"人员",prc:"流程",tch:"技术",
+    title:"网络安全指南针",titlePre:"网络安全",titleWord:"指南针",titlePost:"",badge:"框架",credit:"创作与设计：",
+    pubLine1:"同一个指南针，不同的海洋，",pubLine2:"不同的风暴",
+    pubUrl:"https://www.researchgate.net/publication/409261097",
+    pubDoi:"10.13140/RG.2.2.19705.63843",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.19705.63843"
+  },
+  "zh-hk":{
+    crm:"網絡風險管理",pap:"主動預測",bab:"入侵前",
+    dar:"檢測與響應",rad:"被動防禦",dub:"入侵中",
+    cr:"網絡韌性",rai:"恢復與改進",aab:"入侵後",
+    ppl:"人員",prc:"流程",tch:"技術",
+    title:"網絡安全指南針",titlePre:"網絡安全",titleWord:"指南針",titlePost:"",badge:"框架",credit:"創作與設計：",
+    pubLine1:"同一個指南針，不同的海洋，",pubLine2:"不同的風暴",
+    pubUrl:"https://www.researchgate.net/publication/409261097",
+    pubDoi:"10.13140/RG.2.2.19705.63843",pubDoiUrl:"https://doi.org/10.13140/RG.2.2.19705.63843"
+  },
+  "zh-sg":{
     crm:"网络风险管理",pap:"主动预测",bab:"入侵前",
     dar:"检测与响应",rad:"被动防御",dub:"入侵中",
     cr:"网络韧性",rai:"恢复与改进",aab:"入侵后",
@@ -431,7 +464,26 @@ const TTP={
 
 const IDS={crm:'t-crm',pap:'t-pap',bab:'t-bab',dar:'t-dar',rad:'t-rad',dub:'t-dub',cr:'t-cr',rai:'t-rai',aab:'t-aab',ppl:'t-ppl',prc:'t-prc',tch:'t-tch'};
 
-let lang=(()=>{const n=(navigator.language||'en').slice(0,2).toLowerCase();return T[n]?n:'en';})();
+let lang=(()=>{
+  const full=(navigator.language||'en').toLowerCase();
+  // Chinese needs the FULL locale (zh-TW vs zh-CN vs zh-HK vs zh-SG all
+  // matter here - they're genuinely different content, not just a script
+  // difference), so it's checked separately before falling back to the
+  // generic first-two-letters match every other language uses.
+  if(full.startsWith('zh')){
+    if(full.includes('tw')) return 'zh-tw';
+    if(full.includes('hk') || full.includes('mo')) return 'zh-hk'; // Macau gets the HK variant - closest regional match available
+    if(full.includes('sg')) return 'zh-sg';
+    if(full.includes('cn')) return 'zh-cn';
+    // Bare "zh" or an unrecognized region: fall back on script if present
+    // (zh-Hant implies Traditional, zh-Hans implies Simplified), otherwise
+    // default to Simplified/mainland as the most common case worldwide.
+    if(full.includes('hant')) return 'zh-tw';
+    return 'zh-cn';
+  }
+  const n=full.slice(0,2);
+  return T[n]?n:'en';
+})();
 
 function applyLang(l){
   lang=l;
@@ -452,12 +504,12 @@ function applyLang(l){
       '<span style="display:inline;white-space:nowrap;">'+t.pubLine2+'</span>'+
     '</a>'+
     '<a href="'+t.pubDoiUrl+'" target="_blank" style="color:rgba(255,255,255,.28);text-decoration:none;">DOI: '+t.pubDoi+'</a>';
-  ['en','es','pt','fr','de','ja','ar','zh','ko','hi','it','nl'].forEach(c=>{
+  ['en','es','pt','fr','de','ja','ar','zh-tw','zh-cn','zh-hk','zh-sg','ko','hi','it','nl'].forEach(c=>{
     const b=document.getElementById('btn-'+c);
     b.style.background=c===l?'#E01C24':'rgba(255,255,255,0.1)';
     b.style.color=c===l?'#fff':'#888';
   });
-  document.getElementById('lang-toggle-label').textContent = l.toUpperCase();
+  document.getElementById('lang-toggle-label').textContent = l.startsWith('zh-') ? l.split('-')[1].toUpperCase() : l.toUpperCase();
   closeLangMenu();
   // Arabic is RTL. Flip direction and alignment on the text containers
   // only (not the whole layout) and drop letter-spacing, which breaks
