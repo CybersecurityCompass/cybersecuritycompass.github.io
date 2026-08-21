@@ -2492,6 +2492,7 @@ function collectExportData(){
     targetTotalM: TARGET_TOTAL_M,
     targetGrowthPct: TARGET_GROWTH_PCT, // legacy, kept for older-file compatibility only
     reportedYTDOverride,
+    cstaExpansionOn,
     steps: steps.map(s => ({
       key: s.key,
       actualDelta: s.actualDelta,
@@ -2542,6 +2543,18 @@ function applyImportedData(data){
     targetPctInputRef.value = Math.round(gp*10)/10;
   }
   if(targetDollarInputRef) targetDollarInputRef.value = fmtTargetDollarK();
+  if(typeof data.cstaExpansionOn === 'boolean'){
+    cstaExpansionOn = data.cstaExpansionOn;
+    // CSTA Expansion only makes sense with Squad Impact showing — if the
+    // export had it on, make sure Squad Impact comes back on too.
+    if(cstaExpansionOn && !groupsVisible){
+      groupsVisible = true;
+      toggleGroupsBtn.textContent = t('hideSquadImpact');
+    }
+    cstaExpansionBtn.textContent = cstaExpansionOn ? t('hideCstaExpansion') : t('showCstaExpansion');
+    syncCstaExpansionAvailability();
+    updateCstaExpansionColors();
+  }
   if(Array.isArray(data.steps)){
     data.steps.forEach(sd=>{
       const s = steps.find(x=>x.key===sd.key);
