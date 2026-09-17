@@ -39,7 +39,7 @@ html,body{background:#000;height:100%;}
 #credit{position:absolute;bottom:10px;left:12px;z-index:100;font-family:Inter,Arial,sans-serif;font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.04em;line-height:1.6;pointer-events:auto;}
 #pub-link{position:absolute;bottom:10px;right:12px;z-index:100;font-family:Inter,Arial,sans-serif;font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.03em;line-height:1.6;text-align:right;max-width:52%;pointer-events:auto;}
 /* Tooltip */
-#compassRoot,#dialBg,#dialFineTicks,#rose,#ringBorderOuter,#ringBorderInner,#outerTickMarks,.sectorAccent,
+#compassRoot,#dialBg,#dialFineTicks,#rose,#needle,#ringBorderOuter,#ringBorderInner,#outerTickMarks,.sectorAccent,
 path[fill^="url(#ag"],path[fill^="url(#bg"],#t-bab,#t-dub,#t-aab,#t-crm,#t-dar,#t-cr,#t-pap,#t-rad,#t-rai,
 [data-zone="3"],[data-zone="4"],[data-zone="5"]{opacity:0;transition:opacity .6s ease;}
 #tt{position:absolute;pointer-events:none;z-index:300;opacity:0;transition:opacity .2s ease;width:285px;background:rgba(8,10,12,.94);border:1px solid rgba(255,255,255,.13);border-radius:10px;padding:14px 16px;backdrop-filter:blur(12px);}
@@ -702,7 +702,7 @@ hitsSvg.addEventListener('mouseleave', function(){
 // Going back removes whatever the step you're leaving added.
 const DEMO_STEPS=[
   {labelKey:'stepOcean'},
-  {labelKey:'stepCompass', needleSpin:true, introduce:['compassRoot','dialBg','dialFineTicks','rose']},
+  {labelKey:'stepCompass', needleSpin:true, introduce:['compassRoot','dialBg','dialFineTicks','rose','needle']},
   {labelKey:'stepBreachClock', needleSpin:true, introduce:['ringBorderOuter','outerTickMarks','sectorAccent']},
   {labelKey:'dub', bearing:195, introduce:['ag1','t-dub']},
   {labelKey:'aab', bearing:315, introduce:['ag2','t-aab']},
@@ -716,7 +716,7 @@ const DEMO_STEPS=[
   {labelKey:'stepMotion', glowCycle:true},
 ];
 const DEMO_ELEMENT_SELECTORS={
-  compassRoot:'#compassRoot', dialBg:'#dialBg', dialFineTicks:'#dialFineTicks', rose:'#rose',
+  compassRoot:'#compassRoot', dialBg:'#dialBg', dialFineTicks:'#dialFineTicks', rose:'#rose', needle:'#needle',
   ringBorderOuter:'#ringBorderOuter', ringBorderInner:'#ringBorderInner',
   outerTickMarks:'#outerTickMarks', sectorAccent:'.sectorAccent',
   ag0:'path[fill="url(#ag0)"]', ag1:'path[fill="url(#ag1)"]', ag2:'path[fill="url(#ag2)"]',
@@ -747,7 +747,8 @@ function applyDemoStep(i){
 
   const revealed=demoRevealedSetUpTo(demoStep);
   Object.entries(DEMO_ELEMENT_SELECTORS).forEach(([id,sel])=>{
-    document.querySelectorAll(sel).forEach(el=>{ el.style.opacity = revealed.has(id) ? '1' : '0'; });
+    const shownValue = id==='compassRoot' ? '1' : '0.9'; // compassRoot is just a visibility gate; every actual shape gets a touch of transparency
+    document.querySelectorAll(sel).forEach(el=>{ el.style.opacity = revealed.has(id) ? shownValue : '0'; });
   });
   const labelEl=document.getElementById('stepper-label');
   if(labelEl) labelEl.textContent=(T[lang]&&T[lang][step.labelKey])||step.labelKey;
@@ -790,6 +791,9 @@ function tick(now){
     A.needleVel+=accel*dt;
     A.needle+=A.needleVel*dt;
     glows.forEach(g=>{if(g)g.style.opacity='0';});
+    ['ag0','ag1','ag2'].forEach(sel=>{
+      document.querySelectorAll('path[fill="url(#'+sel+')"]').forEach(el=>{ el.style.filter='none'; });
+    });
   } else if(demoGlowCycle){
     // The closing step: everything is already revealed by now, so this isn't
     // about showing more pieces - it's the original ambient cycle (each sector
@@ -798,6 +802,14 @@ function tick(now){
     const cp=(A.t%A.cd+A.cd)%A.cd;
     const ps=[0,1,2].map(i=>pulse(cp,A.pc[i]));
     glows.forEach((g,i)=>{if(g)g.style.opacity=(ps[i]*0.28).toFixed(3);});
+    // The red breach-phase arrows have no dedicated glow overlay element like the
+    // dark wedges do, so a soft drop-shadow filter gives the same "lit up" effect
+    // without needing new SVG geometry - synced to the same per-sector pulse.
+    ['ag0','ag1','ag2'].forEach((sel,i)=>{
+      document.querySelectorAll('path[fill="url(#'+sel+')"]').forEach(el=>{
+        el.style.filter = ps[i]>0.02 ? 'brightness('+(1+ps[i]*0.7).toFixed(2)+') saturate('+(1+ps[i]*0.4).toFixed(2)+')' : 'none';
+      });
+    });
     let sx=0,sy=0;
     ps.forEach((v,i)=>{const a=A.centers[i]*Math.PI/180;sx+=v*Math.sin(a);sy+=v*Math.cos(a);});
     const sum=ps.reduce((a,b)=>a+b,0);
@@ -810,6 +822,9 @@ function tick(now){
     A.needle+=A.needleVel*dt;
   } else {
     glows.forEach(g=>{if(g)g.style.opacity='0';});
+    ['ag0','ag1','ag2'].forEach(sel=>{
+      document.querySelectorAll('path[fill="url(#'+sel+')"]').forEach(el=>{ el.style.filter='none'; });
+    });
     const target = demoBearing!==null ? demoBearing : A.lastActive; // demo bearing always set for steps 3-8; step 0 leaves the (hidden) needle wherever it last was
     let diff=((target-A.needle+540)%360)-180;
     // Spring-damper physics instead of an instant "move 10% of the gap" snap - a real
