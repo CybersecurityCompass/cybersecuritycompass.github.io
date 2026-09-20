@@ -801,7 +801,7 @@ function tick(now){
     // finale, so the finished compass feels alive rather than static.
     const cp=(A.t%A.cd+A.cd)%A.cd;
     const ps=[0,1,2].map(i=>pulse(cp,A.pc[i]));
-    glows.forEach((g,i)=>{if(g)g.style.opacity=(ps[i]*0.28).toFixed(3);});
+    glows.forEach((g,i)=>{if(g){const gw=Math.max(0,Math.min(1,(Math.min(1,0.50+(0.50)*ps[i])-0.55)/0.45));g.setAttribute('opacity',(gw*0.20).toFixed(3));}});
     // The red breach-phase arrows have no dedicated glow overlay element like the
     // dark wedges do, so a soft drop-shadow filter gives the same "lit up" effect
     // without needing new SVG geometry - synced to the same per-sector pulse.
