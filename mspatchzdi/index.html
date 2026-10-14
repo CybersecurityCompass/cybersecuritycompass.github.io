@@ -517,7 +517,7 @@ function drawKevVendors() {
       scales:{ x:{ ticks:{color:PAL.muted}, grid:{color:PAL.grid}, beginAtZero:true }, y:{ ticks:{color:PAL.text}, grid:{display:false} } } } });
 }
 
-function kpis(rows, mon) {
+function kpis(rows, mon, monAll) {
   const total = rows.length;
   const crit = rows.filter(r=>r[3]==="Critical").length;
   const imp = rows.filter(r=>r[3]==="Important").length;
@@ -528,7 +528,7 @@ function kpis(rows, mon) {
   const peak = mon.reduce((a,m)=> (!a || m.total > a.total) ? m : a, null);
   const cp = total ? (100*crit/total).toFixed(1) : "0.0";
   const items = [
-    { k:"Matching CVEs", v:total, d:`${mon.filter(m=>m.total).length} ${state.period==="year"?"years":"months"} with matches`, cls:"" },
+    { k:"Matching CVEs", v:total, d:`${monAll.filter(m=>m.total).length} ${state.period==="year"?"years":"months"} with matches`, cls:"" },
     { k:"Critical", v:crit, d:`${cp}% of matches`, cls:"crit" },
     { k:"Important", v:imp, d:"severity = Important", cls:"warn" },
     { k:"RCE", v:rce, d:"remote code execution", cls:"crit" },
@@ -637,7 +637,7 @@ function update() {
   const scope = scopeText();
   for (let i = 0; i <= 6; i++) { const el = document.getElementById("scope"+i); if (el) el.textContent = scope; }
   renderChips();
-  kpis(rows, mon);
+  kpis(rows, mon, monTable);
   drawMonthly(mon);
   drawType(rows);
   drawCvss(rows);
