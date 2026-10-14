@@ -193,11 +193,13 @@
           <th data-k="pub">Public</th>
           <th data-k="exp">Exploited</th>
           <th data-k="kev">In KEV</th>
+          <th data-k="worm">Wormable</th>
           <th data-k="critPct">Crit %</th>
         </tr></thead>
         <tbody></tbody>
       </table>
     </div>
+    <div id="monPager" class="pager"></div>
   </div>
 
   <div class="panel">
@@ -215,6 +217,7 @@
           <th data-c="exp" class="l">Exploited</th>
           <th data-c="type" class="l">Type</th>
           <th data-c="kev" class="l">In KEV</th>
+          <th data-c="worm" class="l">Wormable</th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -260,7 +263,8 @@ const SEVS = ["Critical","Important","Moderate","Low","High","Medium","Unknown"]
 const TYPES = TYPE_ORDER.filter(t => ROWS.some(r => r[7] === t));
 
 const DEFAULTS = { year:"all", mode:"type", period:"month", sev:"all", cvss:"all", pub:"all", exp:"all", type:"all", worm:"all", kev:"all", prio:"all" };
-const state = Object.assign({}, DEFAULTS, { search:"", sortK:"idx", sortDir:-1, cveSortK:"month", cveSortDir:-1, cvePage:1 });
+const state = Object.assign({}, DEFAULTS, { search:"", sortK:"idx", sortDir:-1, cveSortK:"month", cveSortDir:-1, cvePage:1, monPage:1 });
+const MON_PAGE_SIZE = 13;
 const CVE_PAGE_SIZE = 50;
 let lastFilterKey = "";
 
@@ -402,6 +406,8 @@ function yearly(rows) {
       idx:y, label:String(y), year:y, total, crit, imp,
       rce: rs.filter(r => r[7] === "RCE").length,
       eop: rs.filter(r => r[7] === "EoP").length,
+      kev: rs.filter(r => r[9] === 1).length,
+      worm: rs.filter(r => r[8] === 1).length,
       pub: rs.filter(r => r[5] === "Yes").length,
       exp: rs.filter(r => r[6] === "Yes").length,
       critPct: total ? 100*crit/total : 0, url: null,
@@ -411,11 +417,11 @@ function yearly(rows) {
   });
 }
 
-function monthly(rows) {
+function monthly(rows, full) {
   const allIdx = MONTHS.map((m,i) => i);
   const idxs = state.year !== "all"
     ? allIdx.filter(i => yearOf(i) === +state.year)   // a year is selected: its 12 months
-    : allIdx.slice(-25);                              // no year selected: the last 25 months
+    : (full ? allIdx : allIdx.slice(-25));            // no year: every month for the table, last 25 for the chart
   return idxs.map(i => {
     const m = MONTHS[i];
     const rs = rows.filter(r => r[0] === i);
@@ -427,6 +433,7 @@ function monthly(rows) {
       rce: rs.filter(r => r[7] === "RCE").length,
       eop: rs.filter(r => r[7] === "EoP").length,
       kev: rs.filter(r => r[9] === 1).length,
+      worm: rs.filter(r => r[8] === 1).length,
       pub: rs.filter(r => r[5] === "Yes").length,
       exp: rs.filter(r => r[6] === "Yes").length,
       critPct: total ? 100*crit/total : 0, url: URLS[m],
@@ -540,19 +547,24 @@ function renderMonthly(mon) {
   const k = state.sortK, dir = state.sortDir;
   const sorted = [...mon].sort((a,b) => (a[k]-b[k]) * dir);
   const max = Math.max(1, ...mon.map(m=>m.total));
-  document.querySelector("#tbl tbody").innerHTML = sorted.map(m => `
+  const pages = Math.max(1, Math.ceil(sorted.length / MON_PAGE_SIZE));
+  state.monPage = Math.min(Math.max(1, state.monPage), pages);
+  const start = (state.monPage - 1) * MON_PAGE_SIZE;
+  const shown = sorted.slice(start, start + MON_PAGE_SIZE);
+  renderPagerInto("monPager", pages, sorted.length, state.monPage, MON_PAGE_SIZE, pg => { state.monPage = pg; update(); });
+  document.querySelector("#tbl tbody").innerHTML = shown.map(m => `
     <tr>
       <td>${m.url ? `<a href="${m.url}" target="_blank" rel="noopener">${m.label}</a>` : m.label}</td>
       <td>${m.year}</td>
       <td>${m.total}<span class="bar" style="width:${Math.round(60*m.total/max)}px"></span></td>
-      <td>${m.crit}</td><td>${m.imp}</td><td>${m.rce}</td><td>${m.eop}</td><td>${m.pub}</td><td>${m.exp}</td><td>${m.kev}</td><td>${m.critPct.toFixed(1)}%</td>
+      <td>${m.crit}</td><td>${m.imp}</td><td>${m.rce}</td><td>${m.eop}</td><td>${m.pub}</td><td>${m.exp}</td><td>${m.kev}</td><td>${m.worm}</td><td>${m.critPct.toFixed(1)}%</td>
     </tr>`).join("");
   document.getElementById("monthCount").textContent = `${mon.length} months`;
 }
 
 function renderCves(rows) {
   const k = state.cveSortK, dir = state.cveSortDir;
-  const val = r => ({ month:r[0], id:r[1], title:r[2], sev:r[3], cvss:parseFloat(r[4])||0, pub:r[5], exp:r[6], type:r[7] })[k];
+  const val = r => ({ month:r[0], id:r[1], title:r[2], sev:r[3], cvss:parseFloat(r[4])||0, pub:r[5], exp:r[6], type:r[7], kev:r[9], worm:r[8] })[k];
   const sorted = [...rows].sort((a,b) => {
     const x=val(a), y=val(b);
     let c = (typeof x==="string" ? x.localeCompare(y) : x-y) * dir;
@@ -569,10 +581,26 @@ function renderCves(rows) {
       <td>${MONTHS[r[0]]}</td>
       <td class="l"><a href="https://msrc.microsoft.com/update-guide/vulnerability/${r[1]}" target="_blank" rel="noopener">${r[1]}</a></td>
       <td class="l title">${isPriority(r) ? `<span class="prio">PRIORITY</span>` : ""}${escapeHtml(r[2])}</td>
-      <td class="l">${r[3]}</td><td>${r[4]}</td><td class="l">${r[5]}</td><td class="l">${r[6]}</td><td class="l">${r[7]}</td><td class="l">${r[9]===1?"Yes":"No"}</td>
-    </tr>`).join("") || `<tr><td colspan="9" class="note">no CVEs match the current filters</td></tr>`;
+      <td class="l">${r[3]}</td><td>${r[4]}</td><td class="l">${r[5]}</td><td class="l">${r[6]}</td><td class="l">${r[7]}</td><td class="l">${r[9]===1?"Yes":"No"}</td><td class="l">${r[8]===1?"Yes":"No"}</td>
+    </tr>`).join("") || `<tr><td colspan="10" class="note">no CVEs match the current filters</td></tr>`;
   document.getElementById("cveCount").textContent = `${sorted.length} matches`;
   renderPager(pages, sorted.length);
+}
+function renderPagerInto(elId, pages, total, cur, size, goTo) {
+  const el = document.getElementById(elId);
+  if (pages <= 1) { el.innerHTML = ""; return; }
+  const from = (cur - 1) * size + 1, to = Math.min(total, cur * size);
+  const nums = [];
+  for (let i = 1; i <= pages; i++) {
+    if (i === 1 || i === pages || Math.abs(i - cur) <= 2) nums.push(i);
+    else if (nums[nums.length-1] !== "…") nums.push("…");
+  }
+  el.innerHTML = `
+    <span class="note">${from}–${to} of ${total}</span>
+    <button data-go="${cur-1}" ${cur===1?"disabled":""}>‹ Prev</button>
+    ${nums.map(n => n === "…" ? `<span class="note">…</span>` : `<button data-go="${n}" class="${n===cur?"on":""}">${n}</button>`).join("")}
+    <button data-go="${cur+1}" ${cur===pages?"disabled":""}>Next ›</button>`;
+  el.querySelectorAll("button[data-go]").forEach(b => b.onclick = () => goTo(+b.dataset.go));
 }
 function renderPager(pages, total) {
   const el = document.getElementById("cvePager");
@@ -602,9 +630,10 @@ function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;"
 
 function update() {
   const filterKey = JSON.stringify([state.year, state.sev, state.cvss, state.pub, state.exp, state.type, state.worm, state.kev, state.prio, state.search, state.mode]);
-  if (filterKey !== lastFilterKey) { state.cvePage = 1; lastFilterKey = filterKey; }
+  if (filterKey !== lastFilterKey) { state.cvePage = 1; state.monPage = 1; lastFilterKey = filterKey; }
   const rows = ROWS.filter(matches);
   const mon = state.period === "year" ? yearly(rows) : monthly(rows);
+  const monTable = state.period === "year" ? yearly(rows) : monthly(rows, true);
   const scope = scopeText();
   for (let i = 0; i <= 6; i++) { const el = document.getElementById("scope"+i); if (el) el.textContent = scope; }
   renderChips();
@@ -615,12 +644,12 @@ function update() {
   drawFlags(rows);
   drawYear(rows);
   drawKevVendors();
-  renderMonthly(mon);
+  renderMonthly(monTable);
   renderCves(rows);
 }
 
 document.querySelectorAll("#tbl th").forEach(th => th.onclick = () => {
-  const k = th.dataset.k; state.sortDir = state.sortK === k ? -state.sortDir : 1; state.sortK = k; update();
+  const k = th.dataset.k; state.sortDir = state.sortK === k ? -state.sortDir : 1; state.sortK = k; state.monPage = 1; update();
 });
 document.querySelectorAll("#cves th").forEach(th => th.onclick = () => {
   const k = th.dataset.c; state.cveSortDir = state.cveSortK === k ? -state.cveSortDir : 1; state.cveSortK = k; state.cvePage = 1; update();
