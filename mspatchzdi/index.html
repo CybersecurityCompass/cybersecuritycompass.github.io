@@ -529,6 +529,12 @@ const axis = { ticks:{ color:PAL.muted, maxRotation:60, minRotation:45 }, grid:{
 const yAxis = { ticks:{ color:PAL.muted }, grid:{ color:PAL.grid }, beginAtZero:true };
 const legend = { labels:{ color:PAL.text, font:{ family:"monospace" }, boxWidth:12 } };
 const tip = { backgroundColor:"#071420", borderColor:PAL.accent, borderWidth:1 };
+// Tooltip title for the monthly charts: the month followed by its total in brackets, e.g. "Sep 2026 (45)"
+const monthTitleTip = { callbacks: { title: items => {
+  const c = items[0].chart, i = items[0].dataIndex;
+  const total = c.data.datasets.reduce((s, ds) => s + (ds.data[i] || 0), 0);
+  return `${items[0].label} (${Math.round(total)})`;
+} } };
 
 // Event markers for the monthly chart: vertical line from the axis, dot, and a bold label
 const EVENTS = [
@@ -629,7 +635,7 @@ function drawMonthly(mon) {
   setChart("monthChart", { type:"bar", plugins:[eventMarkers], data:{ labels:mon.map(m=>m.label), datasets },
     options:{ responsive:true, maintainAspectRatio:false, layout:{ padding:{ top:40 } },
       animation:false,
-      plugins:{ legend, tooltip:{ ...tip, mode:"index", intersect:false } },
+      plugins:{ legend, tooltip:{ ...tip, ...monthTitleTip, mode:"index", intersect:false } },
       scales:{ x:{ ...axis, stacked }, y:{ ...yAxis, stacked, max: yMax } } } });
   // start every bar at zero, then grow them in sequence
   charts.monthChart.data.datasets.forEach(ds => { ds.data = ds.data.map(() => 0); });
@@ -740,7 +746,7 @@ function drawKevMonthly() {
   setChart("kevMonthChart", { type:"bar", plugins:[eventMarkers], data:{ labels:KEV_M.months, datasets: active.map(s => ({ label:s.name, data:s.data.map(() => 0),
       backgroundColor:s.color, borderWidth:0 })) },
     options:{ responsive:true, maintainAspectRatio:false, animation:false,
-      plugins:{ legend, tooltip:{ ...tip, mode:"index", intersect:false } },
+      plugins:{ legend, tooltip:{ ...tip, ...monthTitleTip, mode:"index", intersect:false } },
       scales:{ x:{ ...axis, stacked:true }, y:{ ...yAxis, stacked:true, max:yMax } } } });
   growKevMonthly(charts.kevMonthChart, full);
 }
