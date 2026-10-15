@@ -120,6 +120,7 @@
   <div class="group"><label>Year</label><div class="btns" id="yearBtns"></div></div>
   <div class="group"><label>Monthly chart by</label><div class="btns" id="modeBtns"></div></div>
   <div class="group"><label>Period</label><div class="btns" id="periodBtns"></div></div>
+  <div class="group"><label>Frontier AI models</label><div class="btns" id="modelBtns"></div></div>
   <div class="group"><label>Search</label><input type="search" id="search" placeholder="CVE id, title, month"></div>
 </section>
 
@@ -263,7 +264,7 @@ const SEVS = ["Critical","Important","Moderate","Low","High","Medium","Unknown"]
 const TYPES = TYPE_ORDER.filter(t => ROWS.some(r => r[7] === t));
 
 const DEFAULTS = { year:"all", mode:"type", period:"month", sev:"all", cvss:"all", pub:"all", exp:"all", type:"all", worm:"all", kev:"all", prio:"all" };
-const state = Object.assign({}, DEFAULTS, { search:"", sortK:"idx", sortDir:-1, cveSortK:"month", cveSortDir:-1, cvePage:1, monPage:1 });
+const state = Object.assign({}, DEFAULTS, { models:true, search:"", sortK:"idx", sortDir:-1, cveSortK:"month", cveSortDir:-1, cvePage:1, monPage:1 });
 const MON_PAGE_SIZE = 13;
 const CVE_PAGE_SIZE = 50;
 let lastFilterKey = "";
@@ -385,6 +386,7 @@ function refreshControls() {
   btnGroup("yearBtns", [["all","ALL"],["2024","2024"],["2025","2025"],["2026","2026"]], "year");
   btnGroup("modeBtns", [["sev","Severity"],["type","Type"],["total","Total"]], "mode");
   btnGroup("periodBtns", [["month","Monthly"],["year","Yearly"]], "period");
+  btnGroup("modelBtns", [[true,"Show"],[false,"Hide"]], "models");
   fill("fSev", [["all","All"], ...SEVS.map(s=>[s,s])], "sev");
   fill("fCvss", [["all","All"], ...BANDS.map(b=>[b,b])], "cvss");
   fill("fPub", [["all","All"],["Yes","Yes"],["No","No"]], "pub");
@@ -453,6 +455,48 @@ const yAxis = { ticks:{ color:PAL.muted }, grid:{ color:PAL.grid }, beginAtZero:
 const legend = { labels:{ color:PAL.text, font:{ family:"monospace" }, boxWidth:12 } };
 const tip = { backgroundColor:"#071420", borderColor:PAL.accent, borderWidth:1 };
 
+// Event markers for the monthly chart: vertical line from the axis, dot, and a bold label
+const EVENTS = [
+  { month: "Apr 2026", label: "Claude Mythos Preview + GPT-5.5", color: "#ff8c42" },
+  { month: "Aug 2026", label: "GLM-5.3", color: "#4f8cff" },
+  { month: "Sep 2026", label: "Mythos 5.1 + GPT-6 Astra", color: "#ff66c4" },
+];
+const eventMarkers = {
+  id: "eventMarkers",
+  afterDatasetsDraw(chart) {
+    const { ctx, chartArea, scales } = chart;
+    if (!state.models || !chartArea || !scales.x || !scales.y) return;
+    const labels = chart.data.labels;
+    const barTopAt = i => {                              // top of the stacked bar at index i (pixels)
+      const total = chart.data.datasets.reduce((s, ds) => s + (ds.data[i] || 0), 0);
+      return scales.y.getPixelForValue(total);
+    };
+    EVENTS.forEach(ev => {
+      const idx = labels.indexOf(ev.month);
+      if (idx < 0) return;                               // event is outside the current window
+      const x = scales.x.getPixelForValue(idx);
+      ctx.save();
+      ctx.font = "600 10px monospace";
+      const tw = ctx.measureText(ev.label).width;
+      const left = x - 9 - tw - 4, right = x - 5;        // horizontal extent of the label box
+      // label must sit above every bar it covers, so find the tallest one in that span
+      const iLeft = Math.max(0, Math.floor(scales.x.getValueForPixel(left)));
+      const iRight = Math.min(labels.length - 1, Math.ceil(scales.x.getValueForPixel(right)));
+      let topPx = Infinity;
+      for (let i = iLeft; i <= iRight; i++) topPx = Math.min(topPx, barTopAt(i));
+      const y = Math.max(chartArea.top - 22, topPx - 46);   // same gap above the bar for every label (April's previous 34px lift + 12px)
+      ctx.strokeStyle = ev.color; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x, chartArea.bottom); ctx.lineTo(x, y); ctx.stroke();
+      ctx.fillStyle = ev.color; ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(11,18,27,0.85)";             // backing so the text reads over the bars
+      ctx.fillRect(left, y - 8, tw + 8, 16);
+      ctx.fillStyle = PAL.text; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      ctx.fillText(ev.label, x - 9, y);
+      ctx.restore();
+    });
+  }
+};
+
 function drawMonthly(mon) {
   let datasets, stacked = state.mode !== "total";
   if (state.mode === "sev") {
@@ -464,8 +508,8 @@ function drawMonthly(mon) {
   }
   datasets = activeDatasets(datasets);
   document.getElementById("monthTitle").textContent = state.mode === "sev" ? "by severity" : state.mode === "type" ? "by type" : "total";
-  setChart("monthChart", { type:"bar", data:{ labels:mon.map(m=>m.label), datasets },
-    options:{ responsive:true, maintainAspectRatio:false,
+  setChart("monthChart", { type:"bar", plugins:[eventMarkers], data:{ labels:mon.map(m=>m.label), datasets },
+    options:{ responsive:true, maintainAspectRatio:false, layout:{ padding:{ top:40 } },
       plugins:{ legend, tooltip:{ ...tip, mode:"index", intersect:false } },
       scales:{ x:{ ...axis, stacked }, y:{ ...yAxis, stacked } } } });
 }
