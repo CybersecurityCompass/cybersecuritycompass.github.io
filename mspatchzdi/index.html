@@ -938,7 +938,11 @@ document.getElementById("search").addEventListener("input", e => { state.search 
 function saveChartPng(panel, title) {
   const btn = panel.querySelector(".save");
   if (btn) btn.style.visibility = "hidden";           // keep the button out of the image
+  // the entrance fade can leave the panel partly transparent, so show it at full strength for the capture
+  const prevAnim = panel.style.animation, prevOpacity = panel.style.opacity;
+  panel.style.animation = "none"; panel.style.opacity = "1";
   return html2canvas(panel, { backgroundColor: "#0b121b", scale: 2, useCORS: true }).then(shot => {
+    panel.style.animation = prevAnim; panel.style.opacity = prevOpacity;
     if (btn) btn.style.visibility = "";
     // Frame the chart: page-coloured margin around the panel, with a light blue-grey border
     const pad = 36, border = 4;
