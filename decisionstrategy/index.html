@@ -47,7 +47,7 @@
   }
   header h1 {
     font-weight: 600;
-    font-size: clamp(32px, 4.4vw, 50px);
+    font-size: clamp(28px, 3.6vw, 42px);
     line-height: 1.12;
     margin: 0;
     letter-spacing: -0.005em;
@@ -95,7 +95,7 @@
   .lbl { fill: var(--ink-soft); font-size: 17px; font-style: italic; }
   .legend-text { fill: var(--ink); font-size: 20px; }
   .stage { fill: #9b1c1c; font-size: 17px; font-weight: 600; text-anchor: middle; }
-  .title { fill: var(--ink); font-size: 19px; font-weight: 600; }
+  .title { fill: var(--ink); font-size: 22px; font-weight: 600; }
   .mk-label { font-size: 18px; font-weight: 600; }
 
   /* Story */
@@ -112,7 +112,7 @@
   }
   .story h2 {
     font-weight: 600;
-    font-size: 30px;
+    font-size: 22px;
     line-height: 1.2;
     margin: 6px 0 14px;
     color: var(--ink);
@@ -216,6 +216,59 @@
   #lang-menu button:hover { background: var(--rule); color: var(--ink); }
   .credit { display: none; margin: 8px 0 0; font-size: 14px; line-height: 1.6; color: var(--muted); max-width: 78ch; }
   .credit a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+/* Command center: icon-only playback controls, grouped in one dark capsule */
+  #cmd-bar { display: inline-flex; align-items: center; gap: 8px; margin-right: 12px; }
+  .cmd-btn { width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--rule); border-radius: 50%; background: var(--paper); color: var(--ink); cursor: pointer; transition: background 0.15s, color 0.15s, box-shadow 0.15s; }
+  .cmd-btn:hover { background: var(--rule); box-shadow: 0 0 0 1px var(--muted); }
+  .cmd-btn svg { width: 12px; height: 12px; display: block; }
+  .cmd-btn.cmd-main { background: var(--ink); color: var(--paper); }
+  .cmd-btn.cmd-main:hover { background: var(--ink-soft); }
+  .cmd-btn:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
+  /* Battlefield areas: after their steps they dim and their labels disappear */
+  #def-battle rect, #att-battle rect { transition: fill-opacity 0.6s ease; }
+  #def-battle text, #att-battle text { transition: opacity 0.6s ease; }
+  #def-battle.dim rect, #att-battle.dim rect { fill-opacity: 0.4; }
+  #def-battle.dim text, #att-battle.dim text { opacity: 0; }
+  /* Loop circle: dashed, with the dashes flowing around it */
+  .ring-dash { stroke-dasharray: 8 8; animation: ring-flow 1.4s linear infinite; }
+  @keyframes ring-flow { to { stroke-dashoffset: 16; } }
+  .res-purple { fill: rgba(91, 45, 138, 0.22); }
+  /* Defender advantage areas pulse by strength of fill only, so the fade-in still works */
+  .area-pulse { animation: area-pulse 2.2s ease-in-out infinite; }
+  @keyframes area-pulse {
+    0%, 100% { fill-opacity: 0.55; }
+    50% { fill-opacity: 1; }
+  }
+  /* Pulsing label: scales only, so the fade-in from .fx still works */
+  /* Subtle pulse on the label text only: a small size change, no shapes behind it */
+  /* Two faint copies of the same text grow from the center and fade, behind the main text */
+  .label-halo-text { transform-box: view-box; transform-origin: 780px 269px; animation: label-halo-text 2.4s ease-out infinite; }
+  .label-halo-text.delay { animation-delay: 1.2s; }
+  @keyframes label-halo-text {
+    0% { transform: scale(1); opacity: 0.35; }
+    100% { transform: scale(1.4, 2.2); opacity: 0; }
+  }
+  @keyframes label-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+  @keyframes pulse-text {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  /* Pulsing borders around the three loop boxes */
+  .pulse-border { fill: none; stroke-width: 2; animation: border-pulse 1.4s ease-in-out infinite; }
+  /* Box halos use the same expanding-fade style as the dots */
+  .pulse-box { transform-box: fill-box; transform-origin: center; animation: pulse-box 2s ease-out infinite; }
+  .pulse-box.delay { animation-delay: 1s; }
+  @keyframes pulse-box {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.3); opacity: 0; }
+  }
+  @keyframes border-pulse {
+    0%, 100% { stroke-width: 1.5; stroke-opacity: 0.35; }
+    50% { stroke-width: 4; stroke-opacity: 1; }
+  }
   .hint {
     margin: 14px 0 0;
     font-size: 14px;
@@ -267,7 +320,12 @@
 <div class="wrap">
 
 <div class="topbar">
-    <button id="theme-toggle" type="button" aria-label="Switch to dark theme">◐</button>
+    <div id="cmd-bar" role="group" aria-label="Playback">
+        <button id="cmd-prev" class="cmd-btn" type="button" aria-label="Back to start"><svg viewBox="0 0 24 24"><path d="M6 5v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M19 5.5v13L9 12z" fill="currentColor"/></svg></button>
+        <button id="cmd-play" class="cmd-btn cmd-main" type="button" aria-label="Play or pause"></button>
+        <button id="cmd-next" class="cmd-btn" type="button" aria-label="Next step"><svg viewBox="0 0 24 24"><path d="M18 5v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M5 5.5v13L15 12z" fill="currentColor"/></svg></button>
+      </div>
+      <button id="theme-toggle" type="button" aria-label="Switch to dark theme">◐</button>
     <div id="lang-bar">
       <button id="lang-toggle" aria-haspopup="listbox" aria-expanded="false">
         <span id="lang-toggle-label">EN</span><span class="lang-caret">▾</span>
@@ -332,7 +390,7 @@
       <g clip-path="url(#thrClip)">
         <line id="thr-line" class="thr" x1="200" x2="1450" y1="545" y2="545"></line>
       </g>
-      <text id="thr-label" class="fx lbl" x="1450" y="580" text-anchor="end">Minimum decision</text><text id="thr-label-2" class="fx lbl" x="1450" y="602" text-anchor="end">effectiveness</text>
+      <text id="thr-label" class="fx lbl" x="1444" y="589" text-anchor="end">Minimum decision</text><text id="thr-label-2" class="fx lbl" x="1444" y="611" text-anchor="end">effectiveness</text>
 
       <!-- Steps 9 to 12: attack stages, labelled under the time axis -->
       <g id="stage-1" class="fx"><text class="stage" x="313" y="670">Recon and</text><text class="stage" x="313" y="690">Preparation</text></g>
@@ -346,14 +404,26 @@
       <!-- Step 8: attacker's advantage zone (drawn under the curves) -->
       <g id="attacker-zone" class="fx">
         <rect x="200" y="565" width="1250" height="195" fill="rgba(220, 53, 69, 0.10)"></rect>
-        <polygon points="620,598 940,598 940,588 975,611 940,634 940,624 620,624" fill="rgba(220, 53, 69, 0.18)"></polygon>
+        <path d="M620.0 600.0 Q620.0 593.0 627.0 593.0 L933.0 593.0 Q940.0 593.0 940.0 586.0 L940.0 586.0 Q940.0 579.0 946.2 582.3 L992.1 606.4 Q1001.0 611.0 992.1 615.6 L946.2 639.7 Q940.0 643.0 940.0 636.0 L940.0 636.0 Q940.0 629.0 933.0 629.0 L627.0 629.0 Q620.0 629.0 620.0 622.0 Z" fill="rgba(220, 53, 69, 0.18)"></path>
         <text x="780" y="618" fill="#9b1c1c" font-size="22" text-anchor="middle">Attacker's advantage</text>
       </g>
 
       <!-- Steps 13 to 15: defender advantage areas (drawn under the curves) -->
-      <path id="def-blue" class="fx" fill="rgba(47, 93, 158, 0.18)"></path>
-      <path id="def-orange" class="fx" fill="rgba(196, 98, 45, 0.18)"></path>
-      <path id="def-green" class="fx" fill="rgba(63, 125, 90, 0.18)"></path>
+      <path id="def-blue" class="fx area-pulse" fill="rgba(47, 93, 158, 0.18)"></path>
+      <path id="def-orange" class="fx area-pulse" fill="rgba(196, 98, 45, 0.18)"></path>
+      <path id="res-area" class="fx area-pulse res-purple"></path>
+      <text id="res-label" class="fx" x="780" y="642" text-anchor="middle" fill="#5b2d8a" font-size="30" font-weight="600">Proactive Defense</text>
+      <path id="def-green" class="fx area-pulse" fill="rgba(63, 125, 90, 0.18)"></path>
+
+      <!-- Battlefields: green above the minimum line (step 3), red below it (step 4) -->
+      <g id="def-battle" class="fx">
+        <rect x="200" y="60" width="1250" height="505" fill="rgba(63, 125, 90, 0.14)"></rect>
+        <text x="825" y="322" text-anchor="middle" fill="#1e6b43" font-size="30" font-weight="600">Defender's battlefield</text>
+      </g>
+      <g id="att-battle" class="fx">
+        <rect x="200" y="565" width="1250" height="195" fill="rgba(220, 53, 69, 0.10)"></rect>
+        <text x="825" y="672" text-anchor="middle" fill="#9b1c1c" font-size="30" font-weight="600">Attacker's battlefield</text>
+      </g>
 
       <!-- Step 3: Reactive Precision -->
       <path id="curve-rp" class="draw curve c-rp"></path>
@@ -415,8 +485,8 @@
       </g>
     <!-- Defender advantage banner and arrows -->
       <g id="def-banner" class="fx">
-        <polygon points="620,290 940,290 940,272 975,318 940,364 940,346 620,346" fill="rgba(63, 125, 90, 0.18)"></polygon>
-        <text x="780" y="326" fill="#1e6b43" font-size="22" text-anchor="middle">Defender advantage</text>
+        <path d="M620.0 302.0 Q620.0 295.0 627.0 295.0 L933.0 295.0 Q940.0 295.0 940.0 288.0 L940.0 284.0 Q940.0 277.0 945.8 280.9 L992.7 312.4 Q1001.0 318.0 992.7 323.6 L945.8 355.1 Q940.0 359.0 940.0 352.0 L940.0 348.0 Q940.0 341.0 933.0 341.0 L627.0 341.0 Q620.0 341.0 620.0 334.0 Z" fill="rgba(63, 125, 90, 0.18)"></path>
+        <text x="780" y="325" fill="#1e6b43" font-size="22" text-anchor="middle">Defender advantage</text>
       </g>
       <g id="def-arrow-blue" class="fx"><circle cx="780" cy="290" r="5.5" fill="#2f5d9e"></circle>
         <path d="M780 290 Q525 80 204 160" fill="none" stroke="#2f5d9e" stroke-width="2.2" class="march" stroke-dasharray="2 6" stroke-linecap="round" marker-end="url(#arrowBlue)"></path>
@@ -428,20 +498,45 @@
         <path d="M780 346 Q700 430 500 516" fill="none" stroke="#2f7d4f" stroke-width="2.2" class="march" stroke-dasharray="2 6" stroke-linecap="round" marker-end="url(#arrowGreen)"></path>
       </g>
     <!-- Steps 16 to 18: handoffs and the continuous defense loop -->
+      <circle id="ring-circle" class="ring-dash fx" cx="780" cy="285" r="170" fill="none" stroke="#6d3f9e" stroke-width="2.2"></circle>
+      <g id="ring-label" class="fx"><text class="label-halo-text" x="780" y="277" text-anchor="middle" fill="#5b2d8a" font-size="30" font-weight="600">Cyber resilience</text><text class="label-halo-text delay" x="780" y="277" text-anchor="middle" fill="#5b2d8a" font-size="30" font-weight="600">Cyber resilience</text><text class="label-main" x="780" y="277" text-anchor="middle" fill="#5b2d8a" font-size="30" font-weight="600">Cyber resilience</text></g>
+      <g style="display:none">
+        <g><animateMotion dur="9s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath href="#ring"></mpath></animateMotion><polygon points="-8,-6 8,0 -8,6" fill="#2f7d4f"><animate attributeName="fill" values="#2f7d4f;#c4622d;#6d3f9e;#2f7d4f" keyTimes="0;0.33;0.67;1" dur="9s" begin="0s" repeatCount="indefinite"/></polygon></g>
+        <g><animateMotion dur="9s" begin="-1.8s" repeatCount="indefinite" rotate="auto"><mpath href="#ring"></mpath></animateMotion><polygon points="-8,-6 8,0 -8,6" fill="#2f7d4f"><animate attributeName="fill" values="#2f7d4f;#c4622d;#6d3f9e;#2f7d4f" keyTimes="0;0.33;0.67;1" dur="9s" begin="-1.8s" repeatCount="indefinite"/></polygon></g>
+        <g><animateMotion dur="9s" begin="-3.6s" repeatCount="indefinite" rotate="auto"><mpath href="#ring"></mpath></animateMotion><polygon points="-8,-6 8,0 -8,6" fill="#2f7d4f"><animate attributeName="fill" values="#2f7d4f;#c4622d;#6d3f9e;#2f7d4f" keyTimes="0;0.33;0.67;1" dur="9s" begin="-3.6s" repeatCount="indefinite"/></polygon></g>
+        <g><animateMotion dur="9s" begin="-5.4s" repeatCount="indefinite" rotate="auto"><mpath href="#ring"></mpath></animateMotion><polygon points="-8,-6 8,0 -8,6" fill="#2f7d4f"><animate attributeName="fill" values="#2f7d4f;#c4622d;#6d3f9e;#2f7d4f" keyTimes="0;0.33;0.67;1" dur="9s" begin="-5.4s" repeatCount="indefinite"/></polygon></g>
+        <g><animateMotion dur="9s" begin="-7.2s" repeatCount="indefinite" rotate="auto"><mpath href="#ring"></mpath></animateMotion><polygon points="-8,-6 8,0 -8,6" fill="#2f7d4f"><animate attributeName="fill" values="#2f7d4f;#c4622d;#6d3f9e;#2f7d4f" keyTimes="0;0.33;0.67;1" dur="9s" begin="-7.2s" repeatCount="indefinite"/></polygon></g>
+        
+        
+        
+        
+      </g>
+      <g id="ring-heads" class="fx">
+        <g><animateMotion dur="9s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath href="#ring"></mpath></animateMotion><polygon points="-8,-6 8,0 -8,6" fill="#2f7d4f"><animate attributeName="fill" values="#2f7d4f;#c4622d;#6d3f9e;#2f7d4f" keyTimes="0;0.33;0.67;1" dur="9s" begin="0s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="scale" values="1;1.35;1" dur="1.2s" begin="0s" repeatCount="indefinite"/></polygon></g>
+        <g><animateMotion dur="9s" begin="-1.5s" repeatCount="indefinite" rotate="auto"><mpath href="#ring"></mpath></animateMotion><polygon points="-8,-6 8,0 -8,6" fill="#2f7d4f"><animate attributeName="fill" values="#2f7d4f;#c4622d;#6d3f9e;#2f7d4f" keyTimes="0;0.33;0.67;1" dur="9s" begin="-1.5s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="scale" values="1;1.35;1" dur="1.2s" begin="-1.5s" repeatCount="indefinite"/></polygon></g>
+        <g><animateMotion dur="9s" begin="-3s" repeatCount="indefinite" rotate="auto"><mpath href="#ring"></mpath></animateMotion><polygon points="-8,-6 8,0 -8,6" fill="#2f7d4f"><animate attributeName="fill" values="#2f7d4f;#c4622d;#6d3f9e;#2f7d4f" keyTimes="0;0.33;0.67;1" dur="9s" begin="-3s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="scale" values="1;1.35;1" dur="1.2s" begin="-3s" repeatCount="indefinite"/></polygon></g>
+        <g><animateMotion dur="9s" begin="-4.5s" repeatCount="indefinite" rotate="auto"><mpath href="#ring"></mpath></animateMotion><polygon points="-8,-6 8,0 -8,6" fill="#2f7d4f"><animate attributeName="fill" values="#2f7d4f;#c4622d;#6d3f9e;#2f7d4f" keyTimes="0;0.33;0.67;1" dur="9s" begin="-4.5s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="scale" values="1;1.35;1" dur="1.2s" begin="-4.5s" repeatCount="indefinite"/></polygon></g>
+        <g><animateMotion dur="9s" begin="-6s" repeatCount="indefinite" rotate="auto"><mpath href="#ring"></mpath></animateMotion><polygon points="-8,-6 8,0 -8,6" fill="#2f7d4f"><animate attributeName="fill" values="#2f7d4f;#c4622d;#6d3f9e;#2f7d4f" keyTimes="0;0.33;0.67;1" dur="9s" begin="-6s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="scale" values="1;1.35;1" dur="1.2s" begin="-6s" repeatCount="indefinite"/></polygon></g>
+        <g><animateMotion dur="9s" begin="-7.5s" repeatCount="indefinite" rotate="auto"><mpath href="#ring"></mpath></animateMotion><polygon points="-8,-6 8,0 -8,6" fill="#2f7d4f"><animate attributeName="fill" values="#2f7d4f;#c4622d;#6d3f9e;#2f7d4f" keyTimes="0;0.33;0.67;1" dur="9s" begin="-7.5s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="scale" values="1;1.35;1" dur="1.2s" begin="-7.5s" repeatCount="indefinite"/></polygon></g>
+      </g>
       <g id="static-dots" class="fx"><circle id="s1" r="9" fill="#2f7d4f" stroke="#f6f1e7" stroke-width="2.5"></circle><circle id="s2" r="9" fill="#c4622d" stroke="#f6f1e7" stroke-width="2.5"></circle></g>
       <g id="hand-1" class="fx">
-        <line x1="650" y1="90" x2="226" y2="202" stroke="#2f7d4f" stroke-width="2" marker-end="url(#arrowGreen)"></line>
+        <line x1="642" y1="115" x2="226" y2="202" stroke="#2f7d4f" stroke-width="2" marker-end="url(#arrowGreen)"></line>
         <circle id="h1-a" class="pulse" r="9" fill="#2f7d4f"></circle><circle id="h1-b" class="pulse delay" r="9" fill="#2f7d4f"></circle><circle id="h1-dot" r="9" fill="#2f7d4f" stroke="#f6f1e7" stroke-width="2.5"></circle>
-        <rect x="650" y="60" width="260" height="60" fill="rgba(63, 125, 90, 0.18)"></rect>
-        <text x="780" y="86" text-anchor="middle" fill="#1e6b43" font-size="18">1st hand-off: CROC decides</text>
-        <text x="780" y="108" text-anchor="middle" fill="#1e6b43" font-size="18">Proactive takes over</text>
+        <rect class="fx pulse-border" id="b-hand-1" x="646" y="81" width="268" height="68" rx="16" ry="16" stroke="#2f7d4f"></rect>
+        <rect style="fill: var(--paper)" x="650" y="85" rx="12" ry="12" width="260" height="60"></rect>
+        <rect x="650" y="85" rx="12" ry="12" width="260" height="60" fill="rgba(63, 125, 90, 0.18)"></rect>
+        <text x="780" y="111" font-weight="700" text-anchor="middle" fill="#1e6b43" font-size="18">1st hand-off: CROC decides</text>
+        <text x="780" y="133" font-style="italic" text-anchor="middle" fill="#1e6b43" font-size="18">Proactive takes over</text>
       </g>
       <g id="hand-2" class="fx">
-        <line x1="503" y1="345" x2="272" y2="398" stroke="#c4622d" stroke-width="2" marker-end="url(#arrowOrange)"></line>
+        <line x1="495" y1="370" x2="272" y2="398" stroke="#c4622d" stroke-width="2" marker-end="url(#arrowOrange)"></line>
         <circle id="h2-a" class="pulse" r="9" fill="#c4622d"></circle><circle id="h2-b" class="pulse delay" r="9" fill="#c4622d"></circle><circle id="h2-dot" r="9" fill="#c4622d" stroke="#f6f1e7" stroke-width="2.5"></circle>
-        <rect x="503" y="315" width="260" height="60" fill="rgba(196, 98, 45, 0.18)"></rect>
-        <text x="633" y="341" text-anchor="middle" fill="#8a3f17" font-size="18">2nd hand-off: SOC executes</text>
-        <text x="633" y="363" text-anchor="middle" fill="#8a3f17" font-size="18">Pre-authorized response</text>
+        <rect class="fx pulse-border" id="b-hand-2" x="499" y="336" width="268" height="68" rx="16" ry="16" stroke="#c4622d"></rect>
+        <rect style="fill: var(--paper)" x="503" y="340" rx="12" ry="12" width="260" height="60"></rect>
+        <rect x="503" y="340" rx="12" ry="12" width="260" height="60" fill="rgba(196, 98, 45, 0.18)"></rect>
+        <text x="633" y="366" font-weight="700" text-anchor="middle" fill="#8a3f17" font-size="18">2nd hand-off: SOC executes</text>
+        <text x="633" y="388" font-style="italic" text-anchor="middle" fill="#8a3f17" font-size="18">Pre-authorized response</text>
       </g>
       <g id="loop" class="fx">
         
@@ -457,17 +552,20 @@
         
         
         
-        <path class="flow" d="M682 121 A170 170 0 0 0 620 318" fill="none" stroke="#6d3f9e" stroke-width="2.6" stroke-linecap="round" marker-end="url(#arrowPurple)"></path>
-        <path class="flow" d="M671 390 A170 170 0 0 0 889 390" fill="none" stroke="#6d3f9e" stroke-width="2.6" stroke-linecap="round" marker-end="url(#arrowPurple)"></path>
-        <path class="flow" d="M940 318 A170 170 0 0 0 878 121" fill="none" stroke="#6d3f9e" stroke-width="2.6" stroke-linecap="round" marker-end="url(#arrowPurple)"></path>
+        
+        <path id="ring" d="M780 115 A170 170 0 1 0 780 455 A170 170 0 1 0 780 115" fill="none" stroke="none"></path>
         
         
         
         
         
-        <rect x="797" y="315" width="260" height="60" fill="rgba(109, 63, 158, 0.16)"></rect>
-        <text x="927" y="341" text-anchor="middle" fill="#5b2d8a" font-size="18">Continuous defense loop</text>
-        <text x="927" y="363" text-anchor="middle" fill="#5b2d8a" font-size="18">Learn &amp; improve</text>
+        
+        
+        <rect class="fx pulse-border" id="b-loop" x="793" y="336" width="268" height="68" rx="16" ry="16" stroke="#6d3f9e"></rect>
+        <rect style="fill: var(--paper)" x="797" y="340" rx="12" ry="12" width="260" height="60"></rect>
+        <rect x="797" y="340" rx="12" ry="12" width="260" height="60" fill="rgba(109, 63, 158, 0.16)"></rect>
+        <text x="927" y="366" font-weight="700" text-anchor="middle" fill="#5b2d8a" font-size="18">Continuous defense loop</text>
+        <text x="927" y="388" font-style="italic" text-anchor="middle" fill="#5b2d8a" font-size="18">Learn &amp; improve</text>
       </g>
     <!-- Step 23: Proactive Defense example card, styled like the reference -->
       <g id="pd-card" class="fx">
@@ -638,11 +736,12 @@
 
   el('curve-rp').setAttribute('d', curvePath(FUNCS.rp));
   el('curve-rr').setAttribute('d', curvePath(FUNCS.rr));
+  el('res-area').setAttribute('d', curvePath(FUNCS.pd) + 'L' + X(1).toFixed(1) + ' ' + Y(0).toFixed(1) + 'L' + X(0).toFixed(1) + ' ' + Y(0).toFixed(1) + 'Z');
   el('curve-pd').setAttribute('d', curvePath(FUNCS.pd));
   el('thr-line').setAttribute('y1', Y(THR));
   el('thr-line').setAttribute('y2', Y(THR));
-  el('thr-label').setAttribute('y', Y(THR) + 17);
-  el('thr-label-2').setAttribute('y', Y(THR) + 39);
+  el('thr-label').setAttribute('y', Y(THR) + 23);
+  el('thr-label-2').setAttribute('y', Y(THR) + 45);
 
   // Place the crossing markers at the crossings, solved from the same functions
   function placeCrossing(group, f) {
@@ -707,7 +806,15 @@
 
   function setDraw(id, on) {
     const node = el(id);
-    node.style.strokeDashoffset = on ? 0 : node.dataset.len;
+    clearTimeout(node._hideT);
+    if (on) {
+      node.style.visibility = 'visible';
+      node.style.strokeDashoffset = 0;
+    } else {
+      // After the erase finishes, hide the path completely so no round line-cap dot is left behind
+      node.style.strokeDashoffset = node.dataset.len;
+      node._hideT = setTimeout(() => { node.style.visibility = 'hidden'; }, 1700);
+    }
   }
   function setFx(ids, on) {
     ids.forEach(id => el(id).classList.toggle('on', on));
@@ -844,22 +951,29 @@
     {
       count: 'Step 18 of 19',
       title: '2nd hand-off: SOC executes',
-      body: 'Where the blue and orange curves meet, the SOC executes a response the CROC has already pre-authorized. It is faster because the threat picture was built in advance.',
+      body: 'Where the blue and orange curves meet, the SOC executes a response the CROC has already pre-authorized. It is faster because the threat picture was built in advance, and its results improve the next cycle of the loop.',
       accent: '#c4622d',
       cta: 'Next'
     },
     {
       count: 'Step 19 of 19',
       title: 'The continuous defense loop',
-      body: 'The CROC and SOC form one learning loop. Each incident teaches the CROC what matters, and the next cycle tightens the defense. The loop turns the handoffs into resilience. The CROC runs seven stages continuously: identify, contextualize, measure, prioritize, mitigate, verify, and monitor.',
+      body: 'The CROC and SOC form one learning loop. Each incident shows the CROC which exposures the attacker actually used, so the next cycle is better informed. The CROC runs seven stages continuously: identify, contextualize, measure, prioritize, mitigate, verify, and monitor.',
       accent: '#1f2a44',
+      cta: 'Next'
+    },
+    {
+      count: 'Step 22 of 26',
+      title: 'Cyber resilience',
+      body: 'This is where cyber resilience is built: not by preventing every incident, but by understanding each one better, so the organization comes out stronger than before.',
+      accent: '#5b2d8a',
       cta: 'Next'
     }
   );
   steps.splice(16, 0, {
     count: 'Step 16 of 19',
     title: 'Two handoffs',
-    body: 'Defense does not hand over control in one jump. The first handoff is where the blue and green curves meet: the CROC decides before the attacker arrives. The second is where the blue and orange curves meet: the SOC executes a response that was already authorized.',
+    body: 'Defense does not hand over control in one jump. The first handoff happens where the blue and green curves meet: the CROC has already reduced exposure, so the attack paths the attacker needs are gone. The second happens where the blue and orange curves meet: the SOC executes a response the CROC pre-authorized, working against a reduced attack surface.',
     accent: '#1f2a44',
     cta: 'Next'
   });
@@ -897,6 +1011,19 @@
     body: 'The SOC was easy to build because it answered a question the industry already knew how to ask: how do we contain it? The CROC answers a different question: what is our exposure, continuously, so we can decide before the pressure arrives. The barrier is organizational, not technological. It requires continuous work, the authority to say no to risky initiatives, and treating cyber risk as a business function. AI agents make this more urgent, because they route around controls at machine speed, so decisions must be made in advance and enforced structurally.',
     accent: '#1f2a44',
     cta: 'Start over'
+  });
+steps.splice(3, 0, {
+    count: 'Step 3',
+    title: "Defender's battlefield",
+    body: "The green area above the minimum line is the defender's battlefield. Here decisions are still made calmly, before pressure arrives, so the defender shapes the conditions of the fight.",
+    accent: '#1e6b43',
+    cta: 'Next'
+  }, {
+    count: 'Step 4',
+    title: "Attacker's battlefield",
+    body: "The red area below the minimum line is the attacker's battlefield. Once a decision falls here it can no longer change the outcome, and control belongs to the attacker.",
+    accent: '#9b1c1c',
+    cta: 'Next'
   });
   const last = steps.length - 1;
   let current = 0;
@@ -940,11 +1067,11 @@
       "Fast decisions": "Decisiones rápidas", "(short time)": "(tiempo corto)", "Time to decide": "Tiempo para decidir",
       "Slow decisions": "Decisiones lentas", "(long time)": "(tiempo largo)", "Minimum decision": "Decisión mínima",
       "Recon and": "Reconocimiento y", "Preparation": "preparación", "Initial": "Compromiso", "Compromise": "inicial",
-      "Lateral Movement": "Movimiento lateral", "Objectives": "Objetivos", "Attacker's advantage": "Ventaja del atacante",
+      "Lateral Movement": "Movimiento lateral", "Recon and Preparation": "Reconocimiento y preparación", "Initial Compromise": "Compromiso inicial", "Objectives": "Objetivos", "Defender's battlefield": "Campo de batalla del defensor", "Attacker's battlefield": "Campo de batalla del atacante", "Attacker's advantage": "Ventaja del atacante",
       "SOC Decision Window": "Ventana de decisión del SOC", "Defender can still influence": "El defensor aún puede influir", "the outcome": "el resultado",
       "1st hand-off: CROC decides": "1.er traspaso: el CROC decide", "Proactive takes over": "la defensa proactiva asume",
-      "2nd hand-off: SOC executes": "2.º traspaso: el SOC ejecuta", "Pre-authorized response": "respuesta preautorizada",
-      "Continuous defense loop": "Bucle continuo de defensa", "Learn & improve": "Aprender y mejorar",
+      "2nd hand-off: SOC executes": "2.º traspaso: el SOC ejecuta", "Pre-authorized response": "respuesta preautorizada", "Improves the next cycle": "mejora el siguiente ciclo",
+      "Continuous defense loop": "Bucle continuo de defensa", "Learn & improve": "Aprender y mejorar", "Cyber resilience": "Ciber resiliencia", "Proactive Defense": "Defensa proactiva", "CROC Reduces Exposure": "El CROC reduce la exposición", "Attack Paths Disappear": "desaparecen las rutas de ataque", "SOC Executes Against": "El SOC actúa frente a", "Reduced Attack Surface": "superficie de ataque reducida", "Incident Teaches CROC": "El incidente enseña al CROC", "The Cycle Tightens": "el ciclo se refuerza",
       "Reactive Precision": "Precisión reactiva", "reaches the threshold": "alcanza el umbral",
       "Reactive Response (SOC)": "Respuesta reactiva (SOC)", "Control passes to the attacker": "El control pasa al atacante",
       "Death by": "Muerte por", "Friction": "fricción", "Time to Decide": "Tiempo para decidir", "Exceeds": "supera", "Time to Act": "tiempo para actuar",
@@ -977,11 +1104,11 @@
       "Fast decisions": "Decisões rápidas", "(short time)": "(tempo curto)", "Time to decide": "Tempo para decidir",
       "Slow decisions": "Decisões lentas", "(long time)": "(tempo longo)", "Minimum decision": "Decisão mínima",
       "Recon and": "Reconhecimento e", "Preparation": "preparação", "Initial": "Comprometimento", "Compromise": "inicial",
-      "Lateral Movement": "Movimento lateral", "Objectives": "Objetivos", "Attacker's advantage": "Vantagem do atacante",
+      "Lateral Movement": "Movimento lateral", "Recon and Preparation": "Reconhecimento e preparação", "Initial Compromise": "Comprometimento inicial", "Objectives": "Objetivos", "Defender's battlefield": "Campo de batalha do defensor", "Attacker's battlefield": "Campo de batalha do atacante", "Attacker's advantage": "Vantagem do atacante",
       "SOC Decision Window": "Janela de decisão do SOC", "Defender can still influence": "O defensor ainda pode influenciar", "the outcome": "o resultado",
       "1st hand-off: CROC decides": "1.º repasse: o CROC decide", "Proactive takes over": "a defesa proativa assume",
-      "2nd hand-off: SOC executes": "2.º repasse: o SOC executa", "Pre-authorized response": "resposta pré-autorizada",
-      "Continuous defense loop": "Ciclo contínuo de defesa", "Learn & improve": "Aprender e melhorar",
+      "2nd hand-off: SOC executes": "2.º repasse: o SOC executa", "Pre-authorized response": "resposta pré-autorizada", "Improves the next cycle": "melhora o próximo ciclo",
+      "Continuous defense loop": "Ciclo contínuo de defesa", "Learn & improve": "Aprender e melhorar", "Cyber resilience": "Ciber resiliência", "Proactive Defense": "Defesa proativa", "CROC Reduces Exposure": "O CROC reduz a exposição", "Attack Paths Disappear": "caminhos de ataque desaparecem", "SOC Executes Against": "O SOC executa contra", "Reduced Attack Surface": "superfície de ataque reduzida", "Incident Teaches CROC": "O incidente ensina o CROC", "The Cycle Tightens": "o ciclo se fortalece",
       "Reactive Precision": "Precisão reativa", "reaches the threshold": "atinge o limite",
       "Reactive Response (SOC)": "Resposta reativa (SOC)", "Control passes to the attacker": "O controle passa ao atacante",
       "Death by": "Morte por", "Friction": "atrito", "Time to Decide": "Tempo para decidir", "Exceeds": "excede", "Time to Act": "tempo para agir",
@@ -1014,11 +1141,11 @@
       "Fast decisions": "速い意思決定", "(short time)": "（短い時間）", "Time to decide": "意思決定までの時間",
       "Slow decisions": "遅い意思決定", "(long time)": "（長い時間）", "Minimum decision": "最低の意思決定",
       "Recon and": "偵察と", "Preparation": "準備", "Initial": "初期", "Compromise": "侵害",
-      "Lateral Movement": "横方向移動", "Objectives": "目的", "Attacker's advantage": "攻撃者の優位",
+      "Lateral Movement": "横方向移動", "Recon and Preparation": "偵察と準備", "Initial Compromise": "初期侵入", "Objectives": "目的", "Defender's battlefield": "防御側の戦場", "Attacker's battlefield": "攻撃者の戦場", "Attacker's advantage": "攻撃者の優位",
       "SOC Decision Window": "SOCの意思決定ウィンドウ", "Defender can still influence": "防御側はまだ影響を与えられる", "the outcome": "結果",
       "1st hand-off: CROC decides": "第1の引き継ぎ：CROCが決定", "Proactive takes over": "プロアクティブが主導",
-      "2nd hand-off: SOC executes": "第2の引き継ぎ：SOCが実行", "Pre-authorized response": "事前承認された対応",
-      "Continuous defense loop": "継続的防御ループ", "Learn & improve": "学習と改善",
+      "2nd hand-off: SOC executes": "第2の引き継ぎ：SOCが実行", "Pre-authorized response": "事前承認された対応", "Improves the next cycle": "次のサイクルを改善",
+      "Continuous defense loop": "継続的防御ループ", "Learn & improve": "学習と改善", "Cyber resilience": "サイバーレジリエンス", "Proactive Defense": "プロアクティブ防御", "CROC Reduces Exposure": "CROCが露出を減らす", "Attack Paths Disappear": "攻撃経路が消える", "SOC Executes Against": "SOCが実行", "Reduced Attack Surface": "縮小された攻撃対象", "Incident Teaches CROC": "インシデントがCROCを教える", "The Cycle Tightens": "サイクルが引き締まる",
       "Reactive Precision": "リアクティブ精度", "reaches the threshold": "閾値に到達",
       "Reactive Response (SOC)": "リアクティブ対応（SOC）", "Control passes to the attacker": "主導権は攻撃者に移る",
       "Death by": "摩擦による", "Friction": "死", "Time to Decide": "意思決定までの時間", "Exceeds": "超過", "Time to Act": "行動までの時間",
@@ -1112,8 +1239,10 @@
   const BODY = {
     es: [
       "Dibujaremos el gráfico una pieza a la vez. Cada estrategia responde a la misma pregunta: ¿cuánto importa todavía una decisión a medida que pasa el tiempo?",
-      "El eje horizontal es el tiempo para decidir, desde decisiones rápidas a la izquierda hasta decisiones lentas a la derecha. El eje vertical es la efectividad de la decisión, desde menor abajo hasta mayor arriba.",
+      "El eje horizontal es el tiempo para decidir, desde decisiones rápidas a la izquierda hasta decisiones lentas a la derecha. El eje vertical es la efectividad de la decisión, de abajo, con menor efectividad, hacia arriba, con mayor efectividad.",
       "La línea discontinua marca la efectividad mínima de la decisión. Una vez que una decisión cae por debajo de ella, ya no puede cambiar el resultado. Cada estrategia se juzga por cuándo cruza esta línea.",
+      "El área verde por encima de la línea mínima es el campo de batalla del defensor. Aquí las decisiones todavía se toman con calma, antes de que llegue la presión, así que el defensor da forma a las condiciones de la lucha.",
+      "El área roja por debajo de la línea mínima es el campo de batalla del atacante. Una vez que una decisión cae aquí, ya no puede cambiar el resultado, y el control pertenece al atacante.",
       "Espera a tener información suficiente y luego decide con alta confianza. La confianza empieza en su punto más alto, pero cae más rápido, porque la situación cambia mientras corre el análisis. Cruza el mínimo pronto, antes de que la decisión esté lista para actuar.",
       "Responde rápido, con información incompleta. Empieza más bajo, pero cae más lentamente, así que se mantiene en juego más tiempo. Aun así cruza el mínimo, y ahí es donde el control pasa del defensor al atacante.",
       "Decide antes de que llegue la presión y luego sigue reduciendo la exposición. Empieza en la parte superior del gráfico y se nivela por encima de la línea mínima. Nunca la cruza, así que el atacante nunca hereda la línea de tiempo.",
@@ -1127,10 +1256,11 @@
       "Antes de que llegue el atacante, el defensor todavía tiene la ventaja. El área por encima de la línea mínima y detrás de la curva azul es donde una decisión todavía puede cambiar el resultado, y en el caso de la precisión reactiva se cierra rápidamente.",
       "El área por debajo de la curva naranja y por encima de la línea mínima permanece abierta más tiempo, porque el SOC responde más rápido. Se cierra donde la curva naranja cruza la línea mínima.",
       "El área por debajo de la curva verde y por encima de la línea mínima nunca se cierra. Las decisiones tomadas antes de que llegue la presión mantienen al defensor en control en todo momento. El defensor que decide primero es dueño de la línea de tiempo: el atacante hereda el entorno que el defensor ya construyó.",
-      "La defensa no cede el control en un solo salto. El primer traspaso está donde se encuentran las curvas azul y verde: el CROC decide antes de que llegue el atacante. El segundo está donde se encuentran las curvas azul y naranja: el SOC ejecuta una respuesta que ya estaba autorizada.",
+      "La defensa no cede el control en un solo salto. El primer traspaso está donde se encuentran las curvas azul y verde: el CROC ya ha reducido la exposición, así que desaparecen las rutas de ataque que necesita el atacante. El segundo está donde se encuentran las curvas azul y naranja: el SOC ejecuta una respuesta preautorizada por el CROC, trabajando sobre una superficie de ataque reducida.",
       "Antes de que llegue la presión, el CROC decide. El punto verde marca el momento en que la defensa proactiva toma la línea de tiempo desde el inicio.",
-      "Donde se encuentran las curvas azul y naranja, el SOC ejecuta una respuesta que el CROC ya ha preautorizado. Es más rápida porque el panorama de amenazas se construyó con antelación.",
-      "El CROC y el SOC forman un solo bucle de aprendizaje. Cada incidente enseña al CROC qué importa, y el siguiente ciclo refuerza la defensa. El bucle convierte los traspasos en resiliencia. El CROC ejecuta siete etapas de forma continua: identificar, contextualizar, medir, priorizar, mitigar, verificar y monitorear.",
+      "Donde se encuentran las curvas azul y naranja, el SOC ejecuta una respuesta que el CROC ya ha preautorizado. Es más rápida porque el panorama de amenazas se construyó con antelación, y sus resultados mejoran el siguiente ciclo del bucle.",
+      "El CROC y el SOC forman un solo bucle de aprendizaje. Cada incidente muestra al CROC qué exposiciones usó realmente el atacante, así que el siguiente ciclo está mejor informado. El CROC ejecuta siete etapas de forma continua: identificar, contextualizar, medir, priorizar, mitigar, verificar y monitorear.",
+      "Aquí se construye la ciber resiliencia: no evitando cada incidente, sino entendiendo cada uno mejor, para que la organización salga más fuerte que antes.",
       "Cada estrategia sigue una curva de decaimiento exponencial. Las tres curvas comparten la misma forma general y se diferencian en su valor inicial A y en su tasa de decaimiento k, que es como la fórmula muestra la realidad operativa de cada estrategia.",
       "La efectividad inicial es la más alta (1.00) porque el análisis produce decisiones de alta confianza. Sin embargo, la tasa de decaimiento es extrema (k<sub>RP</sub> = 12), lo que refleja con qué rapidez la situación analizada queda obsoleta a medida que cambia el panorama de amenazas. Hacia t ≈ 0.10, la precisión reactiva alcanza el umbral de efectividad mínima de la decisión (0.30). Más allá de este punto de cruce, la decisión pierde todo valor a medida que se cierra la ventana de decisión.",
       "La efectividad inicial es más baja (0.70), porque la velocidad exige decidir con información incompleta. La tasa de decaimiento es moderada (k<sub>RR</sub> = 5), así que la reacción rápida mantiene a la organización en juego más tiempo, pero la efectividad sigue cayendo. La curva naranja cruza el umbral de efectividad mínima de la decisión (0.30). En ese punto, el control pasa del defensor al atacante.",
@@ -1141,6 +1271,8 @@
       "Vamos desenhar o gráfico uma peça de cada vez. Cada estratégia responde à mesma pergunta: quanto uma decisão ainda importa à medida que o tempo passa?",
       "O eixo horizontal é o tempo para decidir, de decisões rápidas à esquerda até decisões lentas à direita. O eixo vertical é a eficácia da decisão, de menor embaixo até maior em cima.",
       "A linha tracejada marca a eficácia mínima da decisão. Quando uma decisão cai abaixo dela, não pode mais mudar o resultado. Cada estratégia é julgada pelo momento em que cruza esta linha.",
+      "A área verde acima da linha mínima é o campo de batalha do defensor. Aqui as decisões ainda são tomadas com calma, antes que a pressão chegue, então o defensor molda as condições da luta.",
+      "A área vermelha abaixo da linha mínima é o campo de batalha do atacante. Quando uma decisão cai aqui, ela não pode mais mudar o resultado, e o controle pertence ao atacante.",
       "Espere informação suficiente e então decida com alta confiança. A confiança começa no ponto mais alto, mas cai mais rápido, porque a situação muda enquanto a análise acontece. Cruza o mínimo cedo, antes que a decisão esteja pronta para agir.",
       "Responda rápido, com informação incompleta. Começa mais baixo, mas cai mais devagar, então permanece no jogo por mais tempo. Mesmo assim cruza o mínimo, e é aí que o controle passa do defensor para o atacante.",
       "Decida antes que a pressão chegue e continue reduzindo a exposição. Começa no topo do gráfico e se estabiliza acima da linha mínima. Nunca a cruza, então o atacante nunca herda a linha do tempo.",
@@ -1154,10 +1286,11 @@
       "Antes que o atacante chegue, o defensor ainda tem a vantagem. A área acima da linha mínima e atrás da curva azul é onde uma decisão ainda pode mudar o resultado, e para a precisão reativa ela se fecha rapidamente.",
       "A área abaixo da curva laranja e acima da linha mínima permanece aberta por mais tempo, porque o SOC responde mais rápido. Ela se fecha onde a curva laranja cruza a linha mínima.",
       "A área abaixo da curva verde e acima da linha mínima nunca se fecha. Decisões tomadas antes que a pressão chegue mantêm o defensor no controle em todos os momentos. O defensor que decide primeiro é dono da linha do tempo: o atacante herda o ambiente que o defensor já construiu.",
-      "A defesa não entrega o controle de uma só vez. O primeiro repasse está onde se encontram as curvas azul e verde: o CROC decide antes que o atacante chegue. O segundo está onde se encontram as curvas azul e laranja: o SOC executa uma resposta que já estava autorizada.",
+      "A defesa não entrega o controle de uma só vez. O primeiro repasse ocorre onde se encontram as curvas azul e verde: o CROC já reduziu a exposição, então desaparecem os caminhos de ataque que o atacante precisa. O segundo ocorre onde se encontram as curvas azul e laranja: o SOC executa uma resposta pré-autorizada pelo CROC, atuando sobre uma superfície de ataque reduzida.",
       "Antes que a pressão chegue, o CROC decide. O ponto verde marca o momento em que a defesa proativa assume a linha do tempo desde o início.",
-      "Onde as curvas azul e laranja se encontram, o SOC executa uma resposta que o CROC já pré-autorizou. Ela é mais rápida porque o panorama de ameaças foi construído com antecedência.",
-      "O CROC e o SOC formam um único ciclo de aprendizado. Cada incidente ensina ao CROC o que importa, e o ciclo seguinte fortalece a defesa. O ciclo transforma os repasses em resiliência. O CROC executa sete etapas continuamente: identificar, contextualizar, medir, priorizar, mitigar, verificar e monitorar.",
+      "Onde as curvas azul e laranja se encontram, o SOC executa uma resposta que o CROC já pré-autorizou. Ela é mais rápida porque o panorama de ameaças foi construído com antecedência, e seus resultados melhoram o próximo ciclo.",
+      "O CROC e o SOC formam um único ciclo de aprendizado. Cada incidente mostra ao CROC quais exposições o atacante realmente usou, então o ciclo seguinte está mais bem informado. O CROC executa sete etapas continuamente: identificar, contextualizar, medir, priorizar, mitigar, verificar e monitorar.",
+      "É aqui que se constrói a ciber resiliência: não evitando todo incidente, mas entendendo cada um melhor, para que a organização saia mais forte do que antes.",
       "Cada estratégia segue uma curva de decaimento exponencial. As três curvas compartilham a mesma forma geral e diferem no valor inicial A e na taxa de decaimento k, que é como a fórmula mostra a realidade operacional de cada estratégia.",
       "A eficácia inicial é a mais alta (1.00) porque a análise produz decisões de alta confiança. No entanto, a taxa de decaimento é extrema (k<sub>RP</sub> = 12), refletindo a rapidez com que a situação analisada se torna obsoleta à medida que o panorama de ameaças muda. Por volta de t ≈ 0.10, a precisão reativa alcança o limite de eficácia mínima da decisão (0.30). Depois desse ponto de cruzamento, a decisão perde todo o valor à medida que a janela de decisão se fecha.",
       "A eficácia inicial é mais baixa (0.70), porque a velocidade exige decidir com informação incompleta. A taxa de decaimento é moderada (k<sub>RR</sub> = 5), então a reação rápida mantém a organização no jogo por mais tempo, mas a eficácia ainda cai. A curva laranja cruza o limite de eficácia mínima da decisão (0.30). Nesse ponto, o controle passa do defensor para o atacante.",
@@ -1168,12 +1301,14 @@
       "グラフを一度に一つずつ描いていきます。どの戦略も同じ問いに答えます：時間が経つにつれ、意思決定はどれだけ重要であり続けるのか。",
       "横軸は意思決定までの時間で、左側の速い意思決定から右側の遅い意思決定へ進みます。縦軸は意思決定の有効性で、下が低く、上が高くなります。",
       "破線は意思決定の最低有効性を示します。意思決定がこの線を下回ると、もはや結果を変えることはできません。どの戦略も、この線をいつ横切るかで評価されます。",
+      "最低ラインより上の緑の領域は、防御側の戦場です。ここでは圧力が来る前に、まだ落ち着いて決定でき、防御側が戦いの条件を形作ります。",
+      "最低ラインより下の赤い領域は、攻撃者の戦場です。決定がここに落ちると、もはや結果を変えられず、主導権は攻撃者に属します。",
       "十分な情報を待ち、そのうえで高い確信をもって決定します。確信は最初が最も高いものの、分析が進む間に状況が変わるため、最も速く低下します。決定が行動できる状態になる前に、早い段階で最低ラインを下回ります。",
       "不完全な情報のもとで素早く対応します。出発点は低いものの、低下は緩やかなので、より長く競争に残ります。それでも最低ラインを下回り、そこで主導権が防御側から攻撃者へ移ります。",
       "プレッシャーが来る前に決定し、その後も露出を減らし続けます。グラフの上端から始まり、最低ラインより上で横ばいになります。決して下回らないため、攻撃者がタイムラインを引き継ぐことはありません。",
       "青い曲線は最初に最低ラインに到達します。意思決定の準備が整う頃には、すでに機会の窓は閉じています。ここが精度に基づく意思決定が時代遅れになる地点です。これが摩擦による死です。意思決定にかかる時間が行動にかかる時間を超えるため、時間内に行動できない防御は機会を失います。",
-      "オレンジの曲線は二畺目に最低ラインに到達します。ここでは攻撃者の勢いが防御側の意思決定の速さを上回り、主導権が防御側から攻撃者へ移ります。",
-      "最低ラインより下では、意思決定はもはや結果を変えられないため、防御側はここで主導権を失います。攻撃者がタイムラインを決め、この赤い領域はその優位が働く範囲を示します。攻撃者は交差点を中心に作戦を立てます。準備段階では検知を避けるためにザレて動き、交差点に達するとスピードを上げます。",
+      "オレンジの曲線は二番目に最低ラインに到達します。ここでは攻撃者の勢いが防御側の意思決定の速さを上回り、主導権が防御側から攻撃者へ移ります。",
+      "最低ラインより下では、意思決定はもはや結果を変えられないため、防御側はここで主導権を失います。攻撃者がタイムラインを決め、この赤い領域はその優位が働く範囲を示します。攻撃者は交差点を中心に作戦を立てます。準備段階では検知を避けるために慎重に動き、交差点に達するとスピードを上げます。",
       "攻撃者は目立たない位置にとどまり、目に見える動きをする前に環境を学びながらアクセスを築きます。攻撃者が何を見つけられるかが、まだ防御側によって形作られている段階です。",
       "攻撃者は環境内に足がかりを得ます。最初の侵入に成功した時点で、準備は侵入へと変わります。",
       "足がかりから、攻撃者はシステムやアカウントの間を移動してアクセスを広げ、狙う資産に到達します。",
@@ -1181,12 +1316,13 @@
       "攻撃者が到達する前、防御側はまだ優位にあります。最低ラインより上で、青い曲線の内側にある領域は、意思決定がまだ結果を変えられる範囲です。リアクティブ精度の場合、この領域は速く閉じます。",
       "オレンジの曲線より下で、最低ラインより上の領域は、SOCの対応が速いため長く開いたままです。オレンジの曲線が最低ラインを横切る地点で閉じます。",
       "緑の曲線より下で、最低ラインより上の領域は決して閉じません。プレッシャーが来る前に行われた決定により、防御側はあらゆる時点で主導権を保ちます。先に決定する防御側がタイムラインの所有者になります。攻撃者は、防御側がすでに構築した環境を引き継ぎます。",
-      "防御は一度に主導権を手放すわけではありません。最初の引き継ぎは青と緑の曲線が交わる地点で、攻撃者が到達する前にCROCが決定します。二番目は青とオレンジの曲線が交わる地点で、すでに承認されていた対応をSOCが実行します。",
+      "防御は一度に主導権を手放すわけではありません。最初の引き継ぎは青と緑の曲線が交わる地点で、CROCがすでに露出を減らしているため、攻撃者が必要とする攻撃経路は消えています。二番目は青とオレンジの曲線が交わる地点で、CROCが事前承認した対応をSOCが、縮小された攻撃対象の上で実行します。",
       "プレッシャーが来る前に、CROCが決定します。緑の点は、プロアクティブ防御が最初からタイムラインを引き継ぐ地点を示します。",
-      "青とオレンジの曲線が交わる地点で、SOCはことにCROCがあらかじめ承認した対応を実行します。脅威の全体像が事前に構築されているため、対応は速くなります。",
-      "CROCとSOCは一つの学習ループを形成します。インシデントのたびにCROCは何が重要かを学び、次のサイクルで防御が引き締まります。このループが引き継ぎを回復力へと変えます。CROCは七つの段階を継続的に実行します：特定、文脈化、測定、優先順位付け、軽減、検証、監視。",
+      "青とオレンジの曲線が交わる地点で、SOCが、CROCがあらかじめ承認した対応を実行します。脅威の全体像が事前に構築されているため、対応は速くなり、その結果はループの次のサイクルも改善します。",
+      "CROCとSOCは一つの学習ループを形成します。インシデントのたびに、攻撃者が実際に使った露出がCROCに示されるため、次のサイクルはより的確な情報に基づきます。CROCは七つの段階を継続的に実行します：特定、文脈化、測定、優先順位付け、軽減、検証、監視。",
+      "ここでサイバーレジリエンスが築かれます。すべてのインシデントを防ぐことではなく、一つひとつをより深く理解することで、組織は以前より強くなります。",
       "どの戦略も指数関数的減衰曲線に従います。三つの曲線は同じ一般形を共有し、初期値Aと減衰率kで異なります。これは式が、それぞれの戦略の運用上の現実をどのように表しているかを示しています。",
-      "初期有効性は最も高く（1.00）、分析が高い確信をもつ決定を生むためです。しかし減衰率は極端（k<sub>RP</sub> = 12）で、脅威の状況が変わるにつれ分析された状況がどれほど速く陶汗化するかを反映しています。t ≈ 0.10 付近で、リアクティブ精度は最低の意思決定有効性の閾値（0.30）に到達します。この交差点を過ぎると、意思決定の窓が閉じるにつれ価値を失います。",
+      "初期有効性は最も高く（1.00）、分析が高い確信をもつ決定を生むためです。しかし減衰率は極端（k<sub>RP</sub> = 12）で、脅威の状況が変わるにつれ分析された状況がどれほど速く陳腐化するかを反映しています。t ≈ 0.10 付近で、リアクティブ精度は最低の意思決定有効性の閾値（0.30）に到達します。この交差点を過ぎると、意思決定の窓が閉じるにつれ価値を失います。",
       "初期有効性はより低く（0.70）、速さが不完全な情報のもとでの決定を要求するためです。減衰率は中程度（k<sub>RR</sub> = 5）なので、速い反応が組織をより長く競争に残しますが、有効性は依然として低下します。オレンジの曲線は最低の意思決定有効性の閾値（0.30）を横切ります。その時点で主導権は防御側から攻撃者へ移ります。",
       "初期有効性はリアクティブ精度と同程度に高く（0.90）、圧力が来る前に決定が行われたためです。減衰率は低く（k<sub>PD</sub> = 6）、曲線は決して横切ることなく最低の意思決定有効性（0.30）に近づきます。継続的なサイバーリスクの理解に基づく決定が、防御側を主導権のもとに保ちます。",
       "SOCは、業界がすでに問い方を知っていた問いに答えたため、構築が容易でした：どう封じ込めるか。CROCは別の問いに答えます：プレッシャーが来る前に決定できるよう、継続的に自社の露出はどこにあるか。障壁は技術的ではなく組織的です。継続的な取り組み、リスクの高い取り組みに「ノー」と言える権限、そしてサイバーリスクをビジネス機能として扱うことが必要です。AIエージェントは機械の速度で統制を迂回するため、これをより緊急の課題にします。だからこそ、決定は事前に行われ、構造的に徹底される必要があります。"
@@ -1254,6 +1390,12 @@
   }
 
   function renderVisuals(i) {
+    // Battlefield steps (3 and 4) come before the curves; the steps after them use their earlier numbering
+    setFx(['def-battle'], i >= 3);
+    document.getElementById('def-battle').classList.toggle('dim', i >= 5);
+    document.getElementById('att-battle').classList.toggle('dim', i >= 5);
+    setFx(['att-battle'], i >= 4);
+    i = i >= 5 ? i - 2 : Math.min(i, 2);
     // Axes and labels
     const axesOn = i >= 1;
     setDraw('axis-y', axesOn);
@@ -1302,16 +1444,22 @@
     setFx(['hand-1'], i >= 17);
     setFx(['hand-2'], i >= 18);
     setFx(['loop'], i >= 19);
+    setFx(['ring-circle'], i >= 19 && i <= 20);
+    setFx(['ring-heads'], i >= 19 && i <= 20);
+    setFx(['ring-label'], i === 20);
+    setFx(['b-hand-1', 'b-hand-2', 'b-loop'], i >= 19 && i <= 20);
     el('chart-svg').style.display = '';
     el('appendix').style.display = 'none';
-    if (i >= 20) setFx(['hand-1', 'hand-2', 'static-dots', 'loop'], false);
-    setFx(['formula-card'], i === 20);
-    setFx(['rp-card'], i === 21);
-    setFx(['rr-card'], i === 22);
-    setFx(['pd-card'], i === 23);
-    el('curve-rp').classList.toggle('pulse-line', i === 21);
-    el('curve-rr').classList.toggle('pulse-line', i === 22);
-    el('curve-pd').classList.toggle('pulse-line', i === 23);
+    if (i >= 21) setFx(['hand-1', 'hand-2', 'static-dots', 'loop'], false);
+    setFx(['formula-card'], i === 21);
+    setFx(['rp-card'], i === 22);
+    setFx(['rr-card'], i === 23);
+    setFx(['pd-card'], i === 24);
+    el('curve-rp').classList.toggle('pulse-line', i === 22);
+    el('curve-rr').classList.toggle('pulse-line', i === 23);
+    el('curve-pd').classList.toggle('pulse-line', i === 24);
+    // Cyber resilience step: the area under the green curve, down to zero, turns purple and pulses
+    setFx(['res-area', 'res-label'], i === 20);
   }
 
   // Step title colors: brighter variants in dark mode so they stay readable
@@ -1326,9 +1474,9 @@
     const body = el('body');
     body.style.opacity = 0;
     setTimeout(() => {
-      el('count').textContent = trCount(s.count.replace(/of \d+$/, 'of ' + (steps.length - 1)));
+      el('count').textContent = i === 0 ? trCount('Start') : trCount('Step ' + i + ' of ' + (steps.length - 1));
       el('title').textContent = tr(s.title);
-      el('title').style.color = accentFor((i >= 9 && i <= 12) ? '#9b1c1c' : i === 19 ? '#5b2d8a' : s.accent);
+      el('title').style.color = accentFor((i >= 11 && i <= 14) ? '#9b1c1c' : i === 21 ? '#5b2d8a' : s.accent);
       body.querySelector('p').innerHTML = (BODY[curLang] && BODY[curLang][i]) || s.body;
       body.style.opacity = 1;
     }, 180);
@@ -1363,12 +1511,17 @@
   function waitFor(i) {
     if (i === 1) return 4600; // axes, then the labels fade in one after another
     if (i === 2) return 2400; // minimum line draws in
-    return 2000;
+    if (i === 22) return 5000; // cyber resilience: a longer pause on this step
+    // Longer paragraphs need more reading time: 3 seconds, otherwise 2
+    const text = (BODY[curLang] && BODY[curLang][i]) || steps[i].body;
+    const limit = curLang === 'ja' ? 90 : 200;
+    return text.length > limit ? 3000 : 2000;
   }
   function stopAuto() {
     clearTimeout(timer);
     timer = null;
     playBtn.textContent = tr(timer ? 'Pause' : 'Play');
+    syncCmd();
   }
   function startAuto() {
     if (current >= last) go(0);
@@ -1379,11 +1532,21 @@
     };
     tick();
     playBtn.textContent = tr('Pause');
+    syncCmd();
   }
   playBtn.addEventListener('click', () => (timer ? stopAuto() : startAuto()));
+  // Icon-only copies of the playback controls
+  const cmdIcons = {
+    play: '<svg viewBox="0 0 24 24"><path d="M8 5.5v13L19 12z" fill="currentColor"/></svg>',
+    pause: '<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4.2" height="14" rx="1" fill="currentColor"/><rect x="13.8" y="5" width="4.2" height="14" rx="1" fill="currentColor"/></svg>'
+  };
+  function syncCmd() { el('cmd-play').innerHTML = timer ? cmdIcons.pause : cmdIcons.play; }
+  el('cmd-prev').addEventListener('click', () => el('prev').click());
+  el('cmd-play').addEventListener('click', () => playBtn.click());
+  el('cmd-next').addEventListener('click', () => el('next').click());
+  syncCmd();
   el('prev').addEventListener('click', () => {
-    stopAuto();
-    go(0);
+    if (timer) { stopAuto(); go(0); } else go(current - 1);
   });
 
   document.addEventListener('keydown', e => {
@@ -1391,6 +1554,11 @@
     if (e.key === 'ArrowLeft') go(current - 1);
   });
 
+  // Keep the two growing copies showing the same words as the main label in every language
+  const labelMain = document.querySelector('#ring-label .label-main');
+  const syncLabelCopies = () => document.querySelectorAll('#ring-label .label-halo-text').forEach(t => { t.textContent = labelMain.textContent; });
+  new MutationObserver(syncLabelCopies).observe(labelMain, { childList: true, characterData: true, subtree: true });
+  syncLabelCopies();
   initLang();
   go(0);
   startAuto();
