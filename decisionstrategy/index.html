@@ -186,6 +186,15 @@
 .topbar { display: flex; justify-content: flex-end; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
   #theme-toggle { font: inherit; font-size: 12px; line-height: 1; height: 30px; min-width: 56px; box-sizing: border-box; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); cursor: pointer; border-radius: 999px; }
   #theme-toggle:hover { background: var(--rule); }
+  #present-toggle { font: inherit; font-size: 14px; line-height: 1; height: 30px; min-width: 36px; box-sizing: border-box; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--rule); border-radius: 999px; background: transparent; color: var(--ink); cursor: pointer; }
+  #present-toggle:hover { background: var(--rule); }
+
+  /* Presentation mode: only the chart is visible, filling the screen */
+  body.present .topbar > *:not(#present-toggle):not(#cmd-bar) { display: none; }
+  body.present header, body.present .story, body.present footer, body.present #appendix { display: none; }
+  body.present .wrap { max-width: none; padding: 16px 24px; }
+  body.present figure { margin: 0 auto; max-width: 1500px; }
+  body.present .topbar { margin-bottom: 4px; }
   /* Dark theme: swap the page colors, and flip the chart so its dark text and lines stay readable */
   :root[data-theme="dark"] { --paper: #14181f; --ink: #e8ecf4; --ink-soft: #c3cbdb; --muted: #8b95a9; --rule: #3a465e; }
   /* Chart on a dark background: light labels and lines; the formula cards keep their light panels and dark text */
@@ -326,6 +335,7 @@
         <button id="cmd-next" class="cmd-btn" type="button" aria-label="Next step"><svg viewBox="0 0 24 24"><path d="M18 5v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M5 5.5v13L15 12z" fill="currentColor"/></svg></button>
       </div>
       <button id="theme-toggle" type="button" aria-label="Switch to dark theme">◐</button>
+      <button id="present-toggle" type="button" aria-label="Presentation mode" aria-pressed="false" title="Presentation mode">⛶</button>
     <div id="lang-bar">
       <button id="lang-toggle" aria-haspopup="listbox" aria-expanded="false">
         <span id="lang-toggle-label">EN</span><span class="lang-caret">▾</span>
@@ -1557,6 +1567,14 @@ steps.splice(3, 0, {
   });
 
   // Keep the two growing copies showing the same words as the main label in every language
+  const presentBtn = el('present-toggle');
+  const setPresent = on => {
+    document.body.classList.toggle('present', on);
+    presentBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    presentBtn.textContent = on ? '✕' : '⛶';
+  };
+  presentBtn.addEventListener('click', () => setPresent(!document.body.classList.contains('present')));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setPresent(false); });
   const labelMain = document.querySelector('#ring-label .label-main');
   const syncLabelCopies = () => document.querySelectorAll('#ring-label .label-halo-text').forEach(t => { t.textContent = labelMain.textContent; });
   new MutationObserver(syncLabelCopies).observe(labelMain, { childList: true, characterData: true, subtree: true });
