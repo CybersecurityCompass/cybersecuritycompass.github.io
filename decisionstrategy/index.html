@@ -1438,12 +1438,14 @@ steps.splice(3, 0, {
     setFx(['stage-4'], i >= 12);
     // Steps 16 to 18: keep only the three curves, then add the handoffs and the loop
     if (i >= 16) {
-      setFx(['attacker-zone', 'stage-1', 'stage-2', 'stage-3', 'stage-4', 'boundary-1', 'boundary-2', 'boundary-3', 'def-blue', 'def-orange', 'def-green', 'def-banner', 'def-arrow-blue', 'def-arrow-orange', 'def-arrow-green', 'mk-rp', 'mk-rr', 'lg-rp', 'lg-rr', 'lg-pd'], false);
+      setFx(['attacker-zone', 'stage-1', 'stage-2', 'stage-3', 'stage-4', 'boundary-1', 'boundary-2', 'boundary-3', 'def-blue', 'def-orange', 'def-green', 'def-banner', 'def-arrow-blue', 'def-arrow-orange', 'def-arrow-green', 'mk-rp', 'mk-rr'], false);
     }
     setFx(['static-dots'], i >= 16);
     setFx(['hand-1'], i >= 17);
     setFx(['hand-2'], i >= 18);
     setFx(['loop'], i >= 19);
+    // Curve legends stay until the formula steps, then hide
+    if (i >= 21) setFx(['lg-rp', 'lg-rr', 'lg-pd'], false);
     setFx(['ring-circle'], i >= 19 && i <= 20);
     setFx(['ring-heads'], i >= 19 && i <= 20);
     setFx(['ring-label'], i === 20);
