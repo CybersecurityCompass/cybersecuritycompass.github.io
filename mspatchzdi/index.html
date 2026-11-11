@@ -106,6 +106,10 @@
   .chip.on b { color:var(--accent); }
   .reset { margin-left:auto; color:var(--warn); border-color:var(--warn); font-size:11px; padding:4px 10px; }
   main { padding:18px 28px 40px; display:grid; gap:18px; }
+  .summary-box { background:var(--panel); border:1px solid var(--line); padding:14px 16px; margin-bottom:0; }
+  .summary-head { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+  .summary-head .kpi-title { margin:0; }
+  .summary-head .btns { display:flex; gap:6px; }
   .kpi-title { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent2); margin:0 0 -6px; }
   .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
   .kpi { background:var(--panel); border:1px solid var(--line); padding:14px; position:relative; overflow:hidden; }
@@ -164,6 +168,14 @@
   .track-ctl { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 10px; }
   .track-ctl .btns { display:flex; gap:6px; margin-right:14px; }
   .track-ctl button { padding:4px 9px; }
+
+  /* responsive: charts and grid columns may shrink with the window */
+  main > *, .grid2 > *, .grid3 > * { min-width:0; }
+  canvas { max-width:100%; }
+  @media (min-width:1001px) {
+    .grid2 { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+    .grid3 { grid-template-columns: minmax(0,2fr) minmax(0,1fr); }
+  }
 </style>
 </head>
 <body>
@@ -197,13 +209,19 @@
   <div class="group"><label>Wormable (ZDI-named)</label><select id="fWorm"></select></div>
   <div class="group"><label>In CISA KEV</label><select id="fKev"></select></div>
   <div class="group"><label>Priority</label><select id="fPrio"></select></div>
+  <div class="group"><label>Summary</label><select id="fSum"></select></div>
   <button id="resetBtn" class="reset" style="display:none;align-self:flex-end">Reset all</button>
 </section>
 
 
 <main>
-  <div class="kpi-title">Microsoft CVEs</div>
-  <div class="kpis" id="kpis"></div>
+  <div class="summary-box" id="summaryBox">
+    <div class="summary-head">
+      <div class="kpi-title" id="sumTitle">Microsoft CVEs Summary</div>
+      <button class="save" id="sumSave">Save PNG</button>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </div>
 
   <div class="panel">
     <h2>Microsoft monthly CVEs <span id="monthTitle"></span></h2>
@@ -432,7 +450,7 @@ const SEVS = ["Critical","Important","Moderate","Low","High","Medium","Unknown"]
 const TYPES = TYPE_ORDER.filter(t => ROWS.some(r => r[7] === t));
 
 const DEFAULTS = { year:"all", mode:"type", period:"month", sev:"all", cvss:"all", pub:"all", exp:"all", type:"all", worm:"all", kev:"all", prio:"all", kevVendor:"all" };
-const state = Object.assign({}, DEFAULTS, { models:true, zdiMode:"both", search:"", sortK:"idx", sortDir:-1, cveSortK:"month", cveSortDir:-1, cvePage:1, monPage:1 });
+const state = Object.assign({}, DEFAULTS, { models:true, zdiMode:"both", sumMode:"total", search:"", sortK:"idx", sortDir:-1, cveSortK:"month", cveSortDir:-1, cvePage:1, monPage:1 });
 const MON_PAGE_SIZE = 13;
 const CVE_PAGE_SIZE = 50;
 let lastFilterKey = "";
@@ -580,6 +598,7 @@ function refreshControls() {
   fill("fKev", [["all","All"],["yes","Yes"],["no","No"]], "kev");
   fill("fKevV", [["all","All vendors"], ...ALL_VENDORS.map(v=>[v,v])], "kevVendor");
   fill("fPrio", [["all","All"],["yes","Yes"],["no","No"]], "prio");
+  fill("fSum", [["total","Total"],["last","Last month"]], "sumMode");
 }
 
 // Yearly view: the same fields as monthly(), summed per year
@@ -725,6 +744,7 @@ const eventMarkers = {
 // Grow the monthly bars one month at a time, left to right, then show the model markers
 let chartGrowMs = 0;                                        // total length of the last monthly chart animation
 function growMonthly(chart, full) {
+  chart.$full = full;
   const STEP = 45, GROW = 350;                              // ms between months, ms for each month to grow
   const ease = t => 1 - Math.pow(1 - t, 4);
   const n = chart.data.labels.length;
@@ -732,7 +752,7 @@ function growMonthly(chart, full) {
   chartGrowMs = (n - 1) * STEP + GROW;
   const start = performance.now();
   const frame = now => {
-    if (!chart.canvas) return;                         // the chart was replaced or destroyed; stop this animation
+    if (!chart.canvas || animStop) return;             // the chart was replaced, destroyed or is being captured; stop
     const t = now - start;
     const prog = Array.from({ length: n }, (_, i) => Math.min(1, Math.max(0, (t - i * STEP) / GROW)));
     chart.$progress = prog;                                  // model labels fade in with their month
@@ -856,6 +876,7 @@ function finishCounters() {
     const to = kpiFinal[el.dataset.s] != null ? kpiFinal[el.dataset.s] : from;
     const t0 = performance.now(), dur = 800;
     const step = now => {
+      if (animStop) return;
       const k = Math.min(1, (now - t0) / dur);
       el.textContent = String(Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3))));
       if (k < 1) requestAnimationFrame(step);
@@ -865,12 +886,13 @@ function finishCounters() {
 }
 // KEV monthly chart: top six vendors plus others, growing in turn like the monthly chart
 function growKevMonthly(chart, full) {
+  chart.$full = full;
   const STEP = 45, GROW = 350;
   const ease = t => 1 - Math.pow(1 - t, 4);
   const n = chart.data.labels.length;
   const start = performance.now();
   const frame = now => {
-    if (!chart.canvas) return;                         // the chart was replaced or destroyed; stop this animation
+    if (!chart.canvas || animStop) return;             // the chart was replaced, destroyed or is being captured; stop
     const t = now - start;
     const prog = Array.from({ length: n }, (_, i) => Math.min(1, Math.max(0, (t - i * STEP) / GROW)));
     chart.$progress = prog;                                  // model labels fade in with their month
@@ -1144,18 +1166,24 @@ function drawCum() {
 }
 
 function kpis(rows, mon, monAll) {
-  const sum = k => mon.reduce((a, m) => a + m[k], 0);
+  // Total: sums over the 25-month window. Last month: the newest month only.
+  const lastM = mon[mon.length - 1];
+  const isLast = state.sumMode === "last";
+  document.getElementById("sumTitle").textContent = `Microsoft CVEs Summary: ${isLast ? (lastM ? lastM.label : "Last month") : "Total"}`;
+  const base = isLast ? (lastM ? [lastM] : []) : mon;
+  const sum = k => base.reduce((a, m) => a + m[k], 0);
   const total = sum("total"), crit = sum("crit"), imp = sum("imp");
   const rce = sum("rce"), eop = sum("eop"), pub = sum("pub"), exp = sum("exp"), worm = sum("worm"), kev = sum("kev");
-  kpiSeries = { total: mon.map(m=>m.total), crit: mon.map(m=>m.crit), imp: mon.map(m=>m.imp), rce: mon.map(m=>m.rce),
-    eop: mon.map(m=>m.eop), pub: mon.map(m=>m.pub), exp: mon.map(m=>m.exp), worm: mon.map(m=>m.worm), kev: mon.map(m=>m.kev) };
-  const sumAll = k => monAll.reduce((a, m) => a + m[k], 0);
-  kpiFinal = { total:sumAll("total"), crit:sumAll("crit"), imp:sumAll("imp"), rce:sumAll("rce"), eop:sumAll("eop"),
-    pub:sumAll("pub"), exp:sumAll("exp"), worm:sumAll("worm"), kev:sumAll("kev") };
+  const sc = k => mon.map((m, i) => (isLast && i !== mon.length - 1) ? 0 : m[k]);
+  kpiSeries = { total: sc("total"), crit: sc("crit"), imp: sc("imp"), rce: sc("rce"),
+    eop: sc("eop"), pub: sc("pub"), exp: sc("exp"), worm: sc("worm"), kev: sc("kev") };
+  const sumAll = k => isLast ? (lastM ? lastM[k] : 0) : monAll.reduce((a, m) => a + m[k], 0);
+  kpiFinal = { total: sumAll("total"), crit: sumAll("crit"), imp: sumAll("imp"), rce: sumAll("rce"), eop: sumAll("eop"),
+    pub: sumAll("pub"), exp: sumAll("exp"), worm: sumAll("worm"), kev: sumAll("kev") };
   const peak = mon.reduce((a,m)=> (!a || m.total > a.total) ? m : a, null);
   const cp = total ? (100*crit/total).toFixed(1) : "0.0";
   const items = [
-    { s:"total", k:"Matching CVEs", v:total, d:`${monAll.filter(m=>m.total).length} ${state.period==="year"?"years":"months"} with matches`, cls:"" },
+    { s:"total", k:"Matching CVEs", v:total, d:isLast ? `last month: ${lastM ? lastM.label : "-"}` : `${monAll.filter(m=>m.total).length} months with matches`, cls:"" },
     { s:"crit", k:"Critical", v:crit, d:`${cp}% of matches`, cls:"crit" },
     { s:"imp", k:"Important", v:imp, d:"severity = Important", cls:"warn" },
     { s:"rce", k:"RCE", v:rce, d:"remote code execution", cls:"crit" },
@@ -1316,15 +1344,31 @@ document.querySelectorAll("#cves th").forEach(th => th.onclick = () => {
 });
 
 // Save a chart panel as a PNG exactly as it appears on screen (title, subtitle, legend, watermark, frame)
+let animStop = false;                                  // set while a PNG is being captured
 function saveChartPng(panel, title) {
-  const btn = panel.querySelector(".save");
-  if (btn) btn.style.visibility = "hidden";           // keep the button out of the image
-  // the entrance fade can leave the panel partly transparent, so show it at full strength for the capture
-  const prevAnim = panel.style.animation, prevOpacity = panel.style.opacity;
-  panel.style.animation = "none"; panel.style.opacity = "1";
+  const saveBtns = [...panel.querySelectorAll(".save")];
+  saveBtns.forEach(b => b.style.visibility = "hidden");           // keep the button out of the image
+  // capture the finished state: stop running animations, show everything at full strength, draw the final values
+  animStop = true;
+  setTimeout(() => { animStop = false; }, 15000);   // safety: never leave animations stopped
+  const els = [panel, ...panel.querySelectorAll("*")];
+  const prevStyle = els.map(el => [el, el.style.animation, el.style.opacity, el.style.transform]);
+  els.forEach(el => { el.style.animation = "none"; el.style.opacity = "1"; el.style.transform = "none"; });
+  panel.querySelectorAll(".v[data-s]").forEach(el => {
+    const f = kpiFinal[el.dataset.s];
+    if (f != null) el.textContent = String(Math.round(f));
+  });
+  Object.values(charts).forEach(ch => {
+    if (!ch || !ch.canvas || !panel.contains(ch.canvas)) return;
+    if (ch.$full) ch.data.datasets.forEach((ds, di) => { ds.data = ch.$full[di].slice(); });
+    ch.$progress = ch.data.labels.map(() => 1);
+    ch.options.animation = false;
+    ch.update("none");
+  });
   return html2canvas(panel, { backgroundColor: "#0b121b", scale: 2, useCORS: true }).then(shot => {
-    panel.style.animation = prevAnim; panel.style.opacity = prevOpacity;
-    if (btn) btn.style.visibility = "";
+    prevStyle.forEach(([el, a, o, t]) => { el.style.animation = a; el.style.opacity = o; el.style.transform = t; });
+    animStop = false;
+    saveBtns.forEach(b => b.style.visibility = "");
     // Frame the chart: page-coloured margin around the panel, with a light blue-grey border
     const pad = 36, border = 4;
     const out = document.createElement("canvas");
@@ -1368,6 +1412,16 @@ refreshControls();
 update();
 document.getElementById("zdiCvssTh").onclick = () => { zdiCvssDir = zdiCvssDir === -1 ? 1 : -1; zdiPage = 1; renderZdiList(); };
 document.getElementById("upCvssTh").onclick = () => { upCvssDir = upCvssDir === -1 ? 1 : -1; upPage = 1; renderUpcomingList(); };
+{
+  const sb = document.getElementById("summaryBox");
+  const mp = sb.nextElementSibling;          // the Microsoft monthly chart panel (read before moving anything)
+  const wrap = document.createElement("div");
+  wrap.id = "summaryChart";
+  sb.parentNode.insertBefore(wrap, sb);
+  wrap.appendChild(sb);
+  wrap.appendChild(mp);
+}
+document.getElementById("sumSave").onclick = () => saveChartPng(document.getElementById("summaryChart"), "microsoft cves summary and monthly chart");
 renderKevList();
 renderZdiList();
 renderUpcomingList();
