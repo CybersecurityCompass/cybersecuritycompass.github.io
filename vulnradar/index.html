@@ -506,11 +506,11 @@ const DIMS=[
   ["d6a","Does the asset support a critical business service, or process sensitive or regulated data?"],
   ["d6b","Could exploitation affect finance, business continuity, regulatory standing or reputation?"],
   ["d6c","Is the platform shared by many applications, business units, customers or tenants?"]]},
-  {title:"Remediation resilience",items:[
+  {title:"Ability to fix",note:"Can we act? Remediation records what we have already done.",items:[
   ["d6d","Do we run it on end of life versions that no longer receive security fixes?"],
   ["d6e","Is the component embedded in an appliance or vendor product we cannot update ourselves?"],
   ["d6f","Would patching disrupt operations, or do dependencies complicate it?"],
-  ["d6g","Can we disable the feature, isolate the service, segment the network or apply a virtual patch?",1],
+  ["d6g","If we cannot patch now, do we have a way to contain it at all, such as a feature we can disable, a network we can segment or a virtual patch we can deploy?",1],
   ["d6h","Does each affected legacy system have a named owner who can accept risk or approve containment?",1],
   ["d6i","Can we verify that remediation is complete?",1]]}],
   key:"The remediation window is part of the risk."}
@@ -789,8 +789,8 @@ function remItem([id,text,f]){return goodYes(qItem([id,text])).replace("</p>",`<
 const SCOPEDEF=`<p class="scopedef"><b>Third party scope</b> Third party systems that connect to our environment or handle our data: SaaS platforms, managed service and security providers, integrations and APIs, and the subprocessors behind them. Not a third party's whole estate.</p>`;
 function facetPanel(sc){const k=fk(sc),tp=sc==="tp",wa=state.patch==="mitigation";
   const pill=(name,id,label,cur)=>`<label><input type="radio" name="${name}" id="${name}-${id}" value="${id}" ${cur===id?"checked":""}><span>${label}</span></label>`;
-  const rel=tp?`<div class="block"><h3>1. Patch release</h3></div><p class="pq">The vendor's release is the same for our third parties. It is set in the My org scope.</p><p class="relro">${state.patch?pLabel(state.patch):"Not set yet"}</p>`
-    :`<div class="block"><h3>1. Patch release</h3></div><p class="pq">What has the vendor delivered?</p><div class="opts">${PATCH.map((p,i)=>`${i===0||PATCH[i-1][3]!==p[3]?`<span class="pgrp">${p[3]}</span>`:""}${pill("patch",p[0],p[1],state.patch)}`).join("")}</div>`;
+  const rel=tp?`<div class="block"><h3>Patch release</h3></div><p class="pq">The vendor's release is the same for our third parties. It is set in the My org scope.</p><p class="relro">${state.patch?pLabel(state.patch):"Not set yet"}</p>`
+    :`<div class="block"><h3>Patch release</h3></div><p class="pq">What has the vendor delivered?</p><div class="opts">${PATCH.map((p,i)=>`${i===0||PATCH[i-1][3]!==p[3]?`<span class="pgrp">${p[3]}</span>`:""}${pill("patch",p[0],p[1],state.patch)}`).join("")}</div>`;
   const app=`<div class="block"><h3>2. ${wa?"Workaround scope":"Application scope"}</h3></div><p class="pq">${tp?(wa?"Of the third party systems that connect to us or handle our data, how much has the workaround?":"Of the third party systems that connect to us or handle our data, how much is patched?"):(wa?"How much of our affected estate has the workaround? A workaround removes at most half the risk.":"How much of our affected estate is patched?")}</p>`
     +(applyRelevant()?`<div class="opts">${APPLY.map(a=>pill(k.apply,a[0],a[1],state[k.apply])).join("")}</div>`:`<p class="dim">${state.patch?"There is no patch or workaround to apply yet.":"Choose the patch release first."}</p>`);
   const leg=`<div class="block"><h3>3. Legacy systems</h3></div><p class="pq">${PENDING.includes(state.patch)?`What is the plan for legacy versions the coming fix may not cover${tp?" in the third party systems that connect to us or handle our data":""}?`:`What happens to the versions the fix does not cover${tp?" in the third party systems that connect to us or handle our data":""}?`}</p>`
@@ -813,7 +813,7 @@ function renderPanel(){
     h+=`<div class="remgrp"><div class="remhd"><b>2</b><span>Mitigations</span><em>Each one lowers the score</em></div><div class="block">${ACT[sc].map(remItem).join("")}</div></div>`;
     h+=`<div class="remgrp dec"><div class="remhd"><b>3</b><span>Decisions recorded</span><em>They explain the result, they never lower it</em></div><div class="block">${DEC[sc].map(a=>goodYes(qItem([a[0],a[1]]))).join("")}</div></div>`;
     h+=`<p class="hint">Yes applies the full reduction and Partial applies half. Reductions multiply. Two partial controls never add up to a patch, and only decommissioning takes the risk to zero. A backup, a risk acceptance or a promised fix date is not a control.</p>`;}
-  if(d.tp&&sc==="org")d.blocks.forEach(b=>{h+=`<div class="block">${b.title?`<h3>${b.title}</h3>`:""}${b.items.map(qItem).join("")}</div>`;});
+  if(d.tp&&sc==="org")d.blocks.forEach(b=>{h+=`<div class="block">${b.title?`<h3>${b.title}</h3>${b.note?`<p class="hint">${b.note}</p>`:""}`:""}${b.items.map(qItem).join("")}</div>`;});
   h+=`<div class="keyq"><b>Key point</b>${d.id==="rem"?d.key:sc==="tp"?TPKEY[d.id]:d.key}</div>
    <div class="navrow"><button class="btn" type="button" data-nav="-1" ${state.tab===0&&sc!=="tp"?"disabled":""}>Previous</button>
    <button class="btn primary" type="button" data-nav="1">${state.tab===SECTIONS.length-1?"See results":sc==="org"?"Next: third parties":"Next dimension"}</button></div></div>`;
