@@ -1111,16 +1111,22 @@ function buildBlank(scope){const P=newDoc(),d=P.doc,org=scope==="org",col=org?PA
   pdfFooter(P);return d;}
 let DL;
 async function getDL(){if(DL)return DL;
-  for(let i=0;i<20&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,250));
+  for(let i=0;i<8&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,250));
   try{DL=window.claude&&window.claude.use?await window.claude.use("downloads"):null;}catch(e){DL=null;}return DL;}
 async function doExport(kind){const [type,scope]=kind.split(":");const dl=await getDL();
   if(!window.jspdf){toast("The PDF library did not load. Reload the page and try again");return;}
-  if(!dl){toast("Saving files is blocked in this view. Open the Radar on its own page to save the PDF");return;}
+  const hosted=!!(window.claude&&window.claude.use);
+  if(!dl&&hosted){toast("Saving files is blocked in this view. Open the Radar on its own page to save the PDF");return;}
   try{const doc=type==="res"?await buildReport(scope):buildBlank(scope);
     const slug=(state.name||"vulnerability").replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40)||"vulnerability";
     const who=scope==="org"?"organization":"third-parties";
-    await dl.save({filename:type==="res"?`${slug}-${who}-cyber-risk-profile.pdf`:`questionnaire-${who}.pdf`,data:doc.output("blob")});toast("PDF saved");}
-  catch(e){if(e&&e.code==="declined")return;toast(e&&e.code==="host_unavailable"?"Open this page in a browser to save the PDF":e&&e.code==="rate_limited"?"Another save is open. Try again in a moment":"The PDF could not be saved here");}}
+    const fname=type==="res"?`${slug}-${who}-cyber-risk-profile.pdf`:`questionnaire-${who}.pdf`;
+    /* On claude.ai the platform saves the file. On any other web server the browser downloads it directly. */
+    if(dl)await dl.save({filename:fname,data:doc.output("blob")});else doc.save(fname);
+    toast("PDF saved");}
+  catch(e){const c=e&&e.code;if(c==="declined")return;
+    const M={host_unavailable:"This app cannot save files. Open the Radar in a browser to save the PDF",rate_limited:"Another save is open. Try again in a moment",extension_not_enabled:"PDF downloads from artifacts are switched off in this view",rejected_extension:"PDF downloads are not allowed in this view",too_large:"The PDF is too large to save here"};
+    toast((M[c]||"The PDF could not be saved here")+(c?` (code: ${c})`:""));console.warn("PDF save failed",c,e&&e.message);}}
 function renderExp(){const tp=TPON();$("#expList").innerHTML=`<li class="dd-g" role="presentation">Results</li><li class="dd-o" role="menuitem" tabindex="-1" data-exp="res:org"><i class="k-org"></i>My org</li>${tp?`<li class="dd-o" role="menuitem" tabindex="-1" data-exp="res:tp"><i class="k-tp"></i>Third parties</li>`:""}
   <li class="dd-g" role="presentation">Blank questionnaire</li><li class="dd-o" role="menuitem" tabindex="-1" data-exp="blank:org"><i class="k-org"></i>My org</li>${tp?`<li class="dd-o" role="menuitem" tabindex="-1" data-exp="blank:tp"><i class="k-tp"></i>Third parties</li>`:""}`;}
 function expOpen(on){$("#expList").hidden=!on;$("#expBtn").setAttribute("aria-expanded",on);if(on){renderExp();const f=$("#expList .dd-o");f&&f.focus();}}
@@ -1130,7 +1136,7 @@ $("#expList").addEventListener("keydown",e=>{const os=[...$("#expList").querySel
   if(e.key==="ArrowDown"){e.preventDefault();os[Math.min(i+1,os.length-1)].focus();}else if(e.key==="ArrowUp"){e.preventDefault();os[Math.max(i-1,0)].focus();}
   else if(e.key==="Enter"||e.key===" "){e.preventDefault();if(i>=0){expOpen(false);doExport(os[i].dataset.exp);}}else if(e.key==="Escape"){expOpen(false);$("#expBtn").focus();}});
 document.addEventListener("click",e=>{if(!e.target.closest("#expWrap"))expOpen(false);},true);
-getDL().then(dl=>{$("#expBtn").title=dl?"":"If saving is blocked here, open the Radar on its own page to save the PDF";});
+
 
 renderPanel();update();
 </script>
