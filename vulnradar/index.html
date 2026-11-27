@@ -25,7 +25,9 @@ header{display:grid;gap:8px;border-bottom:1px solid var(--line);padding-bottom:1
 .eyebrow b{color:var(--accent);font-weight:500}
 h1{font-family:var(--display);font-weight:800;font-size:clamp(22px,3.4vw,38px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:.02em;text-transform:uppercase;color:var(--accent);text-shadow:0 0 24px rgba(79,179,255,.35)}
 h1 span{color:var(--ink);text-shadow:none}
-.lede{color:var(--muted);max-width:76ch;margin:0;font-size:14.5px}
+.lede{color:var(--muted);max-width:none;margin:0;font-size:14.5px}
+a{color:#8fd3ff;text-decoration-color:rgba(143,211,255,.45);text-underline-offset:3px}
+a:hover{color:#c4e8ff;text-decoration-color:currentColor}
 .ctx{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.3fr) minmax(0,1.5fr) minmax(0,1fr) auto;align-items:end;gap:14px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:16px}
 .ctx label{display:grid;gap:6px;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
 .ctx input,.ctx select{font:inherit;font-family:var(--mono);font-size:14px;text-transform:none;letter-spacing:0;color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:4px;padding:9px 10px;min-width:0}
@@ -44,23 +46,27 @@ h1 span{color:var(--ink);text-shadow:none}
 .btn.primary:hover{background:var(--accent);border-color:var(--accent);color:#04101f}
 .btn:focus-visible,.seg input:focus-visible+span,.tab:focus-visible,.dimrow:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .example-flag{font-family:var(--mono);font-size:11.5px;color:var(--high);border:1px solid var(--high);border-radius:3px;padding:3px 8px;justify-self:start;letter-spacing:.04em}
-.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.kpis{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.5fr) repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:1180px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:520px){.kpis #kOrg,.kpis #kTp{grid-column:1 / -1}}
 .ptiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
 .ptiles.one{grid-template-columns:minmax(0,1fr)}
 @media (max-width:640px){.ptiles{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:980px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:520px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .kpi{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--k,var(--accent));border-radius:4px;padding:12px 14px;display:grid;gap:4px;min-width:0}
-.kpi small{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.kpi small{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;color:var(--muted)}
 .kpi b{font-family:var(--display);font-size:30px;font-weight:800;line-height:1;color:var(--k,var(--accent));font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi b.sm{font-size:16px;line-height:1.3;white-space:normal}
 .kpi span{font-family:var(--mono);font-size:11px;color:var(--muted)}
 .main{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:20px;align-items:start}
 @media (max-width:1060px){.main{grid-template-columns:minmax(0,1fr)}}
 .tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
-.tab{flex:1 0 120px;display:grid;gap:4px;text-align:left;border:1px solid var(--line);background:var(--bg2);color:var(--ink);border-radius:4px;padding:9px 12px;cursor:pointer;font:inherit}
-.tab small{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.12em}
-.tab b{font-family:var(--mono);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+.tab{flex:1 1 auto;min-width:0;display:grid;gap:4px;text-align:left;border:1px solid var(--line);background:var(--bg2);color:var(--ink);border-radius:4px;padding:9px 9px;cursor:pointer;font:inherit}
+.tab small,.tab b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tab small{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em}
+@media (max-width:760px){.tab{flex:0 0 112px}}
+.tab b{font-family:var(--mono);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.02em}
 .tab .bar{height:3px;border-radius:2px;background:var(--line);overflow:hidden}
 .tab .bar i{display:block;height:100%;background:var(--accent);width:0;box-shadow:0 0 8px var(--accent)}
 .tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 -2px 0 var(--accent)}
@@ -127,6 +133,12 @@ aside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid
 .dimrow .track i{position:absolute;inset:0 auto 0 0;border-radius:2px}
 .dimrow .track u{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(45deg,rgba(181,140,255,.55) 0 3px,transparent 3px 6px)}
 .dimrow em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
+.remgrp{border-top:1px dashed var(--line2);padding-top:12px;margin-top:6px}
+.remhd{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.remhd b{font-family:var(--mono);font-size:11px;color:var(--bg);background:var(--low);border-radius:3px;padding:1px 7px}
+.remgrp.dec .remhd b{background:var(--muted)}
+.remhd span{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.remhd em{font-style:normal;font-size:12px;color:var(--muted)}
 .trig{display:grid;gap:7px;margin:0;padding:0;list-style:none}
 .trig li{display:grid;grid-template-columns:14px minmax(0,1fr);gap:8px;font-size:13px;color:var(--muted);align-items:start}
 .trig li::before{content:"";width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line2);margin-top:5px}
@@ -141,7 +153,7 @@ aside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid
 .unknowns li::marker{color:var(--unk);font-family:var(--mono)}
 .unk-head{font-family:var(--mono);font-weight:700;color:var(--unk);text-transform:uppercase;letter-spacing:.06em;font-size:13px}
 .foot{font-size:12px;color:var(--muted);max-width:90ch;border-top:1px solid var(--line);padding-top:14px;font-family:var(--mono)}
-.foot a{color:var(--accent)}
+.foot a{color:#8fd3ff}
 .mbar{display:none}
 @media (max-width:1060px){
   .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:5;gap:12px;align-items:center;justify-content:space-between;
@@ -301,7 +313,7 @@ aside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid
 #mOrg b{color:var(--accent)}#mTp b{color:var(--high)}
 .trig li.maybe{color:var(--ink)}
 .trig li.maybe::before{border-color:var(--high);box-shadow:0 0 6px rgba(255,138,61,.5)}
-.trig li em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--high)}
+.trig li em{display:block;margin-top:2px;font-style:normal;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--high)}
 .scn.blank{border-color:var(--crit);background:var(--crit-soft);box-shadow:0 0 18px rgba(255,77,94,.15)}
 .scn.blank .scn-tag{background:var(--crit);color:#1a0306}
 .scn.blank .scn-txt b{color:var(--crit)}
@@ -340,7 +352,7 @@ aside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid
   <header>
     <div class="eyebrow"><b>Cybersecurity Compass</b> · Vulnpocalypse // Six dimensions // VulnOps</div>
     <h1>Anything2Shell <span>is a name.</span><br>Exposure <span>is the priority.</span></h1>
-    <p class="lede">Start with your own exposure, then understand the vulnerability, then decide. Six dimensions in the order of the Cyber Risk Management Lifecycle, each with a scope for your organization and for your third parties. Answer with evidence, not opinion. Every “Unknown” is treated as exposed, and the dashed line shows how much of your result depends on what you have not confirmed yet.</p>
+    <p class="lede">This tool is based on the article <em>Vulnerability Prioritization in the Age of the Vulnpocalypse: Avoiding the Anything2Shell Hype</em>. It is a helper to organize the manual work of prioritization, not a platform that calculates cyber risk for you. Start with your own exposure, then understand the vulnerability, then decide. Six dimensions in the order of the <a href="https://cybersecuritycompass.github.io/crml/">Cyber Risk Management Lifecycle (CRML)</a>, each with a scope for your organization and for your third parties. The CRML is a continuous cycle, not a one time review, and this assessment is only one turn of it. Answer with evidence, not opinion. Every “Unknown” is treated as exposed, and the dashed line shows how much of your result depends on what you have not confirmed yet.</p>
   </header>
 
       <section class="card dates top" aria-label="Assessment dates">
@@ -507,12 +519,16 @@ const ACT={org:[
   ["r_patch","Have we applied the patch and verified it on every instance?",.1],
   ["r_vpn","Have we applied a virtual patch at the network layer, such as IPS, WAF or gateway rules?",.65],
   ["r_vph","Have we applied a virtual patch at the host layer, such as HIPS, runtime or endpoint rules?",.7],
+  ["r_det","Have we deployed detections for exploitation of this vulnerability?",.85],
+  ["r_priv","Have we reduced the privileges the vulnerable service runs with?",.8],
   ["r_l2","Is the affected edge device shielded by an inline Layer 2 device with no IP address?",.55],
   ["r_feat","Have we disabled the vulnerable feature or module?",.5],
+  ["r_acl","Have we restricted access to known sources or an allowlist?",.7],
   ["r_noinet","Have we removed it from internet exposure and restricted management to trusted networks?",.6],
   ["r_iso","Have we completely isolated it: no internet, no user network, no shared credentials?",.3],
   ["r_decom","Have we decommissioned it?",0],
-  ["r_hunt","Have we completed a compromise assessment and rotated credentials?",.85]],
+  ["r_hunt","Have we completed a compromise assessment?",.9],
+  ["r_cred","Have we rotated the credentials, tokens and keys the affected system holds?",.9]],
  tp:[
   ["rt_patch","Have affected third parties patched, and given us evidence?",.2],
   ["rt_vp","Have third parties applied virtual patching to the systems that serve us while the fix is pending?",.65],
@@ -522,7 +538,11 @@ const ACT={org:[
   ["rt_scope","Have we reduced third party access: API scopes, network paths and permissions?",.6],
   ["rt_susp","Have we suspended third party access until the fix is confirmed?",.15],
   ["rt_cred","Have we rotated credentials, tokens and keys shared with third parties?",.75],
-  ["rt_mon","Are we monitoring third party connections for signs of exploitation?",.85]]};
+  ["rt_mon","Are we monitoring third party connections for signs of exploitation?",.85],
+  ["rt_hunt","Have third parties shown evidence of their own compromise assessment?",.9]]};
+/* Decisions recorded: they explain the result but never lower the score. */
+const DEC={org:[["k_bak","Have we verified backups and a recovery plan for the affected system?"],["k_acc","Is any remaining risk formally accepted, with an owner and an expiry date?"]],
+ tp:[["kt_date","Have third parties committed in writing to a fix date for the systems that serve us?"],["kt_acc","Is any remaining third party risk formally accepted, with an owner and an expiry date?"]]};
 /* Original six dimensions, ordered by the CRML: exposure (inventory and context) and impact first, then the vulnerability. */
 (()=>{const by=id=>DIMS.find(d=>d.id===id);
   const d3=by("d3"),d5=by("d5");
@@ -546,7 +566,7 @@ const TPKEY={d1:"The flaw is the same at a third party. What changes is what an 
  d4:"Attackers like third parties because one compromise opens many customers.",
 d5:"Assess not only where you run vulnerable technology, but where it exists across your extended digital supply chain. A third party with access to our systems is an attack path we did not build and do not monitor by default.",
  d6:"If we cannot switch, bypass or restrict a critical third party, their remediation window becomes ours."};
-const REM={id:"rem",short:"Remediation",name:"Remediation actions applied",q:"What have we already done, and how much risk is left?",group:"rem",blocks:[],key:"Risk is reduced by decision, not only by repair. Every virtual patch needs an owner and a removal date."};
+const REM={id:"rem",short:"Remediation",name:"Remediation actions applied",q:"What have we already done, and how much risk is left?",group:"rem",blocks:[],key:"Risk comes down through repair and controls, never through paperwork. Every virtual patch needs an owner and a removal date."};
 const SECTIONS=[...DIMS,REM];
 const ALL={};DIMS.forEach(d=>{d.blocks.forEach(b=>b.items.forEach(i=>ALL[i[0]]={text:i[1],inv:!!i[2],dim:d.id,scope:"org"}));d.tp.forEach(i=>ALL[i[0]]={text:i[1],inv:!!i[2],dim:d.id,scope:"tp"});});
 const TPIDS=DIMS.flatMap(d=>d.tp.map(i=>i[0]));
@@ -555,6 +575,7 @@ ACT.org=ACT.org.filter(a=>a[0]!=="r_patch");ACT.tp=ACT.tp.filter(a=>a[0]!=="rt_p
 DIMS.forEach(d=>d.blocks.forEach(b=>b.items=b.items.filter(i=>i[0]!=="d6d")));
 const ACTS={};[...ACT.org,...ACT.tp].forEach(a=>ACTS[a[0]]=a);
 ACT.org.forEach(a=>ALL[a[0]]={text:a[1],inv:false,dim:"rem",scope:"org"});ACT.tp.forEach(a=>ALL[a[0]]={text:a[1],inv:false,dim:"rem",scope:"tp"});
+DEC.org.forEach(a=>ALL[a[0]]={text:a[1],inv:false,dim:"rem",scope:"org",dec:true});DEC.tp.forEach(a=>ALL[a[0]]={text:a[1],inv:false,dim:"rem",scope:"tp",dec:true});
 const TPON=()=>state.tpOn!==false;
 const tpHid=()=>!TPON()||!!state.hideSer.tpi;
 delete ALL.d6d;delete ALL.r_patch;delete ALL.rt_patch;
@@ -649,7 +670,8 @@ const PFULL={
  vpn:{tp1a:"y",tp1b:"y",tp1c:"y",tp2a:"y",tp2c:"y",tp2b:"u",t1:"u",tp3d:"p",tp3c:"y",t5:"u",t4:"n",tp4a:"y",tp4b:"y",tp4c:"u",t2:"y",t3:"y",tp5d:"y",tp5e:"n",t7:"p",t8:"y",t6:"n",t9:"u",tp6d:"p",d3g:"y",d3h:"p",d4h:"n",r_patch:"x",r_vpn:"y",r_vph:"n",r_l2:"y",r_feat:"n",r_noinet:"p",r_iso:"n",r_decom:"n",r_hunt:"p",rt_patch:"u",rt_vp:"u",rt_noinet:"u",rt_iso:"n",rt_decom:"n",rt_scope:"p",rt_susp:"n",rt_cred:"p",rt_mon:"n"},
  low:{tp1a:"n",tp1b:"n",tp1c:"n",tp2a:"p",tp2c:"n",tp2b:"p",t1:"n",tp3d:"n",tp3c:"p",t5:"n",t4:"p",tp4a:"n",tp4b:"n",tp4c:"n",t2:"n",t3:"n",tp5d:"n",tp5e:"y",t7:"y",t8:"n",t6:"y",t9:"y",tp6d:"y",d3g:"y",d3h:"p",d4h:"p",r_patch:"y",r_vpn:"n",r_vph:"n",r_l2:"x",r_feat:"n",r_noinet:"x",r_iso:"n",r_decom:"n",r_hunt:"x",rt_patch:"x",rt_vp:"x",rt_noinet:"x",rt_iso:"x",rt_decom:"x",rt_scope:"x",rt_susp:"x",rt_cred:"x",rt_mon:"x"}};
 /* PHP2Shell patch combinations: same flaw, different vendor availability, deployment and legacy situations. */
-const RNONE={r_patch:"n",r_vpn:"n",r_vph:"n",r_l2:"x",r_feat:"n",r_noinet:"n",r_iso:"n",r_decom:"n",r_hunt:"n"};
+const RNONE={r_patch:"n",r_vpn:"n",r_vph:"n",r_l2:"x",r_feat:"n",r_noinet:"n",r_iso:"n",r_decom:"n",r_hunt:"n",r_cred:"n",r_det:"n",r_priv:"n",r_acl:"n"};
+Object.values(PFULL).forEach(o=>{if(o.r_hunt&&!o.r_cred)o.r_cred=o.r_hunt;if(o.rt_cred&&!o.rt_hunt)o.rt_hunt=o.rt_cred==="y"?"p":"n";});
 /* Combinations of the three patch facets: Release, Applied, Legacy. Remediation actions stay at zero unless the case needs them, so the facets drive the difference. */
 const PVAR=[
  ["pv1","All versions · All systems · No legacy","avail","Supported PHP 8.4 fleet, patched and verified",{},"all","none"],
@@ -685,8 +707,8 @@ const AXES=[{k:"d5",label:"Exposure"},{k:"d6",label:"Impact"},{k:"d1",label:"Int
 const SKEY="vpc-state-v9";
 try{const s=JSON.parse(localStorage.getItem(SKEY)||"null");if(s&&s.a)state=Object.assign(state,s);if(!state.hideAx)state.hideAx={};if(!state.hideSer)state.hideSer={};}catch(e){}
 
-/* Start with PHP2Shell unless the viewer is working on their own answers. */
-if((!Object.keys(state.a).length&&!state.blankStart)||(state.preset&&!state.edited)){applyPreset("php",true);}
+/* Start with PHP2Shell unless the viewer is working on their own answers. A blank page is not remembered between visits. */
+if(!Object.keys(state.a).length||(state.preset&&!state.edited)){applyPreset("php",true);}
 function deriveTp(){const a=state.a,f=(id,src)=>{if(!a[id])a[id]=src;};
   f("d4h",a.d3b||"u");f("d3h",a.d3b||"u");f("d3g",a.d6a==="y"?"p":"y");
   if(a.t1==="n"){TPIDS.forEach(id=>{if(id!=="t1")a[id]=a[id]&&["t4","t6","t9","t7","tp6d","tp2b","tp5e"].includes(id)?a[id]:"x";});return;}
@@ -711,7 +733,7 @@ const orgIds=d=>d.blocks.flatMap(b=>b.items.map(i=>i[0]));
 function secScore(d,mode){const core=avg(d.blocks.filter(b=>!b.amp).flatMap(b=>b.items.map(i=>i[0])),mode),all=avg(orgIds(d),mode);
   if(core===null)return all;if(all===null)return core;return Math.max(core,all);}
 function tpScore(d,mode){const ids=d.tp.map(i=>i[0]);return avg(d.id==="d1"||d.id==="d4"?ids.concat(orgIds(d)):ids,mode);}
-function secProgress(d,scope){if(d.id==="rem"){const ids=ACT[scope].map(a=>a[0]);return [ids.filter(id=>state.a[id]).length,ids.length];}
+function secProgress(d,scope){if(d.id==="rem"){const k=fk(scope),ids=[...ACT[scope],...DEC[scope]].map(a=>a[0]);let a=ids.filter(id=>state.a[id]).length,t=ids.length;if(applyRelevant()){t++;if(state[k.apply])a++;}if(legacyRelevant()){t++;if(state[k.legacy])a++;}return [a,t];}
   const ids=scope==="tp"?d.tp.map(i=>i[0]):orgIds(d);return [ids.filter(id=>state.a[id]).length,ids.length];}
 const is=(id,v="y")=>state.a[id]===v;
 let TMODE="confirmed";const tw=id=>state.a[id]==="y"||(TMODE==="worst"&&(state.a[id]==="u"||!state.a[id]));
@@ -762,7 +784,8 @@ function renderTabs(){
 }
 function qItem([id,text,inv]){return `<div class="item"><p>${text}${inv?`<span class="inv">yes lowers risk</span>`:""}</p>
   <div class="seg${inv?" inverse":""}" role="radiogroup" aria-label="${esc(text)}">${OPTS.map(o=>`<label><input type="radio" name="${id}" id="${id}-${o[0]}" value="${o[0]}" ${state.a[id]===o[0]?"checked":""}><span>${o[1]}</span></label>`).join("")}</div></div>`;}
-function remItem([id,text,f]){return qItem([id,text]).replace("</p>",`<span class="rtag">${f===0?"to zero":"−"+Math.round((1-f)*100)+"%"}</span></p>`);}
+const goodYes=h=>h.replace('class="seg"','class="seg inverse"');
+function remItem([id,text,f]){return goodYes(qItem([id,text])).replace("</p>",`<span class="rtag">${f===0?"to zero":"−"+Math.round((1-f)*100)+"%"}</span></p>`);}
 const SCOPEDEF=`<p class="scopedef"><b>Third party scope</b> Third party systems that connect to our environment or handle our data: SaaS platforms, managed service and security providers, integrations and APIs, and the subprocessors behind them. Not a third party's whole estate.</p>`;
 function facetPanel(sc){const k=fk(sc),tp=sc==="tp",wa=state.patch==="mitigation";
   const pill=(name,id,label,cur)=>`<label><input type="radio" name="${name}" id="${name}-${id}" value="${id}" ${cur===id?"checked":""}><span>${label}</span></label>`;
@@ -772,16 +795,24 @@ function facetPanel(sc){const k=fk(sc),tp=sc==="tp",wa=state.patch==="mitigation
     +(applyRelevant()?`<div class="opts">${APPLY.map(a=>pill(k.apply,a[0],a[1],state[k.apply])).join("")}</div>`:`<p class="dim">${state.patch?"There is no patch or workaround to apply yet.":"Choose the patch release first."}</p>`);
   const leg=`<div class="block"><h3>3. Legacy systems</h3></div><p class="pq">${PENDING.includes(state.patch)?`What is the plan for legacy versions the coming fix may not cover${tp?" in the third party systems that connect to us or handle our data":""}?`:`What happens to the versions the fix does not cover${tp?" in the third party systems that connect to us or handle our data":""}?`}</p>`
     +(legacyRelevant()?`<div class="opts">${LEGACY.map(a=>pill(k.legacy,a[0],a[1],state[k.legacy])).join("")}</div>`:`<p class="dim">${fixExists()?"Not relevant: the fix covers every affected version.":state.patch==="never"?"Every affected version is effectively legacy. Use the remediation actions to isolate or decommission.":"Choose the patch release first."}</p>`);
-  return `<div class="patch${tp?" tpfacet":""}">${rel}${app}${leg}</div>`;}
+  return {rel,app,leg};}
+function relPanel(sc){const f=facetPanel(sc);return `<div class="patch${sc==="tp"?" tpfacet":""}">${f.rel}<p class="hint">Application scope and legacy status are what we do about the release, so they are answered in Remediation, for both scopes.</p></div>`;}
+function actPanel(sc){const f=facetPanel(sc),tp=sc==="tp";
+  const relLine=`<p class="relro">Release: ${state.patch?pLabel(state.patch):"not set yet, choose it in Dimension 2"}</p>`;
+  return `<div class="patch${tp?" tpfacet":""}">${relLine}${f.app.replace(/<h3>2\. /,"<h3>")}${f.leg.replace(/<h3>3\. /,"<h3>")}</div>`;}
 function renderPanel(){
   const d=SECTIONS[state.tab];
   const sc=state.scope;
   let h=`<div class="panel p-${d.id==="rem"?"rem":(sc==="tp"?"tp":"org")}" role="tabpanel" aria-labelledby="tab${state.tab}"><div><div class="scope">${d.part?PARTS[d.part]+" · Dimension "+(state.tab+1):"Part three: decide and act"}</div><h2>${d.name}</h2><p class="q">${d.q}</p></div>`;
   if(hasScope(d)){const [a,t]=secProgress(d,"org"),[ta,tt]=secProgress(d,"tp");
     h+=`<div class="scopesw" role="tablist" aria-label="Scope"><button type="button" role="tab" data-scope="org" aria-selected="${sc==="org"}">My org <em>${a}/${t}</em></button><button type="button" role="tab" data-scope="tp" aria-selected="${sc==="tp"}">Third parties <em>${ta}/${tt}</em></button></div>`;}
-  if(d.tp&&sc==="tp"){h+=SCOPEDEF;if(d.patch)h+=facetPanel("tp");h+=`<div class="block"><h3>${d.short} through our third parties</h3>${d.tp.map(qItem).join("")}</div>`;}
-  else if(d.patch){h+=facetPanel("org");}
-  if(d.id==="rem"){if(sc==="tp")h+=SCOPEDEF;h+=`<div class="block"><h3>${sc==="tp"?"Actions with our third parties":"Actions in our organization"}</h3>${ACT[sc].map(remItem).join("")}</div>`+`<p class="hint">Patch release, application scope and legacy status are set in Dimension 2, Impact, for both scopes. Yes applies the full reduction and Partial applies half. Reductions multiply. Two partial controls never add up to a patch, and only decommissioning takes the risk to zero.</p>`;}
+  if(d.tp&&sc==="tp"){h+=SCOPEDEF;if(d.patch)h+=relPanel("tp");h+=`<div class="block"><h3>${d.short} through our third parties</h3>${d.tp.map(qItem).join("")}</div>`;}
+  else if(d.patch){h+=relPanel("org");}
+  if(d.id==="rem"){if(sc==="tp")h+=SCOPEDEF;
+    h+=`<div class="remgrp"><div class="remhd"><b>1</b><span>Patch</span><em>${sc==="tp"?"Applied by third parties to the systems that serve us":"Applied by us"}</em></div>${actPanel(sc)}</div>`;
+    h+=`<div class="remgrp"><div class="remhd"><b>2</b><span>Mitigations</span><em>Each one lowers the score</em></div><div class="block">${ACT[sc].map(remItem).join("")}</div></div>`;
+    h+=`<div class="remgrp dec"><div class="remhd"><b>3</b><span>Decisions recorded</span><em>They explain the result, they never lower it</em></div><div class="block">${DEC[sc].map(a=>goodYes(qItem([a[0],a[1]]))).join("")}</div></div>`;
+    h+=`<p class="hint">Yes applies the full reduction and Partial applies half. Reductions multiply. Two partial controls never add up to a patch, and only decommissioning takes the risk to zero. A backup, a risk acceptance or a promised fix date is not a control.</p>`;}
   if(d.tp&&sc==="org")d.blocks.forEach(b=>{h+=`<div class="block">${b.title?`<h3>${b.title}</h3>`:""}${b.items.map(qItem).join("")}</div>`;});
   h+=`<div class="keyq"><b>Key point</b>${d.id==="rem"?d.key:sc==="tp"?TPKEY[d.id]:d.key}</div>
    <div class="navrow"><button class="btn" type="button" data-nav="-1" ${state.tab===0&&sc!=="tp"?"disabled":""}>Previous</button>
@@ -895,7 +926,7 @@ function update(){
   {const so=!state.hideSer.inh&&!naO,st=!tpHid()&&!naT,cols="92px"+(so?" minmax(0,1fr)":"")+(st?" minmax(0,1fr)":"");
    const bar=(i,sc,v,bv,c)=>`<button type="button" class="dbar" data-go="${i}" data-sc="${sc}" aria-label="${DIMS[i].short}, ${sc==="org"?"my organization":"third parties"} ${v}"><span class="track"><u style="left:${bv}%;width:${v-bv}%"></u><i style="width:${bv}%;background:${c}"></i></span><em style="color:${c}">${v}</em></button>`;
    $("#dimrows").innerHTML=`<div class="drh" style="grid-template-columns:${cols}"><span></span>${so?"<span><i class=\"k-org\"></i>My org</span>":""}${st?"<span><i class=\"k-tp\"></i>Third parties</span>":""}</div>`+DIMS.map((d,i)=>`<div class="dimrow2" style="grid-template-columns:${cols}"><button type="button" class="dl" data-go="${i}">${d.short}</button>${so?bar(i,"org",W.ds[i],B.ds[i],"var(--accent)"):""}${st?bar(i,"tp",W.tds[i],B.tds[i],"var(--high)"):""}</div>`).join("");}
-  $("#trig").innerHTML=TRIG.map(t=>{const c=naAll?0:t[1]();TMODE="worst";const w=naAll?0:t[1]();TMODE="confirmed";return `<li class="${c?"on":w?"maybe":""}">${t[0]}${!c&&w?` <em>if an unknown is confirmed</em>`:""}</li>`;}).join("");
+  $("#trig").innerHTML=TRIG.map(t=>{const c=naAll?0:t[1]();TMODE="worst";const w=naAll?0:t[1]();TMODE="confirmed";return `<li class="${c?"on":w?"maybe":""}"><span>${t[0]}${!c&&w?`<em>Fires if an unknown is confirmed</em>`:""}</span></li>`;}).join("");
   let pk=state.patch,ph="";
   if(done("r_decom")){ph=`<h5>Decommissioned</h5><p class="ok">The system no longer exists, so it cannot be exploited. Confirm data, credentials and DNS records were removed with it.</p>`;}
   else if(!pk){ph=`<p class="dim">Set the patch status in Dimension 2 (Impact) to see the matching playbook.</p>`;}
@@ -1052,13 +1083,14 @@ async function buildReport(scope){
     if(state.patch&&PLAY[state.patch]){P.label("Recommended path: "+PLAY[state.patch][0],col);PLAY[state.patch][1].forEach((x,i)=>P.text(`${i+1}. ${x}`,{gap:1}));P.y+=6;}}
   const applied=ACT[scope].filter(a=>state.a[a[0]]==="y"||state.a[a[0]]==="p");P.label("Actions applied",col);
   if(applied.length)applied.forEach(a=>P.text(`- ${a[1]} ${AL[state.a[a[0]]]}.`,{gap:1}));else P.text("None");P.y+=6;
+  {const dd=DEC[scope].filter(a=>state.a[a[0]]);if(dd.length){P.label("Decisions recorded (no effect on the score)",PAL.muted);dd.forEach(a=>P.text(`- ${a[1]} ${AL[state.a[a[0]]]}.`,{gap:1}));P.y+=6;}}
   const nx=nextActions(ACT[scope],res);if(nx.length&&nx[0][1]>0){P.label("Biggest remaining reductions",col);nx.forEach(([a,g])=>P.text(`- ${a[1]} (${g} points)`,{gap:1}));P.y+=6;}
   const unk=Object.keys(state.a).filter(k=>state.a[k]==="u"&&ALL[k]&&ALL[k].scope===scope);{const na=notAssessed(scope);if(na){P.label(`Not assessed yet: ${na} questions, counted as exposed`,PAL.high);P.y+=2;}}P.label(`Discovery deadline: ${unk.length} unknown answers`,PAL.unk);
   if(unk.length)unk.forEach(k=>P.text("- "+ALL[k].text,{gap:1}));else P.text("None. Every answer is backed by evidence.");
   d.addPage();P.y=56;P.label("Answers by dimension",col);
   DIMS.forEach((dm,i)=>{P.need(30);P.text(`Dimension ${i+1}. ${dm.name}`,{size:12,bold:true,gap:3});(org?dm.blocks.flatMap(b=>b.items):dm.tp).forEach(([id,t])=>ansRow(P,t,state.a[id]));P.y+=8;});
   {P.need(40);P.text(org?"Patch status":"Third party patch status",{size:12,bold:true,gap:3});patchFacets(scope).forEach(([k,v])=>ansRow(P,k,v));P.y+=8;}
-  P.need(30);P.text("Remediation actions applied",{size:12,bold:true,gap:3});ACT[scope].forEach(([id,t])=>ansRow(P,t,state.a[id]));
+  P.need(30);P.text("Mitigations",{size:12,bold:true,gap:3});ACT[scope].forEach(([id,t])=>ansRow(P,t,state.a[id]));P.y+=6;P.need(30);P.text("Decisions recorded",{size:12,bold:true,gap:3});DEC[scope].forEach(([id,t])=>ansRow(P,t,state.a[id]));
   P.y+=10;P.text(`Snapshot, not a status. These answers reflect the estate as of ${when}. Next evaluation: ${fmtDate(nextEval().t)}, or sooner. Refresh them whenever an asset, identity, container, API, AI agent or third party changes.`,{size:9,color:PAL.muted});
   pdfFooter(P);return d;}
 function buildBlank(scope){const P=newDoc(),d=P.doc,org=scope==="org",col=org?PAL.org:PAL.tp;
@@ -1067,11 +1099,15 @@ function buildBlank(scope){const P=newDoc(),d=P.doc,org=scope==="org",col=org?PA
   if(!org)P.text("Scope: third party systems that connect to our environment or handle our data, including SaaS platforms, managed service and security providers, integrations and APIs, and the subprocessors behind them. Not a third party's whole estate.",{size:9.5,bold:true,gap:6});
   P.y+=4;P.text("Answer each question with evidence, not opinion: Yes, Partial, No, Unknown or N/A. An Unknown is not a failure. It is a finding, and a deadline for discovery. This questionnaire scopes the problem the first time. Keep the answers current as assets, identities, containers, APIs, AI agents and third parties change.",{size:9.5,color:PAL.muted,gap:10});
   DIMS.forEach((dm,i)=>{P.need(60);P.text(`Dimension ${i+1}. ${dm.name}`,{size:12,bold:true,gap:1});P.text(dm.q,{size:9,color:PAL.muted,gap:5});
-    if(org){if(dm.patch){P.label("1. Patch release (choose one)",col);PATCH.forEach(p=>boxLine(P,p[1]));P.y+=4;P.label("2. Application scope (if a patch or workaround exists)",col);APPLY.forEach(a=>boxLine(P,a[1]));P.y+=4;P.label("3. Legacy systems (if the fix leaves versions out or is still pending)",col);LEGACY.forEach(a=>boxLine(P,a[1]));P.y+=6;}
+    if(org){if(dm.patch){P.label("Patch release (choose one)",col);PATCH.forEach(p=>boxLine(P,p[1]));P.y+=6;}
       dm.blocks.forEach(b=>{if(b.title)P.label(b.title,col);b.items.forEach(([,t])=>qRow(P,t));});}
-    else{if(dm.patch){P.label("Third party patch application: systems that connect to us or handle our data (choose one)",col);APPLY.forEach(a=>boxLine(P,a[1]));P.y+=4;P.label("Third party legacy versions (choose one)",col);LEGACY.forEach(a=>boxLine(P,a[1]));P.y+=6;}P.label(dm.short+" through our third parties",col);dm.tp.forEach(([,t])=>qRow(P,t));}
+    else{P.label(dm.short+" through our third parties",col);dm.tp.forEach(([,t])=>qRow(P,t));}
     P.y+=8;});
-  P.need(60);P.text("Remediation actions applied",{size:12,bold:true,gap:5});ACT[scope].forEach(([,t])=>qRow(P,t));
+  P.need(60);P.text("Remediation",{size:12,bold:true,gap:5});
+  P.label(org?"1. Patch: application scope (if a patch or workaround exists, choose one)":"1. Patch: application scope in the third party systems that connect to us or handle our data (choose one)",col);APPLY.forEach(a=>boxLine(P,a[1]));P.y+=4;
+  P.label(org?"Patch: legacy systems (if the fix leaves versions out or is still pending, choose one)":"Patch: legacy versions in those third party systems (choose one)",col);LEGACY.forEach(a=>boxLine(P,a[1]));P.y+=6;
+  P.label("2. Mitigations: each one lowers the score",col);ACT[scope].forEach(([,t])=>qRow(P,t));P.y+=4;
+  P.label("3. Decisions recorded: they explain the result, they never lower it",col);DEC[scope].forEach(([,t])=>qRow(P,t));
   pdfFooter(P);return d;}
 let DL;
 async function getDL(){if(DL!==undefined)return DL;try{DL=window.claude&&window.claude.use?await window.claude.use("downloads"):null;}catch(e){DL=null;}return DL;}
