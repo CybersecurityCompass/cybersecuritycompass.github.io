@@ -26,11 +26,17 @@ header{display:grid;gap:8px;border-bottom:1px solid var(--line);padding-bottom:1
 h1{font-family:var(--display);font-weight:800;font-size:clamp(22px,3.4vw,38px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:.02em;text-transform:uppercase;color:var(--accent);text-shadow:0 0 24px rgba(79,179,255,.35)}
 h1 span{color:var(--ink);text-shadow:none}
 .lede{color:var(--muted);max-width:76ch;margin:0;font-size:14.5px}
-.ctx{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:16px}
+.ctx{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.3fr) minmax(0,1.5fr) minmax(0,1fr) auto;align-items:end;gap:14px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:16px}
 .ctx label{display:grid;gap:6px;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
 .ctx input,.ctx select{font:inherit;font-family:var(--mono);font-size:14px;text-transform:none;letter-spacing:0;color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:4px;padding:9px 10px;min-width:0}
 .ctx input:focus,.ctx select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-.ctx .actions{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.ctx .actions{display:flex;gap:8px;align-items:end;flex-wrap:nowrap}
+.ctx>label,.ctx>.field{align-content:end;min-width:0}
+.ctx input,.ctx .dd-btn,.ctx .sw,.ctx .btn{height:42px;box-sizing:border-box}
+.ctx .sw{width:100%;padding-block:0}.ctx .sw-txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctx .btn{white-space:nowrap}
+@media (max-width:1180px){.ctx{grid-template-columns:repeat(2,minmax(0,1fr))}.ctx .actions{grid-column:1 / -1}}
+@media (max-width:560px){.ctx{grid-template-columns:minmax(0,1fr)}.ctx .actions{flex-wrap:wrap}}
 .btn{font-family:var(--mono);font-size:13px;font-weight:500;border-radius:4px;padding:9px 14px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;letter-spacing:.02em}
 .btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
 .btn:disabled{opacity:.4;cursor:default}
@@ -105,6 +111,9 @@ aside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid
 .score{font-family:var(--display);font-weight:800;font-size:60px;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 0 22px currentColor}
 .tier{display:inline-block;font-family:var(--mono);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;border-radius:3px;padding:3px 8px;justify-self:start;border:1px solid currentColor}
 .tier.t4{background:var(--crit-soft);color:var(--crit)}.tier.t3{background:var(--high-soft);color:var(--high)}
+.tier.t0{background:transparent;color:var(--muted);border-color:var(--line2)}
+.vb .score.na{font-size:22px;color:var(--muted);font-family:var(--mono)}
+.kpi b.na{font-size:18px;line-height:1.3;color:var(--muted);white-space:normal}
 .tier.t2{background:var(--med-soft);color:var(--med)}.tier.t1{background:var(--low-soft);color:var(--low)}
 .verdict p{margin:0;font-size:13.5px;color:var(--muted)}
 .range{font-family:var(--mono);font-size:11.5px;color:var(--unk)}
@@ -800,15 +809,15 @@ function radar(vals){
       g+=`<circle class="ring" cx="${px}" cy="${py}" r="5" fill="none" stroke="${pc}" stroke-width="2" style="animation-delay:${(i*per).toFixed(2)}s"/>
         <circle class="dot" cx="${px}" cy="${py}" r="${big?4.5:3.6}" fill="${pc}" stroke="var(--bg)" stroke-width="1.5" style="animation-delay:${(i*per).toFixed(2)}s"/>`;});});
   axes.forEach((a,i)=>{const [x,y]=pt(i,118);const anchor=Math.abs(x-cx)<5?"middle":x>cx?"start":"end";const dy=y<cy-60?-8:y>cy+60?14:0;
-    const v=vals.inh[a.k],tv=vals.tpi[a.k];
+    const v=vals.inh?vals.inh[a.k]:null,tv=vals.tpi?vals.tpi[a.k]:null;
     g+=`<g class="axl" data-ax="${a.k}" role="button" tabindex="0" aria-label="Hide ${a.label}"><text x="${x}" y="${y+dy}" text-anchor="${anchor}" font-size="12" font-weight="700" font-family="var(--mono)" letter-spacing=".8" fill="var(--ink)">${a.label.toUpperCase()}</text>
-    <text x="${x}" y="${y+dy+15}" text-anchor="${anchor}" font-size="11" font-family="var(--mono)" fill="var(--muted)">${[state.hideSer.inh?"":`<tspan fill="var(--accent)">${v}</tspan>`,tpHid()?"":`<tspan fill="var(--high)">${tv}</tspan>`].filter(Boolean).join(" · ")}</text></g>`;});
+    <text x="${x}" y="${y+dy+15}" text-anchor="${anchor}" font-size="11" font-family="var(--mono)" fill="var(--muted)">${[state.hideSer.inh||v===null?"":`<tspan fill="var(--accent)">${v}</tspan>`,tpHid()||tv===null?"":`<tspan fill="var(--high)">${tv}</tspan>`].filter(Boolean).join(" · ")}</text></g>`;});
   if(!axes.length)g+=`<text x="${cx}" y="${cy}" text-anchor="middle" font-family="var(--mono)" font-size="12" fill="var(--muted)">All dimensions hidden</text>`;
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Spider chart of dimension scores">${g}</svg>`;
 }
 const related=k=>(tpHid()&&k==="tpres")||(state.hideSer.inh&&(k==="res"||k==="best"));
-function legendHtml(hasRes){
-  const ser=SERIES.filter(s=>!(s[0]==="res"||s[0]==="tpres")||hasRes).filter(s=>!related(s[0])&&!(!TPON()&&(s[0]==="tpi"||s[0]==="tpres"))).map(([k,l,col,dash])=>`<button type="button" class="lg${state.hideSer[k]?" off":""}" data-ser="${k}" aria-pressed="${!state.hideSer[k]}"><i style="${dash?`border-top:2px dashed ${col};background:none;height:0`:`background:${col}`}"></i>${l}</button>`).join("");
+function legendHtml(hasRes,naO,naT){
+  const ser=SERIES.filter(s=>!(s[0]==="res"||s[0]==="tpres")||hasRes).filter(s=>!(naO&&["inh","best","res"].includes(s[0]))&&!(naT&&["tpi","tpres"].includes(s[0]))).filter(s=>!related(s[0])&&!(!TPON()&&(s[0]==="tpi"||s[0]==="tpres"))).map(([k,l,col,dash])=>`<button type="button" class="lg${state.hideSer[k]?" off":""}" data-ser="${k}" aria-pressed="${!state.hideSer[k]}"><i style="${dash?`border-top:2px dashed ${col};background:none;height:0`:`background:${col}`}"></i>${l}</button>`).join("");
   const ax=AXES.map(a=>`<button type="button" class="lg ax${state.hideAx[a.k]?" off":""}" data-ax="${a.k}" aria-pressed="${!state.hideAx[a.k]}">${a.label}</button>`).join("");
   return `<div class="lgrow">${ser}</div><div class="lgrow"><span class="lgl">Dimensions</span>${ax}</div>`;
 }
@@ -833,6 +842,9 @@ function nextActions(list,cur){const sc=list===ACT.org?"org":"tp",k=fk(sc),tp=sc
     if(gapRelease()&&!["none","decom","patched","comp"].includes(state[k.legacy])){const f1=patchFactor({legacy:"comp"},sc);out.push([["lx",tp?"Have third parties contained or retired their legacy versions?":"Have we added a compensating control, or decommissioned the legacy versions the fix does not cover?"],Math.round(cur-cur*f1/f0)]);}}
   return out.filter(x=>x[1]>0).sort((x,y)=>y[1]-x[1]).slice(0,3);
 }
+const scopeBlank=sc=>!Object.keys(state.a).some(k=>ALL[k]&&ALL[k].dim!=="rem"&&state.a[k]&&((ALL[k].scope==="tp")===(sc==="tp")))&&!(sc==="org"&&state.patch);
+function verdictBlank(label){return `<div class="vb na"><div class="vb-h"><i class="${label==="My org"?"k-org":"k-tp"}"></i>${label}</div>
+   <div class="vb-n"><span class="score na">Not assessed</span></div><span class="tier t0">No answers yet</span></div>`;}
 function verdictBlock(label,inh,resid,sub){
   const [tn,tl,tt]=tierOf(resid,label!=="My org");
   return `<div class="vb"><div class="vb-h"><i class="${label==="My org"?"k-org":"k-tp"}"></i>${label}</div>
@@ -851,37 +863,39 @@ function ddPick(v){ddOpen(false);$("#ddBtn").focus();applyPreset(v);}
 const REVIEW={4:1,3:7,2:7,1:15};
 const fmtDate=t=>{try{return new Date(t).toLocaleDateString(undefined,{dateStyle:"medium"});}catch(e){return "";}};
 const isoDay=t=>{const d=new Date(t);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;};
-function nextEval(){const W=compute("worst"),top=Math.max(W.orgR,TPON()?W.tpR:0),[tn,tl]=tierOf(top),days=REVIEW[tn];
+function nextEval(){const W=compute("worst"),top=Math.max(W.orgR,TPON()?W.tpR:0),blank=scopeBlank("org")&&(!TPON()||scopeBlank("tp")),[tn,tl0]=tierOf(top),days=blank?7:REVIEW[tn],tl=blank?"a first assessment":tl0;
   const sug=(state.at||Date.now())+days*864e5;
   if(state.next){const [y,m,d]=state.next.split("-").map(Number);return {t:new Date(y,m-1,d).getTime(),set:true,days,tl,sug};}
   return {t:sug,set:false,days,tl,sug};}
 function update(){
   $("#radarTitle").textContent=(state.name?state.name+" · ":"")+"Cyber Risk Profile";
-  $("#keyOrg").hidden=!!state.hideSer.inh;$("#keyTp").hidden=tpHid();
+  {const bo=scopeBlank("org"),bt=!TPON()||scopeBlank("tp");$("#keyOrg").hidden=!!state.hideSer.inh||bo;$("#keyTp").hidden=tpHid()||bt;}
   $("#kOrg").hidden=!!state.hideSer.inh;$("#kTp").hidden=tpHid();$("#verdicts").classList.toggle("one",!!(state.hideSer.inh||tpHid()));
-  const dr=$("#dimrows");dr.classList.toggle("no-org",!!state.hideSer.inh);dr.classList.toggle("no-tp",tpHid());dr.hidden=!!(state.hideSer.inh&&tpHid());
+  const dr=$("#dimrows");{const bo=scopeBlank("org"),bt=!TPON()||scopeBlank("tp");dr.classList.toggle("no-org",!!state.hideSer.inh||bo);dr.classList.toggle("no-tp",tpHid()||bt);dr.hidden=!!((state.hideSer.inh||bo)&&(tpHid()||bt));}
   $("#vname").value=state.name;$("#vasset").value=state.asset;const blankA=!state.preset&&!Object.keys(state.a).some(k=>ALL[k]&&ALL[k].dim!=="rem");$("#exflag").hidden=!state.preset&&!blankA;$("#exflag").classList.toggle("blank",blankA);
   $("#scnTag").textContent=blankA?"Blank assessment":"Preloaded scenario";$("#scnClear").hidden=blankA;
   if(blankA){$("#scnName").textContent="Nothing assessed yet.";$("#scnNote").textContent=" Every question counts as exposed until it is answered with evidence. The score comes down as you prove it can.";}renderDD();{const ne=nextEval();$("#nextEval").value=state.next||isoDay(ne.sug);$("#nextReset").hidden=!ne.set;
     $("#snapNextSub").textContent=ne.set?`set by the assessor · suggested ${fmtDate(ne.sug)}`:`suggested for ${ne.tl}, within ${ne.days} day${ne.days>1?"s":""}`;}
-  try{const at=new Date(state.at||Date.now());$("#snapAt").textContent=at.toLocaleDateString(undefined,{dateStyle:"medium"});$("#snapAt").nextElementSibling.textContent="at "+at.toLocaleTimeString(undefined,{timeStyle:"short"})+", answers as of then";}catch(e){}$("#tpSwitch").setAttribute("aria-checked",TPON());$("#tpSwTxt").textContent=TPON()?"Included in the assessment":"Excluded from the assessment";document.body.classList.toggle("tp-off",!TPON());
+  try{const at=new Date(state.at||Date.now());$("#snapAt").textContent=at.toLocaleDateString(undefined,{dateStyle:"medium"});$("#snapAt").nextElementSibling.textContent="at "+at.toLocaleTimeString(undefined,{timeStyle:"short"})+", answers as of then";}catch(e){}$("#tpSwitch").setAttribute("aria-checked",TPON());$("#tpSwTxt").textContent=TPON()?"Included":"Excluded";document.body.classList.toggle("tp-off",!TPON());
   if(state.preset){$("#scnName").textContent=scnName(state.preset)||state.name;
     $("#scnNote").textContent=state.edited?" · You have changed some answers. Make sure every answer reflects your own evidence.":" · These are example answers, not your organization’s. Replace them with your own evidence.";}
   const W=compute("worst"),B=compute("best");
   const tpNone=is("t1","n");
-  $("#verdicts").innerHTML=(state.hideSer.inh?"":verdictBlock("My org",W.org,W.orgR))+(tpHid()?"":verdictBlock("Third parties",W.tp,W.tpR,tpNone?"No third party with access uses the affected technology.":null));
-  {const na=notAssessed("org")+(TPON()?notAssessed("tp"):0);$("#range").textContent=(na?`${na} question${na>1?"s":""} not assessed yet, counted as exposed. `:"")+(()=>{const r=[];if(!state.hideSer.inh&&B.org<W.org)r.push(`my organization could score anywhere from ${B.org} to ${W.org}`);if(TPON()&&!tpHid()&&B.tp<W.tp)r.push(`third parties from ${B.tp} to ${W.tp}`);
+  const naO=scopeBlank("org"),naT=!TPON()||scopeBlank("tp"),naAll=naO&&naT;
+  $("#verdicts").innerHTML=(state.hideSer.inh?"":naO?verdictBlank("My org"):verdictBlock("My org",W.org,W.orgR))+(tpHid()?"":naT?verdictBlank("Third parties"):verdictBlock("Third parties",W.tp,W.tpR,tpNone?"No third party with access uses the affected technology.":null));
+  {const na=notAssessed("org")+(TPON()?notAssessed("tp"):0);$("#range").hidden=naAll;$("#range").textContent=(na?`${na} question${na>1?"s":""} not assessed yet, counted as exposed. `:"")+(()=>{const r=[];if(!state.hideSer.inh&&!naO&&B.org<W.org)r.push(`my organization could score anywhere from ${B.org} to ${W.org}`);if(TPON()&&!tpHid()&&!naT&&B.tp<W.tp)r.push(`third parties from ${B.tp} to ${W.tp}`);
    return r.length?`Before actions, ${r.join(" and ")}, depending on how the unknown or unanswered questions turn out.`:"No result depends on unknown or unanswered questions.";})();}
   const mk=(ds,tps)=>{const o={};DIMS.forEach((d,i)=>o[d.id]=ds[i]);o.tp=tps;return o;};
   const hasRes=W.fo<1||W.ft<1;
   const mk2=ds=>{const o={};DIMS.forEach((d,i)=>o[d.id]=ds[i]);return o;};
   const vals={inh:mk2(W.ds),tpi:mk2(W.tds),best:mk2(B.ds),res:hasRes?mk2(W.ds.map(x=>Math.round(x*W.fo))):null,tpres:hasRes?mk2(W.tds.map(x=>Math.round(x*W.ft))):null};
+  if(naO){vals.inh=null;vals.best=null;vals.res=null;}if(naT){vals.tpi=null;vals.tpres=null;}
   $("#radar").innerHTML=radar(vals);
-  $("#legend").innerHTML=legendHtml(hasRes);
-  {const so=!state.hideSer.inh,st=!tpHid(),cols="92px"+(so?" minmax(0,1fr)":"")+(st?" minmax(0,1fr)":"");
+  $("#legend").innerHTML=naAll?"":legendHtml(hasRes,naO,naT);$("#legend").hidden=naAll;
+  {const so=!state.hideSer.inh&&!naO,st=!tpHid()&&!naT,cols="92px"+(so?" minmax(0,1fr)":"")+(st?" minmax(0,1fr)":"");
    const bar=(i,sc,v,bv,c)=>`<button type="button" class="dbar" data-go="${i}" data-sc="${sc}" aria-label="${DIMS[i].short}, ${sc==="org"?"my organization":"third parties"} ${v}"><span class="track"><u style="left:${bv}%;width:${v-bv}%"></u><i style="width:${bv}%;background:${c}"></i></span><em style="color:${c}">${v}</em></button>`;
    $("#dimrows").innerHTML=`<div class="drh" style="grid-template-columns:${cols}"><span></span>${so?"<span><i class=\"k-org\"></i>My org</span>":""}${st?"<span><i class=\"k-tp\"></i>Third parties</span>":""}</div>`+DIMS.map((d,i)=>`<div class="dimrow2" style="grid-template-columns:${cols}"><button type="button" class="dl" data-go="${i}">${d.short}</button>${so?bar(i,"org",W.ds[i],B.ds[i],"var(--accent)"):""}${st?bar(i,"tp",W.tds[i],B.tds[i],"var(--high)"):""}</div>`).join("");}
-  $("#trig").innerHTML=TRIG.map(t=>{const c=t[1]();TMODE="worst";const w=t[1]();TMODE="confirmed";return `<li class="${c?"on":w?"maybe":""}">${t[0]}${!c&&w?` <em>if an unknown is confirmed</em>`:""}</li>`;}).join("");
+  $("#trig").innerHTML=TRIG.map(t=>{const c=naAll?0:t[1]();TMODE="worst";const w=naAll?0:t[1]();TMODE="confirmed";return `<li class="${c?"on":w?"maybe":""}">${t[0]}${!c&&w?` <em>if an unknown is confirmed</em>`:""}</li>`;}).join("");
   let pk=state.patch,ph="";
   if(done("r_decom")){ph=`<h5>Decommissioned</h5><p class="ok">The system no longer exists, so it cannot be exploited. Confirm data, credentials and DNS records were removed with it.</p>`;}
   else if(!pk){ph=`<p class="dim">Set the patch status in Dimension 2 (Impact) to see the matching playbook.</p>`;}
@@ -907,7 +921,12 @@ function update(){
   const [,tlo]=tierOf(W.orgR),[,tlt]=tierOf(W.tpR);
   setK("#kOrg",W.orgR,color(W.orgR));$("#kOrg span").textContent=tlo+(W.orgR<W.org?` · ${W.org} before actions`:"");
   setK("#kTp",W.tpR,color(W.tpR));$("#kTp span").textContent=tlt+(W.tpR<W.tp?` · ${W.tp} before actions`:"");
-  setK("#kRed",red+"%");setK("#kTrig",W.fired);setK("#kUnk",unk.length);{const na=notAssessed("org")+(TPON()?notAssessed("tp"):0);$("#kUnkSub").textContent=na?`${na} more not assessed yet`:"deadlines for discovery";}
+  setK("#kRed",red+"%");setK("#kTrig",W.fired);setK("#kUnk",unk.length);{const na=notAssessed("org")+(TPON()?notAssessed("tp"):0);$("#kUnkSub").textContent=na?`${na} more not assessed yet`:"deadlines for discovery";
+   const blankK=(id,sub)=>{const el=$(id),b=el.querySelector("b");b.textContent="Not assessed";b.classList.add("na");el.style.setProperty("--k","var(--line2)");if(sub!==undefined)el.querySelector("span:last-child").textContent=sub;};
+   ["#kOrg","#kTp","#kRed","#kTrig","#kUnk"].forEach(id=>$(id+" b").classList.remove("na"));$("#kRed").style.setProperty("--k","var(--low)");$("#kTrig").style.setProperty("--k","var(--crit)");$("#kUnk").style.setProperty("--k","var(--unk)");$("#kRed > span").textContent="by actions applied";
+   if(naO){blankK("#kOrg","answer the questions to score");blankK("#kRed","no actions recorded");}
+   if(naT)blankK("#kTp","answer the questions to score");
+   if(naAll){blankK("#kTrig","of 8 escalation conditions");blankK("#kUnk",`${na} questions open`);}}
   {const tp=!tpHid(),so=!state.hideSer.inh;$("#kPatchTp").hidden=!tp;$("#kPatch").hidden=!so;$("#ptiles").classList.toggle("one",!(tp&&so));$("#ptiles").hidden=!(tp||so);
    const fill=(id,sc,dk)=>{const el=$(id+" b"),sub=$(id+" > span");
      if(done(dk)){el.className="sm";el.textContent="Decommissioned";sub.textContent="system no longer exists";return;}
@@ -915,7 +934,7 @@ function update(){
      el.innerHTML=f.map(([l,v],i)=>`<span class="pline${i?"":" rel"}"><em>${l}</em><span>${esc(v)}</span></span>`).join("");};
    fill("#kPatch","org","r_decom");fill("#kPatchTp","tp","rt_decom");}
   const [mt,ml]=tierOf(Math.max(W.orgR,W.tpR));
-  $("#mOrg b").textContent=W.orgR;$("#mTp b").textContent=W.tpR;$("#mOrg").hidden=!!state.hideSer.inh;$("#mTp").hidden=tpHid();$("#mTier").className="tier t"+mt;$("#mTier").textContent=ml;
+  $("#mOrg b").textContent=naO?"N/A":W.orgR;$("#mTp b").textContent=naT?"N/A":W.tpR;$("#mOrg").hidden=!!state.hideSer.inh;$("#mTp").hidden=tpHid();$("#mTier").className="tier t"+(naAll?0:mt);$("#mTier").textContent=naAll?"Not assessed":ml;
   renderTabs();save();
 }
 document.addEventListener("change",e=>{
