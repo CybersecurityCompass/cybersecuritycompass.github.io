@@ -1110,9 +1110,12 @@ function buildBlank(scope){const P=newDoc(),d=P.doc,org=scope==="org",col=org?PA
   P.label("3. Decisions recorded: they explain the result, they never lower it",col);DEC[scope].forEach(([,t])=>qRow(P,t));
   pdfFooter(P);return d;}
 let DL;
-async function getDL(){if(DL!==undefined)return DL;try{DL=window.claude&&window.claude.use?await window.claude.use("downloads"):null;}catch(e){DL=null;}return DL;}
+async function getDL(){if(DL)return DL;
+  for(let i=0;i<20&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,250));
+  try{DL=window.claude&&window.claude.use?await window.claude.use("downloads"):null;}catch(e){DL=null;}return DL;}
 async function doExport(kind){const [type,scope]=kind.split(":");const dl=await getDL();
-  if(!dl||!window.jspdf){toast("PDF export is not available in this view");return;}
+  if(!window.jspdf){toast("The PDF library did not load. Reload the page and try again");return;}
+  if(!dl){toast("Saving files is blocked in this view. Open the Radar on its own page to save the PDF");return;}
   try{const doc=type==="res"?await buildReport(scope):buildBlank(scope);
     const slug=(state.name||"vulnerability").replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40)||"vulnerability";
     const who=scope==="org"?"organization":"third-parties";
@@ -1127,7 +1130,7 @@ $("#expList").addEventListener("keydown",e=>{const os=[...$("#expList").querySel
   if(e.key==="ArrowDown"){e.preventDefault();os[Math.min(i+1,os.length-1)].focus();}else if(e.key==="ArrowUp"){e.preventDefault();os[Math.max(i-1,0)].focus();}
   else if(e.key==="Enter"||e.key===" "){e.preventDefault();if(i>=0){expOpen(false);doExport(os[i].dataset.exp);}}else if(e.key==="Escape"){expOpen(false);$("#expBtn").focus();}});
 document.addEventListener("click",e=>{if(!e.target.closest("#expWrap"))expOpen(false);},true);
-getDL().then(dl=>{if(!dl){$("#expBtn").disabled=true;$("#expBtn").title="PDF export is not available in this view";}});
+getDL().then(dl=>{$("#expBtn").title=dl?"":"If saving is blocked here, open the Radar on its own page to save the PDF";});
 
 renderPanel();update();
 </script>
