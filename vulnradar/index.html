@@ -1014,16 +1014,33 @@ const PAL={ink:[18,26,43],muted:[95,108,130],line:[210,217,228],org:[30,111,217]
 const HEX={org:"#1e6fd9",tp:"#d96916",unk:"#7a4fd1",line:"#d2d9e4",ink:"#121a2b",res:"#1f8a5c",tpres:"#6a9a12"};
 const tierRGB=s=>s>=75?PAL.crit:s>=55?PAL.high:s>=35?PAL.med:PAL.low;
 function toast(m){const d=document.createElement("div");d.className="toast";d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
-function radarPNG(series){return new Promise(res=>{const W=520,H=440,cx=260,cy=220,R=150,n=AXES.length;
+function radarPNG(series,opt={}){return new Promise(res=>{const W=640,H=720,cx=320,cy=350,R=190,n=AXES.length,F="Helvetica,Arial,sans-serif";
   const pt=(i,v)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [cx+Math.cos(a)*R*v/100,cy+Math.sin(a)*R*v/100];};
+  const esc2=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;");
   let g=`<rect width="${W}" height="${H}" fill="#ffffff"/>`;
-  [25,50,75,100].forEach(r=>{g+=`<polygon points="${AXES.map((_,i)=>pt(i,r).join(",")).join(" ")}" fill="none" stroke="${HEX.line}"/>`;});
+  if(opt.title)g+=`<text x="${cx}" y="28" text-anchor="middle" font-family="${F}" font-size="17" font-weight="700" fill="${HEX.ink}">${esc2(opt.title)}</text>`;
+  if(opt.sub)g+=`<text x="${cx}" y="48" text-anchor="middle" font-family="${F}" font-size="12" fill="#5b6678">${esc2(opt.sub)}</text>`;
+  /* tier bands: the rings sit on the tier thresholds */
+  const BANDS=[[100,"#fdecec"],[75,"#fff1e6"],[55,"#fff8e1"],[35,"#eef8f1"]];
+  BANDS.forEach(([r,c])=>{g+=`<polygon points="${AXES.map((_,i)=>pt(i,r).join(",")).join(" ")}" fill="${c}" stroke="${HEX.line}" stroke-width="1"/>`;});
   AXES.forEach((_,i)=>{const [x,y]=pt(i,100);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${HEX.line}"/>`;});
+  [[35,"35 Scheduled"],[55,"55 Priority"],[75,"75 Emergency"],[100,"100"]].forEach(([r,t])=>{const [x,y]=pt(0,r);g+=`<text x="${x-6}" y="${y+12}" text-anchor="end" font-family="${F}" font-size="9.5" fill="#7b8596">${t}</text>`;});
   series.forEach(s=>{const p=AXES.map((a,i)=>pt(i,Math.max(s.vals[a.k],2)).join(",")).join(" ");
-    g+=`<polygon points="${p}" fill="${s.col}" fill-opacity="${s.fill?.15:0}" stroke="${s.col}" stroke-width="2.4" ${s.dash?'stroke-dasharray="7 5"':""}/>`;
-    if(!s.nodots)AXES.forEach((a,i)=>{const [x,y]=pt(i,Math.max(s.vals[a.k],2));g+=`<circle cx="${x}" cy="${y}" r="4" fill="${s.col}"/>`;});});
-  AXES.forEach((a,i)=>{const [x,y]=pt(i,118);const an=Math.abs(x-cx)<5?"middle":x>cx?"start":"end";const dy=y<cy-60?-6:y>cy+60?14:4;
-    g+=`<text x="${x}" y="${y+dy}" text-anchor="${an}" font-family="Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="${HEX.ink}">${a.label}</text>`;});
+    g+=`<polygon points="${p}" fill="${s.col}" fill-opacity="${s.fill?.16:0}" stroke="${s.col}" stroke-width="2.6" ${s.dash?'stroke-dasharray="8 5"':""}/>`;
+    AXES.forEach((a,i)=>{const [x,y]=pt(i,Math.max(s.vals[a.k],2));g+=`<circle cx="${x}" cy="${y}" r="4.5" fill="${s.col}" stroke="#fff" stroke-width="1.2"/>`;});});
+  /* axis labels with the score of every series */
+  AXES.forEach((a,i)=>{const [x,y]=pt(i,121);const an=Math.abs(x-cx)<5?"middle":x>cx?"start":"end";const top=y<cy-60,bot=y>cy+60;const y0=top?y-22:bot?y+8:y-8;
+    g+=`<text x="${x}" y="${y0}" text-anchor="${an}" font-family="${F}" font-size="14" font-weight="700" fill="${HEX.ink}">${a.label}</text>`;
+    const parts=series.map(s=>`<tspan fill="${s.col}" font-weight="700">${s.vals[a.k]}</tspan>`).join(`<tspan fill="#9aa3b2"> / </tspan>`);
+    g+=`<text x="${x}" y="${y0+17}" text-anchor="${an}" font-family="${F}" font-size="13">${parts}</text>`;});
+  /* legend */
+  const ly=H-52,cols=series.length,cw=(W-40)/cols;
+  g+=`<line x1="20" y1="${ly-18}" x2="${W-20}" y2="${ly-18}" stroke="${HEX.line}"/>`;
+  series.forEach((s,i)=>{const x=20+i*cw+10;
+    g+=`<line x1="${x}" y1="${ly}" x2="${x+30}" y2="${ly}" stroke="${s.col}" stroke-width="3" ${s.dash?'stroke-dasharray="7 4"':""}/><circle cx="${x+15}" cy="${ly}" r="4.5" fill="${s.col}"/>`;
+    g+=`<text x="${x+40}" y="${ly+4}" font-family="${F}" font-size="12.5" font-weight="700" fill="${HEX.ink}">${esc2(s.name)}</text>`;
+    if(s.note)g+=`<text x="${x+40}" y="${ly+20}" font-family="${F}" font-size="10.5" fill="#5b6678">${esc2(s.note)}</text>`;});
+  g+=`<text x="${cx}" y="${H-10}" text-anchor="middle" font-family="${F}" font-size="10" fill="#7b8596">Axis values read in legend order. Rings mark the tier thresholds: Scheduled 35, Priority 55, Emergency 75.</text>`;
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W*2}" height="${H*2}">${g}</svg>`;
   const img=new Image();img.onload=()=>{try{const c=document.createElement("canvas");c.width=W*2;c.height=H*2;c.getContext("2d").drawImage(img,0,0,W*2,H*2);res(c.toDataURL("image/png"));}catch(e){res(null);}};
   img.onerror=()=>res(null);img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);});}
@@ -1066,17 +1083,31 @@ async function buildReport(scope){
   d.setFontSize(12);d.text(tl.toUpperCase(),P.x+92,P.y+22);d.setFont("helvetica","normal");d.setFontSize(9.5);d.setTextColor(...PAL.muted);
   d.text(d.splitTextToSize(san(`${res<inh?`Reduced from ${inh} by the actions applied. `:""}${tt}`),P.w-110),P.x+92,P.y+37);P.y+=76;
   const ds=org?W.ds:W.tds,f=org?W.fo:W.ft,mk=a=>{const o={};DIMS.forEach((dm,i)=>o[dm.id]=a[i]);return o;};
-  const ser=[{vals:mk(ds),col:org?HEX.org:HEX.tp,fill:true}];
-  if(org)ser.push({vals:mk(B.ds),col:HEX.unk,dash:true});
-  if(f<1)ser.push({vals:mk(ds.map(x=>Math.round(x*f))),col:org?HEX.res:HEX.tpres,dash:true});
-  const png=await radarPNG(ser),iw=P.w-140,ih=iw*440/520;
-  if(png){P.need(ih+20);d.addImage(png,"PNG",P.x+70,P.y,iw,ih);P.y+=ih+4;
-    P.text(`Solid: before actions.${f<1?" Green dashed: after actions.":""}${org?" Purple dashed: if every unknown is confirmed safe.":""}`,{size:8,color:PAL.muted,gap:8});}
-  P.label("Six dimensions",col);
-  DIMS.forEach((dm,i)=>{P.need(16);d.setFont("helvetica","normal");d.setFontSize(10);d.setTextColor(...PAL.ink);d.text(`${i+1}. ${san(dm.name)}`,P.x,P.y+10);
-    d.setFont("helvetica","bold");d.setTextColor(...tierRGB(ds[i]));d.text(String(ds[i]),P.x+P.w-50,P.y+10,{align:"right"});
-    if(f<1){const r=Math.round(ds[i]*f);d.setTextColor(...tierRGB(r));d.text(String(r),P.x+P.w,P.y+10,{align:"right"});}P.y+=16;});
-  if(f<1)P.text("Left: before actions. Right: after actions.",{size:8,color:PAL.muted});P.y+=6;
+  const after=ds.map(x=>Math.round(x*f)),bestv=B.ds;
+  const ser=[{vals:mk(ds),col:org?HEX.org:HEX.tp,fill:true,name:"Before actions",note:"unknowns counted as exposed"}];
+  if(org)ser.push({vals:mk(bestv),col:HEX.unk,dash:true,name:"If unknowns are safe",note:"best case, unconfirmed"});
+  if(f<1)ser.push({vals:mk(after),col:org?HEX.res:HEX.tpres,dash:true,name:"After actions",note:`patch and mitigations, x${f.toFixed(2)}`});
+  P.need(40);P.text("Cyber Risk Profile",{size:13,bold:true,gap:2});P.text("Each axis is one dimension, scored 0 to 100. Further from the center means more exploitable risk.",{size:9,color:PAL.muted,gap:6});
+  const png=await radarPNG(ser,{title:`${state.name||"Vulnerability"} · Cyber Risk Profile`,sub:org?"My org":"Third parties"});
+  if(png){let ih=Math.min((P.w-70)*720/640,P.H-60-P.y);if(ih<330){d.addPage();P.y=56;ih=Math.min((P.w-70)*720/640,P.H-60-P.y);}
+    const iw=ih*640/720;d.addImage(png,"PNG",P.x+(P.w-iw)/2,P.y,iw,ih);P.y+=ih+10;}
+  /* dimension table */
+  P.need(40);P.label("Six dimensions",col);
+  const cx=[P.x,P.x+P.w-210,P.x+P.w-140,P.x+P.w-70,P.x+P.w];
+  const hdr=["Dimension","Before",org?"If safe":"",f<1?"After":"",f<1?"Change":""];
+  d.setFont("helvetica","bold");d.setFontSize(8);d.setTextColor(...PAL.muted);d.text(hdr[0].toUpperCase(),cx[0],P.y+8);
+  [1,2,3,4].forEach(j=>{if(hdr[j])d.text(hdr[j].toUpperCase(),cx[j],P.y+8,{align:"right"});});P.y+=14;
+  d.setDrawColor(...PAL.line);d.line(P.x,P.y,P.x+P.w,P.y);P.y+=3;
+  DIMS.forEach((dm,i)=>{P.need(18);d.setFont("helvetica","normal");d.setFontSize(9.5);d.setTextColor(...PAL.ink);
+    d.text(d.splitTextToSize(`${i+1}. ${san(dm.name)}`,cx[1]-cx[0]-40)[0],cx[0],P.y+11);
+    d.setFont("helvetica","bold");d.setTextColor(...tierRGB(ds[i]));d.text(String(ds[i]),cx[1],P.y+11,{align:"right"});
+    if(org){d.setTextColor(...PAL.unk);d.text(String(bestv[i]),cx[2],P.y+11,{align:"right"});}
+    if(f<1){d.setTextColor(...tierRGB(after[i]));d.text(String(after[i]),cx[3],P.y+11,{align:"right"});d.setTextColor(...PAL.muted);d.setFont("helvetica","normal");d.text(String(after[i]-ds[i]),cx[4],P.y+11,{align:"right"});}
+    P.y+=16;d.setDrawColor(...PAL.line);d.line(P.x,P.y,P.x+P.w,P.y);P.y+=2;});
+  {const tot=org?W.org:W.tp,totR=org?W.orgR:W.tpR,totB=org?B.org:B.tp;P.need(18);d.setFont("helvetica","bold");d.setFontSize(9.5);d.setTextColor(...PAL.ink);d.text("Overall score",cx[0],P.y+11);
+    d.setTextColor(...tierRGB(tot));d.text(String(tot),cx[1],P.y+11,{align:"right"});if(org){d.setTextColor(...PAL.unk);d.text(String(totB),cx[2],P.y+11,{align:"right"});}
+    if(f<1){d.setTextColor(...tierRGB(totR));d.text(String(totR),cx[3],P.y+11,{align:"right"});d.setTextColor(...PAL.muted);d.text(String(totR-tot),cx[4],P.y+11,{align:"right"});}P.y+=20;}
+  P.text(`Before: every unknown or unanswered question counted as exposed.${org?" If safe: the same answers, with every unknown confirmed safe.":""}${f<1?" After: the before score multiplied by the patch and mitigation factor.":""} The overall score is weighted and lifted by the escalation triggers, so it is not the average of the rows.`,{size:8,color:PAL.muted,gap:8});
   P.label(org?"Patch status":"Third party patch status",col);patchFacets(scope).forEach(([k,v])=>P.text(`${k}: ${v}`,{gap:1}));P.y+=4;
   if(org){
     const fired=TRIG.filter(t=>t[1]());P.label(`Escalation triggers confirmed (${fired.length} of ${TRIG.length})`,col);if(fired.length)fired.forEach(t=>P.text("- "+t[0],{gap:1}));else P.text("None");P.y+=6;
