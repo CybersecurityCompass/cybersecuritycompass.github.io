@@ -1,1 +1,1080 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Vulnpocalypse Prioritization Radar</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a security operations console. Mono command header, KPI tiles, questionnaire left, sticky readout right. Deliberately dark only. */
+:root{
+  color-scheme:dark;
+  --bg:#070b14; --bg2:#0b1222; --surface:#0f1729; --raised:#14203a; --line:#1f2e4d; --line2:#2a3d63;
+  --ink:#e4ecfa; --muted:#7f90b3; --accent:#4fb3ff; --accent2:#1e8fff; --accent-soft:rgba(79,179,255,.12);
+  --crit:#ff4d5e; --high:#ff8a3d; --med:#f5c044; --low:#3ddc97; --low2:#c6f36b; --unk:#b58cff;
+  --crit-soft:rgba(255,77,94,.14); --high-soft:rgba(255,138,61,.14); --med-soft:rgba(245,192,68,.14); --low-soft:rgba(61,220,151,.13); --unk-soft:rgba(181,140,255,.15);
+  --display:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  background-image:linear-gradient(rgba(79,179,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(79,179,255,.035) 1px,transparent 1px),radial-gradient(1200px 500px at 80% -10%,rgba(30,143,255,.16),transparent 60%);
+  background-size:32px 32px,32px 32px,auto;background-attachment:fixed;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 96px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:grid;gap:8px;border-bottom:1px solid var(--line);padding-bottom:18px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.eyebrow b{color:var(--accent);font-weight:500}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(22px,3.4vw,38px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:.02em;text-transform:uppercase;color:var(--accent);text-shadow:0 0 24px rgba(79,179,255,.35)}
+h1 span{color:var(--ink);text-shadow:none}
+.lede{color:var(--muted);max-width:76ch;margin:0;font-size:14.5px}
+.ctx{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:16px}
+.ctx label{display:grid;gap:6px;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.ctx input,.ctx select{font:inherit;font-family:var(--mono);font-size:14px;text-transform:none;letter-spacing:0;color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:4px;padding:9px 10px;min-width:0}
+.ctx input:focus,.ctx select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.ctx .actions{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.btn{font-family:var(--mono);font-size:13px;font-weight:500;border-radius:4px;padding:9px 14px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;letter-spacing:.02em}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.primary{background:var(--accent2);border-color:var(--accent2);color:#fff;box-shadow:0 0 18px rgba(30,143,255,.35)}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent);color:#04101f}
+.btn:focus-visible,.seg input:focus-visible+span,.tab:focus-visible,.dimrow:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.example-flag{font-family:var(--mono);font-size:11.5px;color:var(--high);border:1px solid var(--high);border-radius:3px;padding:3px 8px;justify-self:start;letter-spacing:.04em}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.ptiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.ptiles.one{grid-template-columns:minmax(0,1fr)}
+@media (max-width:640px){.ptiles{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:980px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:520px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--k,var(--accent));border-radius:4px;padding:12px 14px;display:grid;gap:4px;min-width:0}
+.kpi small{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.kpi b{font-family:var(--display);font-size:30px;font-weight:800;line-height:1;color:var(--k,var(--accent));font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi b.sm{font-size:16px;line-height:1.3;white-space:normal}
+.kpi span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:20px;align-items:start}
+@media (max-width:1060px){.main{grid-template-columns:minmax(0,1fr)}}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.tab{flex:1 0 120px;display:grid;gap:4px;text-align:left;border:1px solid var(--line);background:var(--bg2);color:var(--ink);border-radius:4px;padding:9px 12px;cursor:pointer;font:inherit}
+.tab small{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.12em}
+.tab b{font-family:var(--mono);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+.tab .bar{height:3px;border-radius:2px;background:var(--line);overflow:hidden}
+.tab .bar i{display:block;height:100%;background:var(--accent);width:0;box-shadow:0 0 8px var(--accent)}
+.tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 -2px 0 var(--accent)}
+.tab[aria-selected="true"] b{color:var(--accent)}
+.panel{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:20px;display:grid;gap:16px;margin-top:10px;position:relative}
+.panel::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,var(--accent),transparent 70%);border-radius:6px 6px 0 0}
+.panel h2{font-family:var(--display);font-weight:800;font-size:20px;margin:0;line-height:1.25;text-wrap:balance;text-transform:uppercase;letter-spacing:.03em}
+.panel .q{color:var(--accent);margin:4px 0 0;font-family:var(--mono);font-size:13px}
+.panel .q::before{content:"> ";color:var(--muted)}
+.block{display:grid;gap:0}
+.block h3{font-family:var(--mono);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin:10px 0 4px;padding-top:12px;border-top:1px dashed var(--line2)}
+.block h3::before{content:"// ";color:var(--accent)}
+.block:first-of-type h3{border-top:0;padding-top:0}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;align-items:center;padding:11px 8px;border-bottom:1px solid var(--line);border-radius:3px}
+.item:hover{background:rgba(79,179,255,.04)}
+.item:last-child{border-bottom:0}
+.item p{margin:0;font-size:14.5px}
+.item .inv{font-family:var(--mono);font-size:10px;color:var(--low);margin-left:8px;white-space:nowrap;border:1px solid rgba(61,220,151,.4);border-radius:3px;padding:1px 5px;letter-spacing:.06em;text-transform:uppercase}
+@media (max-width:640px){.item{grid-template-columns:minmax(0,1fr)}}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:4px;overflow:hidden;flex-wrap:nowrap;background:var(--bg)}
+.seg label{position:relative;cursor:pointer}
+.seg input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.seg span{display:block;padding:5px 9px;font-family:var(--mono);font-size:11.5px;border-right:1px solid var(--line2);color:var(--muted);white-space:nowrap;transition:background .15s,color .15s}
+.seg label:hover span{color:var(--ink)}
+.seg label:last-child span{border-right:0}
+.seg input[value="y"]:checked+span{background:var(--crit);color:#1a0306;font-weight:700}
+.seg input[value="p"]:checked+span{background:var(--med);color:#1d1503;font-weight:700}
+.seg input[value="n"]:checked+span{background:var(--low);color:#03170d;font-weight:700}
+.seg input[value="u"]:checked+span{background:var(--unk);color:#14072d;font-weight:700}
+.seg input[value="x"]:checked+span{background:var(--line2);color:var(--ink);font-weight:700}
+.seg.inverse input[value="y"]:checked+span{background:var(--low);color:#03170d}
+.seg.inverse input[value="n"]:checked+span{background:var(--crit);color:#1a0306}
+.keyq{border:1px solid var(--line2);border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:4px;padding:12px 14px;font-size:14px}
+.keyq b{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.16em;color:var(--accent);display:block;margin-bottom:4px}
+.patch{display:grid;gap:8px;border:1px solid var(--line2);border-radius:4px;padding:12px;background:var(--bg)}
+.patch .opts{display:flex;flex-wrap:wrap;gap:6px}
+.patch label{cursor:pointer;position:relative}
+.patch input{position:absolute;opacity:0}
+.patch span{display:inline-block;border:1px solid var(--line2);border-radius:3px;padding:6px 11px;font-family:var(--mono);font-size:12px;background:var(--surface);color:var(--muted)}
+.patch input:checked+span{border-color:var(--accent);background:var(--accent2);color:#fff;box-shadow:0 0 14px rgba(30,143,255,.4)}
+.patch input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.navrow{display:flex;justify-content:space-between;gap:8px}
+aside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid;gap:12px}
+@media (max-width:1060px){aside{position:static}}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:16px;display:grid;gap:10px}
+.card h4{margin:0;font-family:var(--mono);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.16em;color:var(--accent)}
+.verdict{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 16px;align-items:center}
+.score{font-family:var(--display);font-weight:800;font-size:60px;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 0 22px currentColor}
+.tier{display:inline-block;font-family:var(--mono);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;border-radius:3px;padding:3px 8px;justify-self:start;border:1px solid currentColor}
+.tier.t4{background:var(--crit-soft);color:var(--crit)}.tier.t3{background:var(--high-soft);color:var(--high)}
+.tier.t2{background:var(--med-soft);color:var(--med)}.tier.t1{background:var(--low-soft);color:var(--low)}
+.verdict p{margin:0;font-size:13.5px;color:var(--muted)}
+.range{font-family:var(--mono);font-size:11.5px;color:var(--unk)}
+.radar svg{width:100%;height:auto;display:block;filter:drop-shadow(0 0 10px rgba(79,179,255,.18))}
 
+.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px;background:var(--accent)}
+.legend i.d{background:none;border-top:2px dashed var(--unk);height:0}
+.dimrows{display:grid;gap:7px}
+.dimrow{display:grid;grid-template-columns:100px minmax(0,1fr) 34px;gap:10px;align-items:center;font-family:var(--mono);font-size:11.5px;cursor:pointer;background:none;border:0;padding:0;color:var(--ink);text-align:left;text-transform:uppercase;letter-spacing:.06em}
+.dimrow .track{height:8px;background:var(--line);border-radius:2px;position:relative;overflow:hidden}
+.dimrow .track i{position:absolute;inset:0 auto 0 0;border-radius:2px}
+.dimrow .track u{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(45deg,rgba(181,140,255,.55) 0 3px,transparent 3px 6px)}
+.dimrow em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
+.trig{display:grid;gap:7px;margin:0;padding:0;list-style:none}
+.trig li{display:grid;grid-template-columns:14px minmax(0,1fr);gap:8px;font-size:13px;color:var(--muted);align-items:start}
+.trig li::before{content:"";width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line2);margin-top:5px}
+.trig li.on{color:var(--ink)}
+.trig li.on::before{background:var(--crit);border-color:var(--crit);box-shadow:0 0 8px var(--crit)}
+.play{display:grid;gap:8px}
+.play h5{margin:0;font-family:var(--mono);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--high)}
+.play ol{margin:0;padding-left:20px;display:grid;gap:6px;font-size:13.5px}
+.play ol li::marker{font-family:var(--mono);color:var(--accent)}
+.play .note{font-size:13px;border:1px solid rgba(255,138,61,.45);background:var(--high-soft);border-radius:4px;padding:9px 11px}
+.unknowns{font-size:13px;display:grid;gap:5px;margin:0;padding-left:20px;color:var(--ink)}
+.unknowns li::marker{color:var(--unk);font-family:var(--mono)}
+.unk-head{font-family:var(--mono);font-weight:700;color:var(--unk);text-transform:uppercase;letter-spacing:.06em;font-size:13px}
+.foot{font-size:12px;color:var(--muted);max-width:90ch;border-top:1px solid var(--line);padding-top:14px;font-family:var(--mono)}
+.foot a{color:var(--accent)}
+.mbar{display:none}
+@media (max-width:1060px){
+  .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:5;gap:12px;align-items:center;justify-content:space-between;
+    background:rgba(11,18,34,.96);border-top:1px solid var(--line2);font-family:var(--mono);font-size:12px;
+    padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+  .mbar b{font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums}
+}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--accent2);color:#fff;padding:8px 14px;border-radius:4px;font-family:var(--mono);font-size:12.5px;z-index:6}
+@media (prefers-reduced-motion:no-preference){.dimrow .track i{transition:all .35s ease}}
+.tabsep{flex:0 0 1px;background:var(--line2);margin:4px 2px}
+.tab.g-tp .bar i{background:var(--high);box-shadow:0 0 8px var(--high)}
+.tab.g-tp[aria-selected="true"]{border-color:var(--high);background:var(--high-soft);box-shadow:inset 0 -2px 0 var(--high)}
+.tab.g-tp[aria-selected="true"] b{color:var(--high)}
+.tab.g-rem .bar i{background:var(--low);box-shadow:0 0 8px var(--low)}
+.tab.g-rem[aria-selected="true"]{border-color:var(--low);background:var(--low-soft);box-shadow:inset 0 -2px 0 var(--low)}
+.tab.g-rem[aria-selected="true"] b{color:var(--low)}
+.scope{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.p-tp::before{background:linear-gradient(90deg,var(--high),transparent 70%)}
+.p-rem::before{background:linear-gradient(90deg,var(--low),transparent 70%)}
+.acts{display:grid;gap:6px}
+.act{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:4px;cursor:pointer;background:var(--bg);position:relative}
+.act:hover{border-color:var(--line2)}
+.act input{position:absolute;opacity:0;width:1px;height:1px}
+.act .box{width:18px;height:18px;border:1.5px solid var(--line2);border-radius:3px;display:grid;place-items:center}
+.act.on{border-color:var(--low);background:var(--low-soft)}
+.act.on .box{background:var(--low);border-color:var(--low)}
+.act.on .box::after{content:"";width:5px;height:9px;border:solid #03170d;border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.act input:focus-visible~.box{outline:2px solid var(--accent);outline-offset:2px}
+.act .al{font-size:14px}
+.act .af{font-family:var(--mono);font-size:11.5px;color:var(--low);white-space:nowrap}
+.hint{margin:0;font-size:13px;color:var(--muted)}
+.verdicts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.verdicts{grid-template-columns:1fr}}
+.vb{display:grid;gap:6px;align-content:start;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--bg);min-width:0}
+.vb-h{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.vb-n{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.vb .score{font-size:46px}
+.vb .was{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.vb p{margin:0;font-size:12.5px;color:var(--muted)}
+.legend i.r{background:var(--low)}
+.dimrow.tprow{border-top:1px dashed var(--line2);padding-top:8px;margin-top:2px}
+.dim{margin:0;font-size:13px;color:var(--muted)}
+.ok{margin:0;font-size:13.5px;color:var(--low)}
+.nx{display:grid;gap:4px;border-top:1px dashed var(--line2);padding-top:10px;margin-top:4px}
+.nx-h{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.nx-r{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;font-size:13px}
+.nx-r b{font-family:var(--mono);color:var(--low);font-variant-numeric:tabular-nums}
+.radar .ring{opacity:0;transform-box:fill-box;transform-origin:center}
+.radar .dot{transform-box:fill-box;transform-origin:center}
+@media (prefers-reduced-motion:no-preference){
+  .scan{animation:sweep 6s linear infinite}@keyframes sweep{to{transform:rotate(360deg)}}
+  .radar .ring{animation:ping 6s linear infinite}
+  .radar .dot{animation:flash 6s linear infinite}
+  @keyframes ping{0%{opacity:.95;transform:scale(1)}14%{opacity:0;transform:scale(3.4)}100%{opacity:0;transform:scale(3.4)}}
+  @keyframes flash{0%{transform:scale(1.7);filter:brightness(1.8)}8%{transform:scale(1);filter:none}100%{transform:scale(1)}}
+}
+
+
+.legend{display:grid;gap:8px}
+.lgrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lgl{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+.lg{font-family:var(--mono);font-size:11px;color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:3px;padding:4px 8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.lg i{display:inline-block;width:14px;height:3px;margin:0}
+.lg:hover{border-color:var(--accent)}
+.lg.off{opacity:.4;text-decoration:line-through}
+.lg.ax{text-transform:uppercase;letter-spacing:.06em}
+.lg:focus-visible,.axl:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.axl{cursor:pointer}
+.axl:hover text:first-child{fill:var(--accent)}
+
+.tab .tpbar i{background:var(--high);box-shadow:0 0 8px var(--high)}
+.scopesw{display:inline-flex;border:1px solid var(--line2);border-radius:4px;overflow:hidden;justify-self:start;max-width:100%}
+.scopesw button{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px;background:var(--bg);color:var(--muted);border:0;cursor:pointer}
+.scopesw button+button{border-left:1px solid var(--line2)}
+.scopesw button em{font-style:normal;opacity:.7;margin-left:6px;font-variant-numeric:tabular-nums}
+.scopesw button[data-scope="org"][aria-selected="true"]{background:var(--accent2);color:#fff}
+.scopesw button[data-scope="tp"][aria-selected="true"]{background:var(--high);color:#1d0d02}
+.scopesw button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.drh,.dimrow2{display:grid;grid-template-columns:92px minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:center}
+.drh span{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.drh span:nth-child(2){color:var(--accent)}.drh span:nth-child(3){color:var(--high)}
+.dl{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;background:none;border:0;color:var(--ink);text-align:left;padding:0;cursor:pointer}
+.dbar{display:grid;grid-template-columns:minmax(0,1fr) 26px;gap:6px;align-items:center;background:none;border:0;padding:0;cursor:pointer;color:var(--ink)}
+.dbar .track{height:7px;background:var(--line);border-radius:2px;position:relative;overflow:hidden}
+.dbar .track i{position:absolute;inset:0 auto 0 0;border-radius:2px}
+.dbar .track u{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(45deg,rgba(181,140,255,.55) 0 3px,transparent 3px 6px)}
+.dbar em{font-style:normal;font-family:var(--mono);font-size:11px;text-align:right;font-variant-numeric:tabular-nums}
+.dl:focus-visible,.dbar:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rtag{font-family:var(--mono);font-size:10px;color:var(--low);margin-left:8px;white-space:nowrap;border:1px solid rgba(61,220,151,.4);border-radius:3px;padding:1px 5px}
+
+.key{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.k-org,.k-tp{display:inline-block;width:9px;height:9px;border-radius:50%;flex:0 0 auto;vertical-align:middle;margin-right:6px}
+.key .k-org,.key .k-tp{margin-right:0}
+.k-org{background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.k-tp{background:var(--high);box-shadow:0 0 6px var(--high)}
+#dimrows.no-tp .drh span:nth-child(3),#dimrows.no-tp .dbar[data-sc="tp"],#dimrows.no-org .drh span:nth-child(2),#dimrows.no-org .dbar[data-sc="org"]{display:none}
+#dimrows.no-tp .drh,#dimrows.no-tp .dimrow2,#dimrows.no-org .drh,#dimrows.no-org .dimrow2{grid-template-columns:92px minmax(0,1fr)}
+#radarTitle{text-transform:none;letter-spacing:.04em;font-size:13px;color:var(--ink);font-weight:700}
+.verdicts.one{grid-template-columns:1fr}
+.snap{display:grid;gap:4px;border-top:1px dashed var(--line2);padding-top:10px;font-size:12.5px;color:var(--muted)}
+.snap b{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--med)}
+.snap time{font-family:var(--mono);color:var(--ink)}
+.card.dates{margin-bottom:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px}
+.dbox{display:grid;gap:4px;min-width:0;background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--muted);border-radius:4px;padding:10px 12px}
+.dbox.next{border-left-color:var(--med)}
+.dbox small{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.dbox time{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--ink)}
+.dbox.next input{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--med);background:transparent;border:1px solid var(--line);border-radius:4px;padding:4px 6px;width:100%;min-width:0;color-scheme:dark}
+.dbox.next input:focus{outline:none;border-color:var(--med)}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--accent);text-decoration:underline;cursor:pointer}
+.dbox span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+@media (max-width:420px){.card.dates{grid-template-columns:minmax(0,1fr)}}
+
+.scn{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid var(--high);background:var(--high-soft);border-radius:6px;padding:10px 14px;box-shadow:0 0 18px rgba(255,138,61,.15)}
+.scn-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#1d0d02;background:var(--high);border-radius:3px;padding:3px 8px;font-weight:700}
+.scn-txt{flex:1 1 280px;min-width:0;font-size:13.5px;color:var(--ink)}
+.scn-txt b{font-family:var(--mono);font-weight:700;color:var(--high)}
+.scn-txt span{color:var(--muted)}
+
+.field{display:grid;gap:6px;min-width:0;align-content:start}
+.flabel{font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.dd{position:relative}
+.dd-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:4px;padding:9px 10px;cursor:pointer;text-align:left}
+.dd-btn span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dd-btn .ph{color:var(--muted)}
+.dd-btn svg{flex:0 0 auto;color:var(--accent);transition:transform .15s}
+.dd-btn[aria-expanded="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.dd-btn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.dd-btn:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.dd-list{position:absolute;z-index:30;left:0;right:0;top:calc(100% + 4px);margin:0;padding:6px;list-style:none;background:var(--bg2);border:1px solid var(--line2);border-radius:6px;max-height:340px;overflow:auto;box-shadow:0 14px 40px rgba(0,0,0,.55),0 0 0 1px rgba(79,179,255,.08);min-width:260px}
+.dd-g{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);padding:10px 10px 4px}
+.dd-g::before{content:"// ";color:var(--muted)}
+.dd-o{font-size:13.5px;padding:8px 10px 8px 28px;border-radius:4px;cursor:pointer;position:relative;color:var(--ink)}
+.dd-o:hover,.dd-o:focus{background:var(--accent-soft);outline:none}
+.dd-o[aria-selected="true"]{color:var(--accent)}
+.dd-o[aria-selected="true"]::before{content:"";position:absolute;left:11px;top:50%;width:5px;height:9px;border:solid var(--accent);border-width:0 2px 2px 0;transform:translateY(-65%) rotate(45deg)}
+.dd-sep{height:1px;background:var(--line2);margin:6px 4px}
+.dd-blank{color:var(--muted);font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.sw{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--line2);border-radius:4px;padding:8px 10px;cursor:pointer;color:var(--ink);font:inherit;text-align:left}
+.sw-track{width:36px;height:20px;border-radius:999px;background:var(--line2);position:relative;flex:0 0 auto;transition:background .15s}
+.sw-knob{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.sw[aria-checked="true"] .sw-track{background:var(--high-soft);box-shadow:inset 0 0 0 1px var(--high)}
+.sw[aria-checked="true"] .sw-knob{transform:translateX(16px);background:var(--high);box-shadow:0 0 8px var(--high)}
+.sw-txt{font-family:var(--mono);font-size:12.5px}
+.sw:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.dd-o .k-org,.dd-o .k-tp{margin-right:8px}
+.expwrap{position:relative}
+.exp-list{min-width:240px;right:auto}
+.exp-list .dd-o{padding-left:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.drh span{display:inline-flex;align-items:center}
+.nx-h{display:flex;align-items:center}
+.mscores{display:inline-flex;gap:14px;align-items:center}
+.mscores span{display:inline-flex;align-items:center}
+#mOrg b{color:var(--accent)}#mTp b{color:var(--high)}
+.trig li.maybe{color:var(--ink)}
+.trig li.maybe::before{border-color:var(--high);box-shadow:0 0 6px rgba(255,138,61,.5)}
+.trig li em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--high)}
+.scn.blank{border-color:var(--crit);background:var(--crit-soft);box-shadow:0 0 18px rgba(255,77,94,.15)}
+.scn.blank .scn-tag{background:var(--crit);color:#1a0306}
+.scn.blank .scn-txt b{color:var(--crit)}
+.patch .pgrp{flex-basis:100%;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.patch .pgrp:first-child{margin-top:0}
+.ctx .hint{font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;text-transform:none;color:var(--muted)}
+#nextEval{color-scheme:dark}
+
+.patch .pq{margin:-4px 0 4px;font-size:13px;color:var(--muted)}
+.patch .block h3{margin-top:12px}
+.kpi b.pf{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;font-size:13px;line-height:1.35;white-space:normal;font-weight:700}
+.kpi b.pf em{font-style:normal;font-weight:400;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);align-self:center}
+
+.patch .relro{margin:0;font-family:var(--mono);font-size:13px;color:var(--ink);border:1px dashed var(--line2);border-radius:4px;padding:8px 10px}
+.tpfacet{border-color:rgba(255,138,61,.5)}
+.tpfacet input:checked+span{background:var(--high)!important;border-color:var(--high)!important;color:#1d0d02!important;box-shadow:0 0 14px rgba(255,138,61,.4)!important}
+.kpi b.pf em.tpk{color:var(--high)}
+.kpi b.pf span.tpv{color:var(--high);font-weight:500;font-size:12px}
+.scopedef{margin:0;font-size:13px;color:var(--ink);border-left:3px solid var(--high);background:var(--high-soft);border-radius:4px;padding:9px 12px}
+.scopedef b{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--high);margin-bottom:2px}
+
+.kpi b.pf.two{grid-template-columns:auto minmax(0,1fr) minmax(0,1fr)}
+.kpi b.pf.two .rel{grid-column:2 / -1}
+.kpi b.pf i.hd{font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;margin-top:4px}
+.kpi b.pf i.ho{color:var(--accent)}.kpi b.pf i.ht{color:var(--high)}
+.kpi b.pf .vo{color:var(--accent)}.kpi b.pf .vt{color:var(--high)}
+.kpi b.pf .rel{color:var(--ink)}
+.kpi b.pr{display:flex;flex-direction:column;gap:5px;font-family:var(--mono);font-size:12.5px;line-height:1.3;font-weight:600;white-space:normal;overflow:visible;color:var(--k);margin-top:2px}
+.kpi b.pr .pline{color:var(--k);font-size:inherit;display:grid;grid-template-columns:5.2em minmax(0,1fr);column-gap:8px;align-items:baseline}
+.kpi b.pr .pline>span{color:inherit;font-size:inherit;font-weight:inherit}
+.kpi b.pr .pline.rel{color:var(--ink);padding-bottom:5px;margin-bottom:1px;border-bottom:1px dashed var(--line)}
+.kpi b.pr em{font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow"><b>Cybersecurity Compass</b> · Vulnpocalypse // Six dimensions // VulnOps</div>
+    <h1>Anything2Shell <span>is a name.</span><br>Exposure <span>is the priority.</span></h1>
+    <p class="lede">Start with your own exposure, then understand the vulnerability, then decide. Six dimensions in the order of the Cyber Risk Management Lifecycle, each with a scope for your organization and for your third parties. Answer with evidence, not opinion. Every “Unknown” is treated as exposed, and the dashed line shows how much of your result depends on what you have not confirmed yet.</p>
+  </header>
+
+      <section class="card dates top" aria-label="Assessment dates">
+        <div class="dbox"><small>Assessed on</small><time id="snapAt"></time><span>answers as of this date</span></div>
+        <div class="dbox next"><label for="nextEval"><small>Next evaluation</small></label><input id="nextEval" type="date"><span><span id="snapNextSub"></span> <button type="button" class="linkbtn" id="nextReset" hidden>use suggested</button></span></div>
+  </section>
+  <section class="ctx" aria-label="Vulnerability context">
+    <label for="vname">Vulnerability
+      <input id="vname" type="text" placeholder="CVE or name, e.g. PHP2Shell">
+    </label>
+    <label for="vasset">Affected asset or scope
+      <input id="vasset" type="text" placeholder="System, business service or estate">
+    </label>
+    <div class="field"><span class="flabel" id="presetLbl">Load a scenario</span>
+      <div class="dd" id="dd"><button type="button" class="dd-btn" id="ddBtn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="presetLbl ddBtn"><span id="ddVal">Choose a scenario</span><svg viewBox="0 0 12 8" width="12" height="8" aria-hidden="true"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+      <ul class="dd-list" id="ddList" role="listbox" aria-labelledby="presetLbl" tabindex="-1" hidden></ul></div></div>
+    <div class="field"><span class="flabel" id="tpLbl">Third parties</span>
+      <button type="button" class="sw" id="tpSwitch" role="switch" aria-checked="true" aria-labelledby="tpLbl"><span class="sw-track"><span class="sw-knob"></span></span><span class="sw-txt" id="tpSwTxt">Included in the assessment</span></button></div>
+    <div class="actions">
+      <div class="expwrap" id="expWrap"><button class="btn primary" id="expBtn" type="button" aria-haspopup="menu" aria-expanded="false">Export PDF</button>
+        <ul class="dd-list exp-list" id="expList" role="menu" hidden></ul></div>
+      <button class="btn" id="reset" type="button">Clear answers</button>
+    </div>
+    
+  </section>
+
+  <div class="scn" id="exflag" role="status" hidden><span class="scn-tag" id="scnTag">Preloaded scenario</span><span class="scn-txt"><b id="scnName"></b><span id="scnNote"></span></span><button class="btn" id="scnClear" type="button">Start blank</button></div>
+  <section class="kpis" aria-label="Summary">
+    <div class="kpi" id="kOrg"><small><i class="k-org"></i>Exploitable risk · My org</small><b>0</b><span>Monitor</span></div>
+    <div class="kpi" id="kTp"><small><i class="k-tp"></i>Exploitable risk · Third parties</small><b>0</b><span>Monitor</span></div>
+    <div class="kpi" id="kRed" style="--k:var(--low)"><small>Risk reduced</small><b>0%</b><span>by actions applied</span></div>
+    <div class="kpi" id="kTrig" style="--k:var(--crit)"><small>Triggers fired</small><b>0</b><span>of 8 escalation conditions</span></div>
+    <div class="kpi" id="kUnk" style="--k:var(--unk)"><small>Unknowns</small><b>0</b><span id="kUnkSub">deadlines for discovery</span></div>
+  </section>
+  <section class="ptiles" id="ptiles" aria-label="Patch status">
+    <div class="kpi" id="kPatch" style="--k:var(--accent)"><small><i class="k-org"></i>Patch status · My org</small><b class="sm">Not set</b><span></span></div>
+    <div class="kpi" id="kPatchTp" style="--k:var(--high)"><small><i class="k-tp"></i>Patch status · Third parties</small><b class="sm">Not set</b><span></span></div>
+  </section>
+
+  <div class="main">
+    <section aria-label="Self assessment">
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div id="panel"></div>
+    </section>
+
+    <aside id="results" aria-label="Results">
+      <div class="card">
+        <h4>Exploitable risk after actions</h4>
+        <div class="verdicts" id="verdicts"></div>
+        <div class="range" id="range"></div>
+        <div class="snap"><b>Snapshot, not a status</b><span>This score reflects the answers on the assessment date. Reassess on the next evaluation date, or sooner whenever an asset, identity, container, API, AI agent or third party changes. An exposure answer is true on the day it was given. After that, it is an assumption.</span></div>
+      </div>
+      <div class="card radar">
+        <h4 id="radarTitle">Cyber Risk Profile</h4>
+        <div class="key"><span id="keyOrg"><i class="k-org"></i>My org</span><span id="keyTp"><i class="k-tp"></i>Third parties</span></div>
+        <div id="radar"></div>
+        <div class="legend" id="legend"></div>
+        <div class="dimrows" id="dimrows"></div>
+      </div>
+      <div class="card">
+        <h4>Escalation triggers</h4>
+        <ul class="trig" id="trig"></ul>
+      </div>
+      <div class="card">
+        <h4>Recommended path</h4>
+        <div class="play" id="play"></div>
+      </div>
+      <div class="card" id="unkCard">
+        <h4>Discovery deadline</h4>
+        <div id="unk"></div>
+      </div>
+    </aside>
+  </div>
+
+  <p class="foot">Built on the six dimension framework from the article <em>Vulnerability Prioritization in the Age of the Vulnpocalypse: Avoiding the Anything2Shell Hype</em>. Its five outcomes extend <a href="https://cybersecuritycompass.github.io/cisabod2604/">CISA BOD 26-04</a> to the cases where no patch arrives in time. This is a static tool. The score supports judgment, it does not replace it. A full picture needs a Cyber Risk Index (CRI) with a documented methodology, fed by your own asset, threat and business data in real time. Your answers stay in this browser.</p>
+</div>
+
+<div class="mbar" aria-hidden="true">
+  <span class="mscores"><span id="mOrg"><i class="k-org"></i><b>0</b></span><span id="mTp"><i class="k-tp"></i><b>0</b></span></span>
+  <span class="tier t1" id="mTier">Monitor</span>
+  <a class="btn" href="#results">Results</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const DIMS=[
+ {id:"d1",tp:[["tp1a","Would exploitation give the attacker code execution on the third party systems that connect to us or handle our data?"],["tp1b","Could it expose credentials, tokens or keys a third party holds for our environment?"],["tp1c","Could the attacker reach administrator or root level on the third party systems that manage our services or store our data?"]],short:"Intrinsic",name:"Intrinsic vulnerability characteristics",q:"What can an attacker achieve, and how hard is it?",w:.2,blocks:[{items:[
+  ["d1a","Can it be exploited remotely, without authentication?"],
+  ["d1b","Can it be exploited without any user interaction?"],
+  ["d1c","Is exploitation reliable and repeatable?"],
+  ["d1d","Can it lead to remote code execution or operating system command execution?"],
+  ["d1e","Can it reach root or SYSTEM, directly or chained with a local privilege escalation?"],
+  ["d1f","Can it bypass authentication or expose credentials, tokens or keys?"],
+  ["d1g","Can a limited primitive, such as file read or memory corruption, be turned into code execution?"]]}],
+  key:"Classify a vulnerability by where it can end, not by where it starts."},
+ {id:"d2",tp:[["tp2a","Do the third party systems that connect to us or handle our data run the vulnerable feature in its default or common configuration?"],["tp2c","Do third party products we use expose the vulnerable function or a management interface by default?"],["tp2b","Have third parties shown evidence that the systems serving us are hardened against it?",1]],short:"Configuration",name:"Default configuration and security posture",q:"Does it work the way the product is normally deployed?",w:.15,blocks:[{items:[
+  ["d2a","Is the vulnerable component or feature enabled in a standard installation?"],
+  ["d2b","Is it exploitable without a non default setting or a weakened control?"],
+  ["d2c","Is the vulnerable feature commonly enabled in production, even if it ships disabled?"],
+  ["d2d","Does the default installation expose the function or a management interface to the network?"],
+  ["d2e","Does our configuration telemetry confirm our own instances are hardened against it?",1]]}],
+  key:"The question is not whether the product is secure by default. It is whether your deployment still is."},
+ {id:"d3",tp:[["t1","Do any third party systems that connect to us or handle our data use the affected technology?"],["tp3d","Do several of our third parties likely depend on it?"],["tp3c","Is the component embedded in third party products we run, such as appliances, SaaS or libraries?"],["tp3e","Do our third parties' own providers that touch our data, such as subprocessors, hosting and managed services, run the affected technology?"],["t5","Do any of those third party systems run end of life or unsupported versions?"],["t4","Do we know which third party systems connect to us or handle our data, and their versions and posture?",1]],short:"Prevalence",name:"Platform adoption and prevalence",q:"How many systems could be affected?",w:.15,blocks:[{items:[
+  ["d3a","Is the platform widely adopted, including in critical infrastructure or regulated industries?"],
+  ["d3b","Is the component embedded in other products, distributions, container images or cloud services?"],
+  ["d3c","Are many vulnerable instances publicly exposed on the internet?"],
+  ["d3d","Do we run it across several business units, environments or versions?"],
+  ["d3e","Are there unmanaged, shadow IT or legacy deployments our inventory does not show?"],
+  ["d3f","Can our tools see the component inside containers, appliances and dependencies of dependencies?",1]]}],
+  key:"Global prevalence tells you how big the problem is for the world. Organizational prevalence tells you how big it is for you."},
+ {id:"d4",tp:[["tp4a","Is the technology targeted through managed service providers or supply chain campaigns?"],["tp4b","Are attackers exploiting it at scale against providers in our third parties’ sectors?"],["tp4c","Has any of our third parties reported an incident linked to it?"]],short:"Threat",name:"Threat intelligence and weaponization",q:"How close is the vulnerability to becoming an operational attack?",w:.2,blocks:[{items:[
+  ["d4a","Is technical research or a proof of concept public?"],
+  ["d4b","Is reliable exploit code public or already in offensive frameworks?"],
+  ["d4c","Is exploitation confirmed in the wild, or is it in CISA’s KEV catalog?"],
+  ["d4d","Are ransomware or advanced persistent threat groups using it or targeting the technology?"],
+  ["d4e","Can attackers find and exploit vulnerable instances at scale with little human effort?"],
+  ["d4f","Could AI agents discover, adapt or chain this exploit at machine speed?"],
+  ["d4g","Is the effort to weaponize it falling, or is the exploit becoming a commodity?"]]}],
+  key:"When the cost of weaponization falls close to zero, the window you have is the window the attacker gives you."},
+ {id:"d5",tp:[["t2","Do those third party systems hold our sensitive data, credentials, tokens or critical processes?"],["t3","Can it be exploited through a trusted integration, API connection or third party service?"],["tp5d","Do third parties have privileged or administrative access to our systems?"],["tp5e","Can our telemetry see activity coming through third party connections?",1],["t7","Can we reduce or suspend a third party’s access until their exposure is fixed?",1]],short:"Exposure",name:"Exposure and attack path context",q:"Where does it live, and what can an attacker reach from there?",w:.15,blocks:[
+  {title:"Attack surface and paths",items:[
+  ["d5a","Is the affected asset internet facing, or reachable from untrusted networks?"],
+  ["d5b","Does the vulnerable process or service run with high privileges?"],
+  ["d5c","Can exploitation expose privileged identities, credentials, tokens or secrets?"],
+  ["d5d","Can it open a path to critical assets or lateral movement?"],
+  ["d5e","Does it open a path toward identity infrastructure, cloud control planes or critical applications?"],
+  ["d5f","Can our telemetry detect exploitation, such as unusual process execution from the service?",1]]},
+  {title:"When the defense is the entry point",amp:1,items:[
+  ["s1","Does it affect our security technologies, such as firewalls, VPN gateways, remote access or email gateways?"],
+  ["s2","Are our security providers, such as MSSP, MDR or identity providers, affected in the systems they use for us?"],
+  ["s3","Is the affected device’s management interface reachable from untrusted networks?"],
+  ["s4","Can we detect compromise of the device itself?",1],
+  ["s5","Can we restrict its exposure, rotate its credentials or fail over without losing protection?",1]]},
+  {title:"Where the technology lives",amp:1,items:[
+  ["w7","Is it on servers we run on premises, including data centers, virtualization hosts and mainframes?"],
+  ["w8","Is it inside a regulated environment, such as card data, health records, financial reporting or critical infrastructure?"],
+  ["w1","Is it in cloud workloads we own under the shared responsibility model?"],
+  ["w2","Is it in base images or running containers we must rebuild and redeploy?"],
+  ["w3","Is it behind our own exposed APIs, gateways or backends?"],
+  ["w4","Does it exist in OT, ICS or IoT environments, including embedded firmware?"],
+  ["w5","Do our AI applications, agents or MCP servers run on it or include it?"],
+  ["w6","Do our CI/CD systems, code signing or identity infrastructure run it?"],
+  ["w9","Is it inside software, devices or firmware we ship to customers?"],
+  ["w10","Is it on laptops, workstations or mobile apps we distribute?"],
+  ["w11","Is it in dev, test, staging, disaster recovery or backup environments that are not patched with production?"],
+  ["w12","Is it in acquired environments not yet integrated into our security program?"],
+  ["w13","Is it at branch offices, remote sites or edge locations outside central management?"]]}],
+  key:"Prioritize the attack path, not the asset."},
+ {id:"d6",tp:[["t8","Is any affected third party critical to a core business process?"],["t6","Do our contracts require third parties to disclose exposure in the systems that serve us and notify us?",1],["t9","Have affected third parties confirmed, in writing, the status of the systems that serve us?",1],["tp6d","Can we switch, bypass or run without the third party if they cannot fix it?",1]],short:"Impact",name:"Business impact and remediation resilience",q:"What would exploitation mean for the business, and how fast can we reduce the risk?",w:.15,patch:true,blocks:[
+  {title:"Business impact",items:[
+  ["d6a","Does the asset support a critical business service, or process sensitive or regulated data?"],
+  ["d6b","Could exploitation affect finance, business continuity, regulatory standing or reputation?"],
+  ["d6c","Is the platform shared by many applications, business units, customers or tenants?"]]},
+  {title:"Remediation resilience",items:[
+  ["d6d","Do we run it on end of life versions that no longer receive security fixes?"],
+  ["d6e","Is the component embedded in an appliance or vendor product we cannot update ourselves?"],
+  ["d6f","Would patching disrupt operations, or do dependencies complicate it?"],
+  ["d6g","Can we disable the feature, isolate the service, segment the network or apply a virtual patch?",1],
+  ["d6h","Does each affected legacy system have a named owner who can accept risk or approve containment?",1],
+  ["d6i","Can we verify that remediation is complete?",1]]}],
+  key:"The remediation window is part of the risk."}
+];
+const ACT={org:[
+  ["r_patch","Have we applied the patch and verified it on every instance?",.1],
+  ["r_vpn","Have we applied a virtual patch at the network layer, such as IPS, WAF or gateway rules?",.65],
+  ["r_vph","Have we applied a virtual patch at the host layer, such as HIPS, runtime or endpoint rules?",.7],
+  ["r_l2","Is the affected edge device shielded by an inline Layer 2 device with no IP address?",.55],
+  ["r_feat","Have we disabled the vulnerable feature or module?",.5],
+  ["r_noinet","Have we removed it from internet exposure and restricted management to trusted networks?",.6],
+  ["r_iso","Have we completely isolated it: no internet, no user network, no shared credentials?",.3],
+  ["r_decom","Have we decommissioned it?",0],
+  ["r_hunt","Have we completed a compromise assessment and rotated credentials?",.85]],
+ tp:[
+  ["rt_patch","Have affected third parties patched, and given us evidence?",.2],
+  ["rt_vp","Have third parties applied virtual patching to the systems that serve us while the fix is pending?",.65],
+  ["rt_noinet","Have third parties removed the affected systems that serve us from internet exposure?",.6],
+  ["rt_iso","Have third parties isolated the affected systems from our data and connections?",.3],
+  ["rt_decom","Have third parties decommissioned or replaced the affected systems that serve us?",0],
+  ["rt_scope","Have we reduced third party access: API scopes, network paths and permissions?",.6],
+  ["rt_susp","Have we suspended third party access until the fix is confirmed?",.15],
+  ["rt_cred","Have we rotated credentials, tokens and keys shared with third parties?",.75],
+  ["rt_mon","Are we monitoring third party connections for signs of exploitation?",.85]]};
+/* Original six dimensions, ordered by the CRML: exposure (inventory and context) and impact first, then the vulnerability. */
+(()=>{const by=id=>DIMS.find(d=>d.id===id);
+  const d3=by("d3"),d5=by("d5");
+  const it=d3.blocks[0].items,pick=ids=>ids.map(id=>it.find(i=>i[0]===id));
+  const inv=pick(["d3b","d3d","d3e","d3f"]).map(i=>i[0]==="d3b"?["d3b","Is it embedded in products, appliances, container images or cloud services that we run?"]:i)
+    .concat([["d3g","Is each affected asset valued and mapped to the business service it supports?"]]);
+  d3.blocks=[{items:pick(["d3a","d3c"]).concat([["d4h","Is the component embedded in other products, distributions or cloud services, so one exploit reaches many targets?"],["d3h","Does it affect downstream vendors or software supply chains?"]])}];
+  const tpi=d3.tp;d3.tp=tpi.filter(i=>i[0]==="tp3d");
+  d5.tp=["t1","tp3c","tp3e","t5","t4"].map(id=>tpi.find(i=>i[0]===id)).concat(d5.tp);
+  d5.blocks[0].title="Context: what an attacker can reach";
+  d5.blocks.unshift({title:"Inventory: where we run it",items:inv});
+  Object.assign(d5,{short:"Exposure",name:"Exposure: inventory and context",q:"Where do we run it, including through those we trust, and what can an attacker reach from there?",key:"Exposure starts with inventory. Inventory built during an incident is always incomplete, so this work belongs before the headline. Then prioritize the attack path, not the asset."});
+  Object.assign(d3,{short:"Prevalence",name:"Platform adoption and global prevalence",q:"How many targets does it offer the world?",key:"Global prevalence tells you how big the problem is for the world, and how attractive it is to attackers. It does not tell you how big it is for you."});
+  const ORDER=["d5","d6","d1","d2","d3","d4"];DIMS.sort((a,b)=>ORDER.indexOf(a.id)-ORDER.indexOf(b.id));
+  DIMS.forEach((d,i)=>d.part=i<2?1:2);
+})();
+const PARTS={1:"Part one: know your exposure",2:"Part two: understand the vulnerability"};
+const TPKEY={d1:"The flaw is the same at a third party. What changes is what an attacker gains in our environment once they own the third party.",
+ d2:"We rarely see a third party’s configuration. Without evidence, assume it is the default.",
+ d3:"Attackers invest where targets are many. A technology used by many of our third parties multiplies the ways in.",
+ d4:"Attackers like third parties because one compromise opens many customers.",
+d5:"Assess not only where you run vulnerable technology, but where it exists across your extended digital supply chain. A third party with access to our systems is an attack path we did not build and do not monitor by default.",
+ d6:"If we cannot switch, bypass or restrict a critical third party, their remediation window becomes ours."};
+const REM={id:"rem",short:"Remediation",name:"Remediation actions applied",q:"What have we already done, and how much risk is left?",group:"rem",blocks:[],key:"Risk is reduced by decision, not only by repair. Every virtual patch needs an owner and a removal date."};
+const SECTIONS=[...DIMS,REM];
+const ALL={};DIMS.forEach(d=>{d.blocks.forEach(b=>b.items.forEach(i=>ALL[i[0]]={text:i[1],inv:!!i[2],dim:d.id,scope:"org"}));d.tp.forEach(i=>ALL[i[0]]={text:i[1],inv:!!i[2],dim:d.id,scope:"tp"});});
+const TPIDS=DIMS.flatMap(d=>d.tp.map(i=>i[0]));
+/* Patch application and legacy status are their own facets in Dimension 2, so they leave the remediation list and Impact. */
+ACT.org=ACT.org.filter(a=>a[0]!=="r_patch");ACT.tp=ACT.tp.filter(a=>a[0]!=="rt_patch");
+DIMS.forEach(d=>d.blocks.forEach(b=>b.items=b.items.filter(i=>i[0]!=="d6d")));
+const ACTS={};[...ACT.org,...ACT.tp].forEach(a=>ACTS[a[0]]=a);
+ACT.org.forEach(a=>ALL[a[0]]={text:a[1],inv:false,dim:"rem",scope:"org"});ACT.tp.forEach(a=>ALL[a[0]]={text:a[1],inv:false,dim:"rem",scope:"tp"});
+const TPON=()=>state.tpOn!==false;
+const tpHid=()=>!TPON()||!!state.hideSer.tpi;
+delete ALL.d6d;delete ALL.r_patch;delete ALL.rt_patch;
+const hasScope=d=>TPON()&&(!!d.tp||d.id==="rem");
+const OPTS=[["y","Yes"],["p","Partial"],["n","No"],["u","Unknown"],["x","N/A"]];
+/* Patch status: id, label, short label for the tile, group, whether a fix is missing for some or all of the estate. */
+const PATCH=[
+ ["avail","Patch available for every affected version","Patch available","Fix exists"],
+ ["legacy","Patch available, but not for legacy or end of life versions","Not for legacy","Fix exists"],
+ ["backport","Patch only in a newer major version, no backport","No backport","Fix exists"],
+ ["notyet","Patch announced, not released yet","Coming, not yet","No fix yet"],
+ ["mitigation","Vendor workaround or mitigation only","Workaround only","No fix yet"],
+ ["vendor","Fix depends on a vendor product we cannot update","Waiting on vendor","No fix yet"],
+ ["punknown","Patch status unknown","Status unknown","No fix yet"],
+ ["never","No patch will ever come: end of life or abandoned","Will never come","No fix ever"],
+ ["unknown","Not sure we are affected","Not sure affected","Other"],
+ ["none","Not affected","Not affected","Other"]];
+const PSHORT={avail:"All versions",legacy:"Supported versions only",backport:"Newer version only",notyet:"Announced",mitigation:"Workaround only",vendor:"Waiting on vendor",punknown:"Unknown",never:"Never",unknown:"Not sure affected",none:"Not affected"};
+/* Coverage weights reflect where the risk sits: patching the critical assets first removes most of it, missing them leaves most of it. */
+const APPLY=[["all","All affected systems, verified","All systems, verified",1],["allnv","All systems, not yet verified","All, not verified",.833],["crit","Partial: critical assets patched, others pending","Partial, critical done",.7],["critmiss","Partial: critical assets still missing","Critical assets missing",.25],["none","None yet","None yet",0],["unk","Unknown","Unknown",0]];
+const LEGACY=[["none","No legacy versions in scope","None in scope",0],["patched","Patched: extended support or custom fix","Patched",.1],["comp","Compensating control: isolated, segmented or feature disabled","Compensating control",.3],["vp","Virtual patch: network or host","Virtual patch",.4],["nopatch","No patch available, no controls","No patch, exposed",.55],["decom","Decommissioned","Decommissioned",0],["unk","Unknown","Unknown",.55]];
+const FIX=["avail","legacy","backport"],PENDING=["notyet","mitigation","vendor","punknown"];
+const fixExists=()=>FIX.includes(state.patch);
+/* Application scope applies to a patch or to a vendor workaround. */
+const applyRelevant=()=>fixExists()||state.patch==="mitigation";
+/* Legacy matters when the fix leaves versions out, or while a fix is still pending. */
+const legacyRelevant=()=>["legacy","backport",...PENDING].includes(state.patch);
+const gapRelease=()=>["legacy","backport","mitigation"].includes(state.patch);
+const aRow=id=>APPLY.find(a=>a[0]===id),lRow=id=>LEGACY.find(a=>a[0]===id);
+const fk=sc=>sc==="tp"?{apply:"tpApply",legacy:"tpLegacy"}:{apply:"apply",legacy:"legacy"};
+/* Patch factor per scope: coverage scales a 90% reduction (50% for a workaround); legacy versions left out set a floor. */
+function patchFactor(o,sc="org"){const k=fk(sc),ap=o&&o.apply!==undefined?o.apply:state[k.apply],lg=o&&o.legacy!==undefined?o.legacy:state[k.legacy];
+  if(!applyRelevant())return 1;const max=state.patch==="mitigation"?.5:.9;let f=1-((aRow(ap)||[])[3]||0)*max;
+  if(gapRelease())f=Math.max(f,lg?lRow(lg)[3]:.55);return f;}
+const pLabel=id=>(PATCH.find(p=>p[0]===id)||[0,"Not set"])[1];
+/* Composite status for the tile and the report: vendor availability, our deployment, and the legacy gap. */
+function patchFacets(sc="org"){const id=state.patch,k=fk(sc);
+  const rel=id?PSHORT[id]:"Not set";
+  const app=!id?"Not set":applyRelevant()?(state[k.apply]?aRow(state[k.apply])[2]:"Not set"):"Nothing to apply";
+  const leg=!id?"Not set":legacyRelevant()?(state[k.legacy]?lRow(state[k.legacy])[2]:"Not set"):"Not relevant";
+  return [["Release",rel],[state.patch==="mitigation"?"Workaround":"Applied",app],["Legacy",leg]];}
+const pShort=id=>(PATCH.find(p=>p[0]===id)||[0,"Not set","Not set"])[2];
+/* Is the fix missing for at least part of the affected estate? Legacy gaps count only when legacy versions are present or not yet ruled out. */
+const NOFIX=["notyet","mitigation","vendor","punknown","never"];
+const noFix=()=>NOFIX.includes(state.patch)||(["legacy","backport"].includes(state.patch)&&(state.legacy==="nopatch"||(TMODE==="worst"&&(state.legacy==="unk"||!state.legacy))))||(!state.patch&&TMODE==="worst");
+/* Third party patch status per scenario: [application scope, legacy status] for the third party systems that connect to us or handle our data. */
+const PTPF={php:["critmiss","nopatch"],phpfleet:["crit","vp"],react:["unk",""],brotli:["","unk"],frag:["allnv",""],pan:["crit","unk"],forti:["crit",""],vpn:["none","none"],low:["all",""],
+ pv1:["all",""],pv2:["crit",""],pv3:["critmiss",""],pv6:["all","patched"],pv7:["crit","comp"],pv8:["crit","vp"],pv9:["critmiss","nopatch"],pv10:["all","decom"],pv11:["none","nopatch"],pv12:["unk","unk"]};
+const PTPF_DEF={avail:["crit",""],legacy:["critmiss","nopatch"],backport:["crit","unk"],notyet:["","unk"],vendor:["","unk"],punknown:["","unk"],mitigation:["none","unk"]};
+const PFACET={vpn:["all","none"],brotli:["","unk"],php:["none","vp"],phpfleet:["crit","none"],react:["all",""],frag:["crit",""],pan:["critmiss","unk"],forti:["all",""],low:["all",""],pv1:["all",""],pv4:["none",""],pv5:["unk",""],pv6:["crit","vp"]};
+const PRESETS={
+ php:{name:"PHP2Shell (CVE-2026-109618)",asset:"Legacy payroll approval portal, PHP 7.4",patch:"legacy",a:{
+  d1a:"y",d1b:"y",d1c:"p",d1d:"y",d1e:"p",d1f:"y",d1g:"y",d2a:"y",d2b:"y",d2c:"y",d2d:"y",d2e:"n",
+  d3a:"y",d3b:"y",d3c:"y",d3d:"p",d3e:"u",d3f:"n",t1:"u",t2:"y",t3:"u",t4:"n",t5:"u",t6:"n",t7:"p",
+  d4a:"y",d4b:"y",d4c:"y",d4d:"u",d4e:"y",d4f:"y",d4g:"y",
+  d5a:"y",d5b:"p",d5c:"y",d5d:"y",d5e:"p",d5f:"n",s1:"n",s2:"u",s3:"x",s4:"x",s5:"x",w1:"p",w2:"y",w3:"y",w4:"n",w5:"u",w6:"n",
+  d6a:"y",d6b:"y",d6c:"p",d6d:"y",d6e:"n",d6f:"y",d6g:"p",d6h:"n",d6i:"p"}},
+ phpfleet:{name:"PHP2Shell (CVE-2026-109618 and CVE-2026-109619)",asset:"Supported PHP 8 web fleet and third party hosting",patch:"legacy",a:{d1a:"y",d1b:"y",d1c:"p",d1d:"y",d1e:"p",d1f:"y",d1g:"y",d2a:"y",d2b:"y",d2c:"y",d2d:"y",d2e:"n",d3a:"y",d3b:"y",d3c:"y",d3d:"y",d3e:"p",d3f:"p",t1:"y",t2:"y",t3:"p",t4:"n",t5:"u",t6:"p",t7:"y",d4a:"y",d4b:"y",d4c:"y",d4d:"u",d4e:"y",d4f:"y",d4g:"y",d5a:"y",d5b:"p",d5c:"y",d5d:"p",d5e:"p",d5f:"p",s1:"n",s2:"u",s3:"x",s4:"x",s5:"x",w1:"y",w2:"y",w3:"y",w4:"n",w5:"n",w6:"n",d6a:"y",d6b:"y",d6c:"y",d6d:"n",d6e:"n",d6f:"p",d6g:"y",d6h:"y",d6i:"p"}},
+ log4:{name:"Log4Shell (CVE-2021-44228)",asset:"Java services across the estate, including vendor appliances",patch:"unknown",a:{d1a:"y",d1b:"y",d1c:"y",d1d:"y",d1e:"p",d1f:"y",d1g:"x",d2a:"y",d2b:"y",d2c:"y",d2d:"p",d2e:"u",d3a:"y",d3b:"y",d3c:"y",d3d:"y",d3e:"u",d3f:"p",t1:"y",t2:"y",t3:"u",t4:"n",t5:"u",t6:"n",t7:"p",d4a:"y",d4b:"y",d4c:"y",d4d:"y",d4e:"y",d4f:"p",d4g:"y",d5a:"y",d5b:"p",d5c:"y",d5d:"y",d5e:"p",d5f:"p",s1:"u",s2:"u",s3:"u",s4:"n",s5:"p",w1:"y",w2:"y",w3:"y",w4:"u",w5:"n",w6:"u",d6a:"y",d6b:"y",d6c:"y",d6d:"p",d6e:"y",d6f:"y",d6g:"y",d6h:"n",d6i:"p"}},
+ react:{name:"React2Shell (CVE-2025-55182)",asset:"Customer portal built on React Server Components",patch:"avail",a:{d1a:"y",d1b:"y",d1c:"y",d1d:"y",d1e:"p",d1f:"p",d1g:"x",d2a:"y",d2b:"y",d2c:"y",d2d:"y",d2e:"n",d3a:"y",d3b:"y",d3c:"y",d3d:"p",d3e:"u",d3f:"y",t1:"u",t2:"p",t3:"n",t4:"n",t5:"u",t6:"n",t7:"y",d4a:"y",d4b:"y",d4c:"y",d4d:"u",d4e:"y",d4f:"y",d4g:"y",d5a:"y",d5b:"p",d5c:"y",d5d:"p",d5e:"p",d5f:"p",s1:"n",s2:"n",s3:"x",s4:"x",s5:"x",w1:"y",w2:"y",w3:"y",w4:"n",w5:"u",w6:"n",d6a:"y",d6b:"y",d6c:"n",d6d:"n",d6e:"n",d6f:"p",d6g:"p",d6h:"y",d6i:"y"}},
+ brotli:{name:"Node2Shell, also HTTP2Shell (CVE-2026-111497)",asset:"Node.js APIs, Envoy service mesh and Python HTTP clients",patch:"vendor",a:{d1a:"y",d1b:"y",d1c:"n",d1d:"y",d1e:"n",d1f:"n",d1g:"y",d2a:"y",d2b:"y",d2c:"y",d2d:"y",d2e:"u",d3a:"y",d3b:"y",d3c:"y",d3d:"y",d3e:"u",d3f:"p",t1:"u",t2:"y",t3:"y",t4:"n",t5:"u",t6:"n",t7:"p",d4a:"y",d4b:"p",d4c:"u",d4d:"u",d4e:"p",d4f:"y",d4g:"y",d5a:"y",d5b:"p",d5c:"p",d5d:"p",d5e:"u",d5f:"n",s1:"u",s2:"u",s3:"u",s4:"n",s5:"p",w1:"y",w2:"y",w3:"y",w4:"u",w5:"y",w6:"y",d6a:"y",d6b:"p",d6c:"y",d6d:"p",d6e:"u",d6f:"y",d6g:"p",d6h:"n",d6i:"n"}},
+ frag:{name:"Fragnesia (CVE-2026-46300), chained after PHP2Shell",asset:"Linux web servers and container hosts",patch:"avail",a:{d1a:"n",d1b:"y",d1c:"y",d1d:"n",d1e:"y",d1f:"n",d1g:"x",d2a:"y",d2b:"y",d2c:"y",d2d:"n",d2e:"u",d3a:"y",d3b:"y",d3c:"p",d3d:"y",d3e:"u",d3f:"p",t1:"u",t2:"p",t3:"n",t4:"n",t5:"u",t6:"n",t7:"p",d4a:"y",d4b:"y",d4c:"n",d4d:"u",d4e:"p",d4f:"y",d4g:"y",d5a:"p",d5b:"y",d5c:"y",d5d:"y",d5e:"p",d5f:"p",s1:"u",s2:"u",s3:"x",s4:"x",s5:"x",w1:"y",w2:"p",w3:"n",w4:"u",w5:"u",w6:"y",d6a:"y",d6b:"y",d6c:"y",d6d:"p",d6e:"u",d6f:"y",d6g:"y",d6h:"n",d6i:"p"}},
+ pan:{name:"PAN-OS management interface RCE (CVE-2026-0322)",asset:"Perimeter firewalls and Panorama",patch:"legacy",a:{d1a:"n",d1b:"y",d1c:"y",d1d:"y",d1e:"y",d1f:"p",d1g:"x",d2a:"y",d2b:"y",d2c:"p",d2d:"p",d2e:"u",d3a:"y",d3b:"n",d3c:"p",d3d:"y",d3e:"n",d3f:"p",t1:"u",t2:"y",t3:"n",t4:"n",t5:"u",t6:"p",t7:"p",d4a:"p",d4b:"n",d4c:"y",d4d:"u",d4e:"p",d4f:"p",d4g:"p",d5a:"p",d5b:"y",d5c:"y",d5d:"y",d5e:"y",d5f:"n",s1:"y",s2:"u",s3:"p",s4:"n",s5:"p",w1:"p",w2:"n",w3:"n",w4:"n",w5:"n",w6:"n",d6a:"y",d6b:"y",d6c:"y",d6d:"u",d6e:"y",d6f:"y",d6g:"p",d6h:"y",d6i:"p"}},
+ forti:{name:"FortiCloud SSO authentication bypass (CVE-2026-24858)",asset:"FortiGate edge firewalls, FortiManager and FortiAnalyzer",patch:"avail",a:{d1a:"y",d1b:"y",d1c:"y",d1d:"n",d1e:"y",d1f:"y",d1g:"x",d2a:"p",d2b:"p",d2c:"p",d2d:"y",d2e:"u",d3a:"y",d3b:"n",d3c:"y",d3d:"y",d3e:"n",d3f:"p",t1:"y",t2:"y",t3:"y",t4:"n",t5:"u",t6:"p",t7:"p",d4a:"y",d4b:"p",d4c:"y",d4d:"u",d4e:"y",d4f:"p",d4g:"y",d5a:"y",d5b:"y",d5c:"y",d5d:"y",d5e:"y",d5f:"p",s1:"y",s2:"u",s3:"y",s4:"p",s5:"p",w1:"n",w2:"n",w3:"n",w4:"u",w5:"n",w6:"n",d6a:"y",d6b:"y",d6c:"y",d6d:"n",d6e:"y",d6f:"p",d6g:"p",d6h:"y",d6i:"p"}},
+ vpn:{name:"VPN gateway pre authentication zero day",asset:"Remote access VPN cluster, internet edge",patch:"mitigation",a:{
+  d1a:"y",d1b:"y",d1c:"y",d1d:"y",d1e:"y",d1f:"y",d1g:"x",d2a:"y",d2b:"y",d2c:"y",d2d:"y",d2e:"u",
+  d3a:"y",d3b:"n",d3c:"y",d3d:"n",d3e:"n",d3f:"p",t1:"u",t2:"y",t3:"p",t4:"n",t5:"u",t6:"p",t7:"y",
+  d4a:"y",d4b:"p",d4c:"y",d4d:"y",d4e:"y",d4f:"p",d4g:"y",
+  d5a:"y",d5b:"y",d5c:"y",d5d:"y",d5e:"y",d5f:"n",s1:"y",s2:"u",s3:"p",s4:"n",s5:"p",w1:"n",w2:"n",w3:"n",w4:"n",w5:"n",w6:"n",
+  d6a:"y",d6b:"y",d6c:"y",d6d:"n",d6e:"y",d6f:"y",d6g:"p",d6h:"y",d6i:"p"}},
+ low:{name:"Image parsing library, local file read",asset:"Internal reporting batch server",patch:"avail",a:{
+  d1a:"n",d1b:"n",d1c:"p",d1d:"n",d1e:"n",d1f:"n",d1g:"p",d2a:"n",d2b:"n",d2c:"p",d2d:"n",d2e:"y",
+  d3a:"p",d3b:"y",d3c:"n",d3d:"n",d3e:"n",d3f:"y",t1:"n",t2:"x",t3:"n",t4:"p",t5:"x",t6:"p",t7:"y",
+  d4a:"y",d4b:"n",d4c:"n",d4d:"n",d4e:"n",d4f:"p",d4g:"n",
+  d5a:"n",d5b:"n",d5c:"n",d5d:"p",d5e:"n",d5f:"y",s1:"n",s2:"n",s3:"x",s4:"x",s5:"x",w1:"n",w2:"p",w3:"n",w4:"n",w5:"n",w6:"n",
+  d6a:"n",d6b:"n",d6c:"n",d6d:"n",d6e:"n",d6f:"n",d6g:"y",d6h:"y",d6i:"y"}}
+};
+const SCN=[["The 2Shell family",[["php","PHP2Shell on a legacy portal"],["phpfleet","PHP2Shell across a supported fleet"],["log4","Log4Shell buried in dependencies"],["react","React2Shell on a customer portal"],["brotli","Node2Shell (Brotli) in runtimes and proxies"],["frag","Fragnesia: from web shell to root"]]],
+ ["When the defense is the entry point",[["pan","Palo Alto PAN-OS management RCE"],["forti","Fortinet FortiCloud SSO bypass"],["vpn","Generic zero day on the VPN gateway"]]],
+ ["Baseline",[["low","Internal library, low exposure"]]]];
+const scnName=k=>{for(const [,it] of SCN)for(const [id,l] of it)if(id===k)return l;return "";};
+/* Every scenario carries its own answers for all dimensions, both scopes and remediation. */
+const PFULL={
+ php:{tp1a:"y",tp1b:"y",tp1c:"p",tp2a:"y",tp2c:"p",tp2b:"u",t1:"y",tp3d:"y",tp3c:"p",t5:"u",t4:"n",tp4a:"p",tp4b:"y",tp4c:"u",t2:"y",t3:"p",tp5d:"p",tp5e:"n",t7:"p",t8:"y",t6:"n",t9:"n",tp6d:"p",d3g:"n",d3h:"y",d4h:"y",r_patch:"x",r_vpn:"y",r_vph:"n",r_l2:"x",r_feat:"p",r_noinet:"n",r_iso:"n",r_decom:"n",r_hunt:"p",rt_patch:"u",rt_vp:"n",rt_noinet:"u",rt_iso:"n",rt_decom:"n",rt_scope:"p",rt_susp:"n",rt_cred:"p",rt_mon:"n"},
+ phpfleet:{tp1a:"y",tp1b:"y",tp1c:"p",tp2a:"y",tp2c:"y",tp2b:"u",t1:"y",tp3d:"y",tp3c:"y",t5:"p",t4:"p",tp4a:"p",tp4b:"y",tp4c:"n",t2:"y",t3:"p",tp5d:"n",tp5e:"p",t7:"y",t8:"p",t6:"p",t9:"p",tp6d:"y",d3g:"y",d3h:"y",d4h:"y",r_patch:"p",r_vpn:"y",r_vph:"p",r_l2:"x",r_feat:"n",r_noinet:"x",r_iso:"n",r_decom:"n",r_hunt:"y",rt_patch:"p",rt_vp:"u",rt_noinet:"n",rt_iso:"n",rt_decom:"n",rt_scope:"y",rt_susp:"n",rt_cred:"y",rt_mon:"p"},
+ log4:{tp1a:"y",tp1b:"y",tp1c:"y",tp2a:"y",tp2c:"p",tp2b:"u",t1:"y",tp3d:"y",tp3c:"y",t5:"u",t4:"n",tp4a:"y",tp4b:"y",tp4c:"u",t2:"y",t3:"y",tp5d:"p",tp5e:"n",t7:"p",t8:"y",t6:"n",t9:"n",tp6d:"n",d3g:"n",d3h:"y",d4h:"y",r_patch:"n",r_vpn:"p",r_vph:"p",r_l2:"x",r_feat:"n",r_noinet:"n",r_iso:"n",r_decom:"n",r_hunt:"n",rt_patch:"u",rt_vp:"n",rt_noinet:"u",rt_iso:"n",rt_decom:"n",rt_scope:"n",rt_susp:"n",rt_cred:"n",rt_mon:"p"},
+ react:{tp1a:"y",tp1b:"p",tp1c:"n",tp2a:"y",tp2c:"y",tp2b:"u",t1:"u",tp3d:"p",tp3c:"u",t5:"u",t4:"n",tp4a:"n",tp4b:"y",tp4c:"u",t2:"p",t3:"n",tp5d:"n",tp5e:"n",t7:"y",t8:"n",t6:"n",t9:"p",tp6d:"y",d3g:"y",d3h:"y",d4h:"y",r_patch:"y",r_vpn:"y",r_vph:"n",r_l2:"x",r_feat:"n",r_noinet:"x",r_iso:"n",r_decom:"n",r_hunt:"y",rt_patch:"u",rt_vp:"u",rt_noinet:"u",rt_iso:"n",rt_decom:"n",rt_scope:"p",rt_susp:"n",rt_cred:"n",rt_mon:"n"},
+ brotli:{tp1a:"y",tp1b:"n",tp1c:"n",tp2a:"y",tp2c:"y",tp2b:"u",t1:"y",tp3d:"y",tp3c:"y",t5:"u",t4:"n",tp4a:"p",tp4b:"p",tp4c:"u",t2:"y",t3:"y",tp5d:"p",tp5e:"n",t7:"p",t8:"p",t6:"n",t9:"n",tp6d:"p",d3g:"n",d3h:"y",d4h:"y",r_patch:"n",r_vpn:"p",r_vph:"y",r_l2:"x",r_feat:"y",r_noinet:"n",r_iso:"n",r_decom:"n",r_hunt:"n",rt_patch:"n",rt_vp:"n",rt_noinet:"u",rt_iso:"n",rt_decom:"n",rt_scope:"p",rt_susp:"n",rt_cred:"p",rt_mon:"n"},
+ frag:{tp1a:"n",tp1b:"p",tp1c:"y",tp2a:"y",tp2c:"n",tp2b:"u",t1:"u",tp3d:"y",tp3c:"y",t5:"u",t4:"p",tp4a:"n",tp4b:"n",tp4c:"n",t2:"p",t3:"n",tp5d:"p",tp5e:"p",t7:"y",t8:"n",t6:"p",t9:"p",tp6d:"y",d3g:"p",d3h:"y",d4h:"y",r_patch:"p",r_vpn:"n",r_vph:"y",r_l2:"x",r_feat:"y",r_noinet:"x",r_iso:"n",r_decom:"n",r_hunt:"p",rt_patch:"p",rt_vp:"u",rt_noinet:"n",rt_iso:"n",rt_decom:"n",rt_scope:"n",rt_susp:"n",rt_cred:"n",rt_mon:"p"},
+ pan:{tp1a:"y",tp1b:"y",tp1c:"y",tp2a:"p",tp2c:"y",tp2b:"u",t1:"u",tp3d:"n",tp3c:"y",t5:"u",t4:"p",tp4a:"y",tp4b:"y",tp4c:"n",t2:"y",t3:"n",tp5d:"y",tp5e:"n",t7:"p",t8:"y",t6:"p",t9:"u",tp6d:"n",d3g:"y",d3h:"p",d4h:"n",r_patch:"p",r_vpn:"n",r_vph:"n",r_l2:"x",r_feat:"x",r_noinet:"y",r_iso:"n",r_decom:"n",r_hunt:"p",rt_patch:"u",rt_vp:"n",rt_noinet:"p",rt_iso:"n",rt_decom:"n",rt_scope:"p",rt_susp:"n",rt_cred:"n",rt_mon:"p"},
+ forti:{tp1a:"y",tp1b:"y",tp1c:"y",tp2a:"p",tp2c:"y",tp2b:"n",t1:"y",tp3d:"y",tp3c:"y",t5:"u",t4:"n",tp4a:"y",tp4b:"y",tp4c:"p",t2:"y",t3:"y",tp5d:"y",tp5e:"p",t7:"p",t8:"y",t6:"p",t9:"p",tp6d:"n",d3g:"y",d3h:"y",d4h:"n",r_patch:"y",r_vpn:"n",r_vph:"n",r_l2:"x",r_feat:"y",r_noinet:"y",r_iso:"n",r_decom:"n",r_hunt:"y",rt_patch:"p",rt_vp:"n",rt_noinet:"y",rt_iso:"n",rt_decom:"n",rt_scope:"y",rt_susp:"n",rt_cred:"y",rt_mon:"y"},
+ vpn:{tp1a:"y",tp1b:"y",tp1c:"y",tp2a:"y",tp2c:"y",tp2b:"u",t1:"u",tp3d:"p",tp3c:"y",t5:"u",t4:"n",tp4a:"y",tp4b:"y",tp4c:"u",t2:"y",t3:"y",tp5d:"y",tp5e:"n",t7:"p",t8:"y",t6:"n",t9:"u",tp6d:"p",d3g:"y",d3h:"p",d4h:"n",r_patch:"x",r_vpn:"y",r_vph:"n",r_l2:"y",r_feat:"n",r_noinet:"p",r_iso:"n",r_decom:"n",r_hunt:"p",rt_patch:"u",rt_vp:"u",rt_noinet:"u",rt_iso:"n",rt_decom:"n",rt_scope:"p",rt_susp:"n",rt_cred:"p",rt_mon:"n"},
+ low:{tp1a:"n",tp1b:"n",tp1c:"n",tp2a:"p",tp2c:"n",tp2b:"p",t1:"n",tp3d:"n",tp3c:"p",t5:"n",t4:"p",tp4a:"n",tp4b:"n",tp4c:"n",t2:"n",t3:"n",tp5d:"n",tp5e:"y",t7:"y",t8:"n",t6:"y",t9:"y",tp6d:"y",d3g:"y",d3h:"p",d4h:"p",r_patch:"y",r_vpn:"n",r_vph:"n",r_l2:"x",r_feat:"n",r_noinet:"x",r_iso:"n",r_decom:"n",r_hunt:"x",rt_patch:"x",rt_vp:"x",rt_noinet:"x",rt_iso:"x",rt_decom:"x",rt_scope:"x",rt_susp:"x",rt_cred:"x",rt_mon:"x"}};
+/* PHP2Shell patch combinations: same flaw, different vendor availability, deployment and legacy situations. */
+const RNONE={r_patch:"n",r_vpn:"n",r_vph:"n",r_l2:"x",r_feat:"n",r_noinet:"n",r_iso:"n",r_decom:"n",r_hunt:"n"};
+/* Combinations of the three patch facets: Release, Applied, Legacy. Remediation actions stay at zero unless the case needs them, so the facets drive the difference. */
+const PVAR=[
+ ["pv1","All versions · All systems · No legacy","avail","Supported PHP 8.4 fleet, patched and verified",{},"all","none"],
+ ["pv2","All versions · Partial, critical done · No legacy","avail","Fleet with critical payment servers patched first",{},"crit","none"],
+ ["pv3","All versions · Critical missing · No legacy","avail","Fleet where the payment servers wait for a maintenance window",{},"critmiss","none"],
+ ["pv4","All versions · None yet · No legacy","avail","Fleet during a year end change freeze",{d6f:"y"},"none","none"],
+ ["pv5b","All versions · All, not verified · No legacy","avail","Fleet patched last night, verification scans pending",{},"allnv","none"],
+ ["pv5","All versions · Unknown · No legacy","avail","Fleet with no reliable patch reporting",{d6i:"n"},"unk","none"],
+ ["pv6","Supported only · All systems · Patched","legacy","PHP 8 patched, PHP 7.4 covered by extended support",{},"all","patched"],
+ ["pv7","Supported only · All systems · Compensating control","legacy","PHP 8 patched, PHP 7.4 portal isolated and segmented",{},"all","comp"],
+ ["pv8","Supported only · All systems · Virtual patch","legacy","PHP 8 patched, PHP 7.4 portal behind IPS and host rules",{},"all","vp"],
+ ["pv9","Supported only · All systems · No patch available","legacy","PHP 8 patched, PHP 7.4 portal left exposed",{},"all","nopatch"],
+ ["pv10","Supported only · All systems · Decommissioned","legacy","PHP 8 patched, PHP 7.4 portal retired",{},"all","decom"],
+ ["pv11","Supported only · Critical missing · No patch available","legacy","Rollout stalled, legacy portal untouched",{},"critmiss","nopatch"],
+ ["pv12","Supported only · Partial, critical done · Unknown","legacy","Critical systems patched, legacy inventory incomplete",{},"crit","unk"],
+ ["pv13","Newer version only · Partial, critical done · Virtual patch","backport","PHP 8.1 apps that cannot move to 8.2 yet",{},"crit","vp"],
+ ["pv14","Announced · Nothing to apply · Legacy virtual patched","notyet","Early disclosure window, legacy PHP 7.4 behind IPS",{r_vpn:"y",r_vph:"y"},"","vp"],
+ ["pv15","Workaround only · All systems · Legacy unknown","mitigation","Vendor workaround applied everywhere while the fix is built",{},"all","unk"],
+ ["pv16","Waiting on vendor · Nothing to apply · Legacy exposed","vendor","PHP bundled in a managed hosting panel",{r_vpn:"p",d6e:"y"},"","nopatch"],
+ ["pv17","Never · Decommissioned","never","PHP 5.6 marketing site, retired",{r_decom:"y"},"",""],
+ ["pv18","Never · No controls, risk accepted","never","PHP 7.4 portal kept running with no compensating controls",{d6g:"n",d6h:"n"},"",""]];
+const WX={php:{w7:"y",w8:"p",w9:"n",w10:"n",w11:"y",w12:"u",w13:"n"},phpfleet:{w7:"y",w8:"y",w9:"n",w10:"n",w11:"p",w12:"p",w13:"p"},
+ log4:{w7:"y",w8:"y",w9:"p",w10:"p",w11:"y",w12:"u",w13:"p"},react:{w7:"n",w8:"p",w9:"n",w10:"n",w11:"y",w12:"n",w13:"n"},
+ brotli:{w7:"p",w8:"p",w9:"p",w10:"p",w11:"y",w12:"u",w13:"n"},frag:{w7:"y",w8:"p",w9:"n",w10:"n",w11:"p",w12:"u",w13:"p"},
+ pan:{w7:"y",w8:"p",w9:"n",w10:"n",w11:"x",w12:"p",w13:"y"},forti:{w7:"y",w8:"p",w9:"n",w10:"n",w11:"x",w12:"n",w13:"y"},
+ vpn:{w7:"y",w8:"p",w9:"n",w10:"p",w11:"n",w12:"u",w13:"y"},low:{w7:"y",w8:"n",w9:"n",w10:"n",w11:"p",w12:"n",w13:"n"}};
+Object.entries(WX).forEach(([k,v])=>{PFULL[k]={...(PFULL[k]||{}),...v};});
+PVAR.forEach(([k,,patch,asset,o,ap,lg])=>{PRESETS[k]={...PRESETS.php,patch,asset};PFULL[k]={...PFULL.php,...RNONE,...o};PFACET[k]=[ap,lg];});
+SCN.splice(1,0,["PHP2Shell: Release · Applied · Legacy",PVAR.map(v=>[v[0],v[1]])]);
+
+let state={name:"",asset:"",patch:"",a:{},r:{},tab:0,scope:"org",hideAx:{},hideSer:{}};
+const AXES=[{k:"d5",label:"Exposure"},{k:"d6",label:"Impact"},{k:"d1",label:"Intrinsic"},{k:"d2",label:"Configuration"},{k:"d3",label:"Prevalence"},{k:"d4",label:"Threat"}];
+const SKEY="vpc-state-v9";
+try{const s=JSON.parse(localStorage.getItem(SKEY)||"null");if(s&&s.a)state=Object.assign(state,s);if(!state.hideAx)state.hideAx={};if(!state.hideSer)state.hideSer={};}catch(e){}
+
+/* Start with PHP2Shell unless the viewer is working on their own answers. */
+if((!Object.keys(state.a).length&&!state.blankStart)||(state.preset&&!state.edited)){applyPreset("php",true);}
+function deriveTp(){const a=state.a,f=(id,src)=>{if(!a[id])a[id]=src;};
+  f("d4h",a.d3b||"u");f("d3h",a.d3b||"u");f("d3g",a.d6a==="y"?"p":"y");
+  if(a.t1==="n"){TPIDS.forEach(id=>{if(id!=="t1")a[id]=a[id]&&["t4","t6","t9","t7","tp6d","tp2b","tp5e"].includes(id)?a[id]:"x";});return;}
+  f("tp1a",a.d1d||"u");f("tp1b",a.d1f||"u");f("tp1c",a.d1e||"u");f("tp2a",a.d2a||"u");f("tp2c",a.d2d||"u");f("tp2b","u");
+  f("tp3e","u");f("tp3d",a.d3a==="y"?"p":"n");f("tp3c",a.d3b||"u");f("tp4a",a.d4d==="y"?"y":"u");f("tp4b",a.d4e||"u");f("tp4c","u");f("tp5d","p");f("tp5e","u");f("tp6d","p");}
+function save(){try{localStorage.setItem(SKEY,JSON.stringify(state));}catch(e){}}
+function applyPreset(k,silent){
+  if(k==="blank"){state.next="";state.apply="";state.legacy="";state.tpApply="";state.tpLegacy="";state.blankStart=true;state.a={};state.name="";state.asset="";state.patch="";state.preset="";state.edited=false;}
+  else{const p=PRESETS[k];state.a=Object.assign({},p.a,PFULL[k]||{});deriveTp();
+    state.name=p.name;state.asset=p.asset;state.patch=p.patch;state.preset=k;state.edited=false;state.at=Date.now();state.blankStart=false;state.next="";const fc=PFACET[k]||["",""];state.apply=fc[0];state.legacy=fc[1];
+    {const tf=PTPF[k]||PTPF_DEF[state.patch]||["",""];state.tpApply=applyRelevant()?tf[0]:"";state.tpLegacy=legacyRelevant()?tf[1]:"";}}
+  if(!silent){renderPanel();update();}
+}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function val(id,mode){const v=state.a[id];if(v==="x")return null;const inv=ALL[id].inv;
+  /* Not assessed yet counts exactly like Unknown: exposed in the main score, safe in the best case. */
+  if(!v||v==="u")return mode==="best"?0:1;if(v==="p")return .5;const r=v==="y"?1:0;return inv?1-r:r;}
+function avg(ids,mode){let s=0,c=0;ids.forEach(id=>{const v=val(id,mode);if(v!==null){s+=v;c++;}});return c?Math.round(s/c*100):null;}
+const orgIds=d=>d.blocks.flatMap(b=>b.items.map(i=>i[0]));
+/* Amplifier blocks (defense as entry point, where the technology lives) can raise a dimension but never dilute it. */
+function secScore(d,mode){const core=avg(d.blocks.filter(b=>!b.amp).flatMap(b=>b.items.map(i=>i[0])),mode),all=avg(orgIds(d),mode);
+  if(core===null)return all;if(all===null)return core;return Math.max(core,all);}
+function tpScore(d,mode){const ids=d.tp.map(i=>i[0]);return avg(d.id==="d1"||d.id==="d4"?ids.concat(orgIds(d)):ids,mode);}
+function secProgress(d,scope){if(d.id==="rem"){const ids=ACT[scope].map(a=>a[0]);return [ids.filter(id=>state.a[id]).length,ids.length];}
+  const ids=scope==="tp"?d.tp.map(i=>i[0]):orgIds(d);return [ids.filter(id=>state.a[id]).length,ids.length];}
+const is=(id,v="y")=>state.a[id]===v;
+let TMODE="confirmed";const tw=id=>state.a[id]==="y"||(TMODE==="worst"&&(state.a[id]==="u"||!state.a[id]));
+const TRIG=[
+ ["Unauthenticated remote code execution on an internet facing asset",()=>tw("d1a")&&tw("d1d")&&tw("d5a")],
+ ["Exploitable under default or common configurations",()=>tw("d2a")||tw("d2c")],
+ ["Confirmed exploitation in the wild or KEV listing",()=>tw("d4c")],
+ ["Reliable public exploit code that allows automated attacks",()=>tw("d4b")&&tw("d4e")],
+ ["Widely adopted platform or shared infrastructure",()=>tw("d3a")||tw("d6c")],
+ ["Attack path to privileged identities or critical systems",()=>tw("d5c")||tw("d5e")],
+ ["Security device or security provider is the entry point",()=>tw("s1")||tw("s2")],
+ ["No patch in time and no effective compensating control",()=>noFix()&&!is("d6g")]
+];
+/* A patch can only reduce risk when one exists; other actions apply as answered. */
+/* Patch credit: full when a fix covers everything, half when legacy versions are left out, none otherwise (including not set). */
+const counts=a=>true;
+const factor=list=>list.reduce((f,a)=>{let v=state.a[a[0]];return v==="y"?f*a[2]:v==="p"?f*(1+a[2])/2:f;},1);
+const done=id=>state.a[id]==="y";
+function notAssessed(scope){const ids=Object.keys(ALL).filter(k=>ALL[k].dim!=="rem"&&ALL[k].scope===scope);let n=ids.filter(k=>!state.a[k]).length;
+  const k=fk(scope);if(scope==="org"&&!state.patch)n++;if(applyRelevant()&&!state[k.apply])n++;if(legacyRelevant()&&!state[k.legacy])n++;return n;}
+function firedCount(mode){TMODE=mode;const n=TRIG.filter(t=>t[1]()).length;TMODE="confirmed";return n;}
+function compute(mode){
+  const dsn=DIMS.map(d=>secScore(d,mode)),ds=dsn.map(x=>x??0);
+  /* Unanswered dimensions are left out of the weighted average instead of counting as zero risk. */
+  const wa=arr=>{let s=0,w=0;DIMS.forEach((d,i)=>{if(arr[i]!==null){s+=d.w*arr[i];w+=d.w;}});return w?Math.round(s/w):0;};
+  let org=wa(dsn);
+  const fired=firedCount(mode==="best"?"confirmed":"worst");
+  if(fired>=5)org=Math.max(org,80);else if(fired>=3)org=Math.max(org,62);else if(fired>=2)org=Math.max(org,45);
+  if(state.patch==="none"&&mode!=="best")org=Math.min(org,25);
+  const tdsn=DIMS.map(d=>tpScore(d,mode)),tds=tdsn.map(x=>x??0);
+  let tp=wa(tdsn);const tps=tp;
+  if((is("t1")||(mode!=="best"&&(is("t1","u")||!state.a.t1)))&&(is("d4c")||(mode!=="best"&&(is("d4c","u")||!state.a.d4c))))tp=Math.max(tp,55);
+  if(is("t1","n"))tp=Math.min(tp,15);
+  const fo=factor(ACT.org)*patchFactor(null,"org"),ft=factor(ACT.tp)*patchFactor(null,"tp");
+  return {ds,tds,dsn,tdsn,answered:dsn.filter(x=>x!==null).length,tpAnswered:tdsn.filter(x=>x!==null).length,tps,org,tp,orgR:Math.round(org*fo),tpR:Math.round(tp*ft),fo,ft,fired};
+}
+function tierOf(s,tp){return s>=75?[4,"Emergency",tp?"Require containment from the third party within hours, and evidence that nothing was compromised.":"Contain within hours. Check for signs of compromise before closing anything."]:
+  s>=55?[3,"Priority",tp?"Require a fix or containment from the third party within days.":"Act within days. Contain now if the patch is not ready."]:
+  s>=35?[2,"Scheduled",tp?"Track the third party fix in the normal review cycle and watch for signal changes.":"Fix it in the normal remediation cycle and watch for signal changes."]:
+  [1,"Monitor",tp?"Confirm at the next third party review. Revisit when exploitation signals change.":"Fix on the next system upgrade. Revisit when exploitation signals change."];}
+const color=s=>s>=75?"var(--crit)":s>=55?"var(--high)":s>=35?"var(--med)":"var(--low)";
+
+function renderTabs(){
+  $("#tabs").innerHTML=SECTIONS.map((d,i)=>{const [a,t]=secProgress(d,"org");const [ta,tt]=hasScope(d)?secProgress(d,"tp"):[0,1];
+   const lab=i<6?`Dimension ${i+1}`:"Remediation";
+   return `${i===2||i===6?'<span class="tabsep" aria-hidden="true"></span>':''}<button class="tab${d.group?" g-"+d.group:""}" role="tab" id="tab${i}" aria-selected="${i===state.tab}" data-i="${i}">
+   <small>${lab}</small><b>${d.id==="rem"?"Actions":d.short}</b><span class="bar"><i style="width:${Math.round(a/t*100)}%"></i></span>${hasScope(d)?`<span class="bar tpbar"><i style="width:${Math.round(ta/tt*100)}%"></i></span>`:""}</button>`}).join("");
+}
+function qItem([id,text,inv]){return `<div class="item"><p>${text}${inv?`<span class="inv">yes lowers risk</span>`:""}</p>
+  <div class="seg${inv?" inverse":""}" role="radiogroup" aria-label="${esc(text)}">${OPTS.map(o=>`<label><input type="radio" name="${id}" id="${id}-${o[0]}" value="${o[0]}" ${state.a[id]===o[0]?"checked":""}><span>${o[1]}</span></label>`).join("")}</div></div>`;}
+function remItem([id,text,f]){return qItem([id,text]).replace("</p>",`<span class="rtag">${f===0?"to zero":"−"+Math.round((1-f)*100)+"%"}</span></p>`);}
+const SCOPEDEF=`<p class="scopedef"><b>Third party scope</b> Third party systems that connect to our environment or handle our data: SaaS platforms, managed service and security providers, integrations and APIs, and the subprocessors behind them. Not a third party's whole estate.</p>`;
+function facetPanel(sc){const k=fk(sc),tp=sc==="tp",wa=state.patch==="mitigation";
+  const pill=(name,id,label,cur)=>`<label><input type="radio" name="${name}" id="${name}-${id}" value="${id}" ${cur===id?"checked":""}><span>${label}</span></label>`;
+  const rel=tp?`<div class="block"><h3>1. Patch release</h3></div><p class="pq">The vendor's release is the same for our third parties. It is set in the My org scope.</p><p class="relro">${state.patch?pLabel(state.patch):"Not set yet"}</p>`
+    :`<div class="block"><h3>1. Patch release</h3></div><p class="pq">What has the vendor delivered?</p><div class="opts">${PATCH.map((p,i)=>`${i===0||PATCH[i-1][3]!==p[3]?`<span class="pgrp">${p[3]}</span>`:""}${pill("patch",p[0],p[1],state.patch)}`).join("")}</div>`;
+  const app=`<div class="block"><h3>2. ${wa?"Workaround scope":"Application scope"}</h3></div><p class="pq">${tp?(wa?"Of the third party systems that connect to us or handle our data, how much has the workaround?":"Of the third party systems that connect to us or handle our data, how much is patched?"):(wa?"How much of our affected estate has the workaround? A workaround removes at most half the risk.":"How much of our affected estate is patched?")}</p>`
+    +(applyRelevant()?`<div class="opts">${APPLY.map(a=>pill(k.apply,a[0],a[1],state[k.apply])).join("")}</div>`:`<p class="dim">${state.patch?"There is no patch or workaround to apply yet.":"Choose the patch release first."}</p>`);
+  const leg=`<div class="block"><h3>3. Legacy systems</h3></div><p class="pq">${PENDING.includes(state.patch)?`What is the plan for legacy versions the coming fix may not cover${tp?" in the third party systems that connect to us or handle our data":""}?`:`What happens to the versions the fix does not cover${tp?" in the third party systems that connect to us or handle our data":""}?`}</p>`
+    +(legacyRelevant()?`<div class="opts">${LEGACY.map(a=>pill(k.legacy,a[0],a[1],state[k.legacy])).join("")}</div>`:`<p class="dim">${fixExists()?"Not relevant: the fix covers every affected version.":state.patch==="never"?"Every affected version is effectively legacy. Use the remediation actions to isolate or decommission.":"Choose the patch release first."}</p>`);
+  return `<div class="patch${tp?" tpfacet":""}">${rel}${app}${leg}</div>`;}
+function renderPanel(){
+  const d=SECTIONS[state.tab];
+  const sc=state.scope;
+  let h=`<div class="panel p-${d.id==="rem"?"rem":(sc==="tp"?"tp":"org")}" role="tabpanel" aria-labelledby="tab${state.tab}"><div><div class="scope">${d.part?PARTS[d.part]+" · Dimension "+(state.tab+1):"Part three: decide and act"}</div><h2>${d.name}</h2><p class="q">${d.q}</p></div>`;
+  if(hasScope(d)){const [a,t]=secProgress(d,"org"),[ta,tt]=secProgress(d,"tp");
+    h+=`<div class="scopesw" role="tablist" aria-label="Scope"><button type="button" role="tab" data-scope="org" aria-selected="${sc==="org"}">My org <em>${a}/${t}</em></button><button type="button" role="tab" data-scope="tp" aria-selected="${sc==="tp"}">Third parties <em>${ta}/${tt}</em></button></div>`;}
+  if(d.tp&&sc==="tp"){h+=SCOPEDEF;if(d.patch)h+=facetPanel("tp");h+=`<div class="block"><h3>${d.short} through our third parties</h3>${d.tp.map(qItem).join("")}</div>`;}
+  else if(d.patch){h+=facetPanel("org");}
+  if(d.id==="rem"){if(sc==="tp")h+=SCOPEDEF;h+=`<div class="block"><h3>${sc==="tp"?"Actions with our third parties":"Actions in our organization"}</h3>${ACT[sc].map(remItem).join("")}</div>`+`<p class="hint">Patch release, application scope and legacy status are set in Dimension 2, Impact, for both scopes. Yes applies the full reduction and Partial applies half. Reductions multiply. Two partial controls never add up to a patch, and only decommissioning takes the risk to zero.</p>`;}
+  if(d.tp&&sc==="org")d.blocks.forEach(b=>{h+=`<div class="block">${b.title?`<h3>${b.title}</h3>`:""}${b.items.map(qItem).join("")}</div>`;});
+  h+=`<div class="keyq"><b>Key point</b>${d.id==="rem"?d.key:sc==="tp"?TPKEY[d.id]:d.key}</div>
+   <div class="navrow"><button class="btn" type="button" data-nav="-1" ${state.tab===0&&sc!=="tp"?"disabled":""}>Previous</button>
+   <button class="btn primary" type="button" data-nav="1">${state.tab===SECTIONS.length-1?"See results":sc==="org"?"Next: third parties":"Next dimension"}</button></div></div>`;
+  $("#panel").innerHTML=h;renderTabs();
+}
+const SERIES=[["inh","My org","var(--accent)",""],["tpi","Third parties","var(--high)",""],["best","My org if unknowns are safe","var(--unk)","6 4"],["res","My org after actions","var(--low)","6 4"],["tpres","Third parties after actions","var(--low2)","6 4"]];
+function radar(vals){
+  const axes=AXES.filter(a=>!state.hideAx[a.k]);
+  const W=540,H=460,cx=270,cy=232,R=140,n=Math.max(axes.length,1);
+  const pt=(i,v)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [cx+Math.cos(a)*R*v/100,cy+Math.sin(a)*R*v/100];};
+  let g=`<defs><linearGradient id="sw" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="var(--accent)" stop-opacity="0"/><stop offset="1" stop-color="var(--accent)" stop-opacity=".7"/></linearGradient></defs>`;
+  if(n>=3){[25,50,75,100].forEach(r=>{g+=`<polygon points="${axes.map((_,i)=>pt(i,r).join(",")).join(" ")}" fill="none" stroke="var(--line)"/>`;});}
+  else{[25,50,75,100].forEach(r=>{g+=`<circle cx="${cx}" cy="${cy}" r="${R*r/100}" fill="none" stroke="var(--line)"/>`;});}
+  axes.forEach((_,i)=>{const [x,y]=pt(i,100);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)"/>`;});
+  [100].forEach(r=>{const [x,y]=pt(0,r);g+=`<text x="${x+6}" y="${y+4}" font-size="10" font-family="var(--mono)" fill="var(--muted)">${r}</text>`;});
+  const per=6/n;
+  g+=`<g class="scan" style="transform-origin:${cx}px ${cy}px"><path d="M${cx} ${cy} L${cx} ${cy-R} A${R} ${R} 0 0 0 ${pt(-.25,100).join(" ")} Z" fill="var(--accent)" fill-opacity=".07"/><line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy-R}" stroke="url(#sw)" stroke-width="2"/></g>`;
+  const shown=SERIES.filter(s=>!state.hideSer[s[0]]&&vals[s[0]]&&!related(s[0])&&!(s[0]==="tpi"&&!TPON()));
+  shown.forEach(([k,,col,dash])=>{const v=axes.map(a=>vals[k][a.k]);
+    const pts=v.map((x,i)=>pt(i,Math.max(x,2)).join(",")).join(" ");
+    if(n>=3)g+=`<polygon points="${pts}" fill="${col}" fill-opacity="${dash?0:k==="inh"?.18:.12}" stroke="${col}" stroke-width="${dash?1.6:2}" ${dash?`stroke-dasharray="${dash}"`:""}/>`;
+    else if(n===2)g+=`<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" ${dash?`stroke-dasharray="${dash}"`:""}/>`;
+    v.forEach((x,i)=>{const [px,py]=pt(i,Math.max(x,2));const pc=col;const big=k==="inh"||k==="tpi";
+      g+=`<circle class="ring" cx="${px}" cy="${py}" r="5" fill="none" stroke="${pc}" stroke-width="2" style="animation-delay:${(i*per).toFixed(2)}s"/>
+        <circle class="dot" cx="${px}" cy="${py}" r="${big?4.5:3.6}" fill="${pc}" stroke="var(--bg)" stroke-width="1.5" style="animation-delay:${(i*per).toFixed(2)}s"/>`;});});
+  axes.forEach((a,i)=>{const [x,y]=pt(i,118);const anchor=Math.abs(x-cx)<5?"middle":x>cx?"start":"end";const dy=y<cy-60?-8:y>cy+60?14:0;
+    const v=vals.inh[a.k],tv=vals.tpi[a.k];
+    g+=`<g class="axl" data-ax="${a.k}" role="button" tabindex="0" aria-label="Hide ${a.label}"><text x="${x}" y="${y+dy}" text-anchor="${anchor}" font-size="12" font-weight="700" font-family="var(--mono)" letter-spacing=".8" fill="var(--ink)">${a.label.toUpperCase()}</text>
+    <text x="${x}" y="${y+dy+15}" text-anchor="${anchor}" font-size="11" font-family="var(--mono)" fill="var(--muted)">${[state.hideSer.inh?"":`<tspan fill="var(--accent)">${v}</tspan>`,tpHid()?"":`<tspan fill="var(--high)">${tv}</tspan>`].filter(Boolean).join(" · ")}</text></g>`;});
+  if(!axes.length)g+=`<text x="${cx}" y="${cy}" text-anchor="middle" font-family="var(--mono)" font-size="12" fill="var(--muted)">All dimensions hidden</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Spider chart of dimension scores">${g}</svg>`;
+}
+const related=k=>(tpHid()&&k==="tpres")||(state.hideSer.inh&&(k==="res"||k==="best"));
+function legendHtml(hasRes){
+  const ser=SERIES.filter(s=>!(s[0]==="res"||s[0]==="tpres")||hasRes).filter(s=>!related(s[0])&&!(!TPON()&&(s[0]==="tpi"||s[0]==="tpres"))).map(([k,l,col,dash])=>`<button type="button" class="lg${state.hideSer[k]?" off":""}" data-ser="${k}" aria-pressed="${!state.hideSer[k]}"><i style="${dash?`border-top:2px dashed ${col};background:none;height:0`:`background:${col}`}"></i>${l}</button>`).join("");
+  const ax=AXES.map(a=>`<button type="button" class="lg ax${state.hideAx[a.k]?" off":""}" data-ax="${a.k}" aria-pressed="${!state.hideAx[a.k]}">${a.label}</button>`).join("");
+  return `<div class="lgrow">${ser}</div><div class="lgrow"><span class="lgl">Dimensions</span>${ax}</div>`;
+}
+const PLAY={
+ legacy:["Patch supported versions, contain legacy ones",["Patch every supported version within the window this risk justifies, and verify it.","List every legacy or end of life instance. These follow the never path: isolate, replace, decommission or accept with an owner and an expiry date.","Apply network and host virtual patching to the legacy instances while the decision is made.","Report the two populations separately. A fleet that is 90 percent patched still has its exposure in the other 10."]],
+ backport:["Upgrade where possible, contain where not",["Plan the upgrade to the fixed major version and test it against the applications that depend on it.","Where the upgrade cannot happen within the window, contain: virtual patch, disable the feature, restrict exposure.","Ask the vendor or community whether a backport is planned, and record the answer with a date.","Treat systems that cannot upgrade as legacy: they follow the never path."]],
+ mitigation:["Apply the vendor workaround and verify it",["Apply the vendor workaround on every affected instance and confirm it is effective, not just configured.","Add network and host virtual patching, because workarounds are often incomplete.","Watch for the real patch and for bypasses of the workaround.","Give the workaround an owner and a removal date tied to the patch."]],
+ vendor:["Press the vendor, protect what you cannot touch",["Ask the vendor for a fixed release date in writing, and escalate through the contract if needed.","Shield the product: network virtual patching, restricted management access, an inline Layer 2 device for edge appliances.","Isolate the product from critical assets and rotate any credentials it holds.","If the date slips past your window, decide on replacement and record the decision."]],
+ punknown:["Find out whether a fix exists",["Check the vendor advisory, the distribution trackers and the KEV entry for a fixed version.","Until confirmed, treat it as no fix: contain with virtual patching and exposure reduction.","Assign an owner to track the answer, with a deadline measured in hours, not weeks."]],
+ avail:["A patch exists",["Apply it within the window this risk justifies, not the window the change calendar allows.","Verify deployment on every instance, including containers and appliances.","If it was exploited before you patched, hunt for signs of compromise before closing the ticket."]],
+ notyet:["The patch is coming, but not yet",["Virtual patch at the network layer: IPS, WAF and gateway rules on known exploit paths.","Virtual patch at the host layer: HIPS, runtime protection and endpoint rules that block post exploitation behavior.","Disable the vulnerable feature and restrict management interfaces.","Raise monitoring and hunt for the public indicators.","Give every virtual patch an owner and a removal date."]],
+ never:["The patch will never come",["Decide: permanent compensating controls, complete isolation, replacement or decommissioning.","Complete isolation means no route from the internet or user network, no shared credentials and only monitored minimum connections.","If the business keeps it running, record an explicit risk acceptance with an owner, a reason and an expiry date.","Prefer decommissioning when possible. A system that no longer exists cannot be exploited."]],
+ unknown:["We do not know if we are affected",["Treat unknown as exposed until proven otherwise.","Run discovery in parallel: software composition analysis, image scanning, runtime inventory and external scans.","Apply broad virtual patching at the network edge to protect systems you have not found yet.","Ask third parties directly, and reduce their access if they cannot answer."]],
+ none:["Not affected, or low risk",["Document the evidence: component absent, feature disabled, asset isolated or no meaningful path.","Defer to the next system upgrade when the risk is low.","Set an expiry date and bring it back when public exploits, KEV listing or a new chain to root appear."]]
+};
+function nextActions(list,cur){const sc=list===ACT.org?"org":"tp",k=fk(sc),tp=sc==="tp";
+  const out=list.filter(a=>!done(a[0])).filter(a=>!(a[0]==="r_l2"&&!is("s1")))
+    .map(a=>{const base=state.a[a[0]]==="p"?cur/((1+a[2])/2):cur;return [a,Math.round(cur-base*a[2])];});
+  if(applyRelevant()){const f0=patchFactor(null,sc);
+    if(state[k.apply]!=="all"){const f1=patchFactor({apply:"all"},sc),wa=state.patch==="mitigation";
+      out.push([["px",tp?(wa?"Have third parties applied the workaround on every system that serves us, with evidence?":"Have third parties patched every affected system that serves us, with evidence?"):state[k.apply]==="critmiss"?"Have we patched the critical assets first, then the rest, and verified it?":state[k.apply]==="allnv"?"Have we verified the patch on every system?":wa?"Have we applied the workaround everywhere and verified it?":"Have we extended the patch to every affected system and verified it?"],Math.round(cur-cur*f1/f0)]);}
+    if(gapRelease()&&!["none","decom","patched","comp"].includes(state[k.legacy])){const f1=patchFactor({legacy:"comp"},sc);out.push([["lx",tp?"Have third parties contained or retired their legacy versions?":"Have we added a compensating control, or decommissioned the legacy versions the fix does not cover?"],Math.round(cur-cur*f1/f0)]);}}
+  return out.filter(x=>x[1]>0).sort((x,y)=>y[1]-x[1]).slice(0,3);
+}
+function verdictBlock(label,inh,resid,sub){
+  const [tn,tl,tt]=tierOf(resid,label!=="My org");
+  return `<div class="vb"><div class="vb-h"><i class="${label==="My org"?"k-org":"k-tp"}"></i>${label}</div>
+   <div class="vb-n"><span class="score" style="color:${color(resid)}">${resid}</span>${resid<inh?`<span class="was">down from <s>${inh}</s> before actions</span>`:""}</div>
+   <span class="tier t${tn}">${tl}</span><p>${sub||tt}</p></div>`;
+}
+function renderDD(){
+  $("#ddVal").textContent=scnName(state.preset)||"Choose a scenario";$("#ddVal").classList.toggle("ph",!state.preset);
+  $("#ddList").innerHTML=SCN.map(([g,it])=>`<li class="dd-g" role="presentation">${g}</li>`+it.map(([id,l])=>`<li class="dd-o" role="option" id="opt-${id}" data-v="${id}" tabindex="-1" aria-selected="${state.preset===id}">${l}</li>`).join("")).join("")
+   +`<li class="dd-sep" role="presentation"></li><li class="dd-o dd-blank" role="option" data-v="blank" tabindex="-1" aria-selected="false">Start blank</li>`;
+}
+function ddOpen(on,focusSel){const L=$("#ddList");L.hidden=!on;$("#ddBtn").setAttribute("aria-expanded",on);
+  if(on){const o=L.querySelector('[aria-selected="true"]')||L.querySelector(".dd-o");if(focusSel&&o)o.focus();o&&o.scrollIntoView({block:"nearest"});}}
+function ddPick(v){ddOpen(false);$("#ddBtn").focus();applyPreset(v);}
+/* Next evaluation: the assessor's date, or a suggestion from the highest tier in view. */
+const REVIEW={4:1,3:7,2:7,1:15};
+const fmtDate=t=>{try{return new Date(t).toLocaleDateString(undefined,{dateStyle:"medium"});}catch(e){return "";}};
+const isoDay=t=>{const d=new Date(t);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;};
+function nextEval(){const W=compute("worst"),top=Math.max(W.orgR,TPON()?W.tpR:0),[tn,tl]=tierOf(top),days=REVIEW[tn];
+  const sug=(state.at||Date.now())+days*864e5;
+  if(state.next){const [y,m,d]=state.next.split("-").map(Number);return {t:new Date(y,m-1,d).getTime(),set:true,days,tl,sug};}
+  return {t:sug,set:false,days,tl,sug};}
+function update(){
+  $("#radarTitle").textContent=(state.name?state.name+" · ":"")+"Cyber Risk Profile";
+  $("#keyOrg").hidden=!!state.hideSer.inh;$("#keyTp").hidden=tpHid();
+  $("#kOrg").hidden=!!state.hideSer.inh;$("#kTp").hidden=tpHid();$("#verdicts").classList.toggle("one",!!(state.hideSer.inh||tpHid()));
+  const dr=$("#dimrows");dr.classList.toggle("no-org",!!state.hideSer.inh);dr.classList.toggle("no-tp",tpHid());dr.hidden=!!(state.hideSer.inh&&tpHid());
+  $("#vname").value=state.name;$("#vasset").value=state.asset;const blankA=!state.preset&&!Object.keys(state.a).some(k=>ALL[k]&&ALL[k].dim!=="rem");$("#exflag").hidden=!state.preset&&!blankA;$("#exflag").classList.toggle("blank",blankA);
+  $("#scnTag").textContent=blankA?"Blank assessment":"Preloaded scenario";$("#scnClear").hidden=blankA;
+  if(blankA){$("#scnName").textContent="Nothing assessed yet.";$("#scnNote").textContent=" Every question counts as exposed until it is answered with evidence. The score comes down as you prove it can.";}renderDD();{const ne=nextEval();$("#nextEval").value=state.next||isoDay(ne.sug);$("#nextReset").hidden=!ne.set;
+    $("#snapNextSub").textContent=ne.set?`set by the assessor · suggested ${fmtDate(ne.sug)}`:`suggested for ${ne.tl}, within ${ne.days} day${ne.days>1?"s":""}`;}
+  try{const at=new Date(state.at||Date.now());$("#snapAt").textContent=at.toLocaleDateString(undefined,{dateStyle:"medium"});$("#snapAt").nextElementSibling.textContent="at "+at.toLocaleTimeString(undefined,{timeStyle:"short"})+", answers as of then";}catch(e){}$("#tpSwitch").setAttribute("aria-checked",TPON());$("#tpSwTxt").textContent=TPON()?"Included in the assessment":"Excluded from the assessment";document.body.classList.toggle("tp-off",!TPON());
+  if(state.preset){$("#scnName").textContent=scnName(state.preset)||state.name;
+    $("#scnNote").textContent=state.edited?" · You have changed some answers. Make sure every answer reflects your own evidence.":" · These are example answers, not your organization’s. Replace them with your own evidence.";}
+  const W=compute("worst"),B=compute("best");
+  const tpNone=is("t1","n");
+  $("#verdicts").innerHTML=(state.hideSer.inh?"":verdictBlock("My org",W.org,W.orgR))+(tpHid()?"":verdictBlock("Third parties",W.tp,W.tpR,tpNone?"No third party with access uses the affected technology.":null));
+  {const na=notAssessed("org")+(TPON()?notAssessed("tp"):0);$("#range").textContent=(na?`${na} question${na>1?"s":""} not assessed yet, counted as exposed. `:"")+(()=>{const r=[];if(!state.hideSer.inh&&B.org<W.org)r.push(`my organization could score anywhere from ${B.org} to ${W.org}`);if(TPON()&&!tpHid()&&B.tp<W.tp)r.push(`third parties from ${B.tp} to ${W.tp}`);
+   return r.length?`Before actions, ${r.join(" and ")}, depending on how the unknown or unanswered questions turn out.`:"No result depends on unknown or unanswered questions.";})();}
+  const mk=(ds,tps)=>{const o={};DIMS.forEach((d,i)=>o[d.id]=ds[i]);o.tp=tps;return o;};
+  const hasRes=W.fo<1||W.ft<1;
+  const mk2=ds=>{const o={};DIMS.forEach((d,i)=>o[d.id]=ds[i]);return o;};
+  const vals={inh:mk2(W.ds),tpi:mk2(W.tds),best:mk2(B.ds),res:hasRes?mk2(W.ds.map(x=>Math.round(x*W.fo))):null,tpres:hasRes?mk2(W.tds.map(x=>Math.round(x*W.ft))):null};
+  $("#radar").innerHTML=radar(vals);
+  $("#legend").innerHTML=legendHtml(hasRes);
+  {const so=!state.hideSer.inh,st=!tpHid(),cols="92px"+(so?" minmax(0,1fr)":"")+(st?" minmax(0,1fr)":"");
+   const bar=(i,sc,v,bv,c)=>`<button type="button" class="dbar" data-go="${i}" data-sc="${sc}" aria-label="${DIMS[i].short}, ${sc==="org"?"my organization":"third parties"} ${v}"><span class="track"><u style="left:${bv}%;width:${v-bv}%"></u><i style="width:${bv}%;background:${c}"></i></span><em style="color:${c}">${v}</em></button>`;
+   $("#dimrows").innerHTML=`<div class="drh" style="grid-template-columns:${cols}"><span></span>${so?"<span><i class=\"k-org\"></i>My org</span>":""}${st?"<span><i class=\"k-tp\"></i>Third parties</span>":""}</div>`+DIMS.map((d,i)=>`<div class="dimrow2" style="grid-template-columns:${cols}"><button type="button" class="dl" data-go="${i}">${d.short}</button>${so?bar(i,"org",W.ds[i],B.ds[i],"var(--accent)"):""}${st?bar(i,"tp",W.tds[i],B.tds[i],"var(--high)"):""}</div>`).join("");}
+  $("#trig").innerHTML=TRIG.map(t=>{const c=t[1]();TMODE="worst";const w=t[1]();TMODE="confirmed";return `<li class="${c?"on":w?"maybe":""}">${t[0]}${!c&&w?` <em>if an unknown is confirmed</em>`:""}</li>`;}).join("");
+  let pk=state.patch,ph="";
+  if(done("r_decom")){ph=`<h5>Decommissioned</h5><p class="ok">The system no longer exists, so it cannot be exploited. Confirm data, credentials and DNS records were removed with it.</p>`;}
+  else if(!pk){ph=`<p class="dim">Set the patch status in Dimension 2 (Impact) to see the matching playbook.</p>`;}
+  else{const p=PLAY[pk];ph=`<h5>${p[0]}</h5><ol>${p[1].map(x=>`<li>${x}</li>`).join("")}</ol>`;
+    if(is("s1")&&(NOFIX.includes(pk)||pk==="unknown")&&!done("r_l2"))ph+=`<div class="note"><b>Edge device affected.</b> The vulnerable firewall or VPN cannot virtual patch itself. Place a transparent inline Layer 2 inspection device with no IP address in front of it, so the protection cannot be reached or targeted.</div>`;
+    if(fixExists()&&state.apply==="critmiss")ph+=`<div class="note"><b>Critical assets are still unpatched.</b> Coverage may look high, but the risk sits in the systems that matter most. Patch them first, or contain them until you can.</div>`;
+    if(W.fired>=3&&fixExists()&&state.apply!=="all"&&state.apply!=="critmiss"&&!(legacyRelevant()&&state.apply==="none"))ph+=`<div class="note">${W.fired} escalation triggers fired. Patch now and check for compromise in parallel.</div>`;}
+  const no=state.hideSer.inh?[]:nextActions(ACT.org,W.orgR),nt=(tpNone||tpHid())?[]:nextActions(ACT.tp,W.tpR);
+  const nxt=(arr,lab,k)=>arr.length&&arr[0][1]>0?`<div class="nx"><div class="nx-h"><i class="${k}"></i>${lab}</div>${arr.map(([a,g])=>`<div class="nx-r"><span>${a[1]}</span><b>−${g}</b></div>`).join("")}</div>`:"";
+  ph+=nxt(no,"Biggest remaining reductions · My org","k-org")+nxt(nt,"Biggest remaining reductions · Third parties","k-tp");
+  $("#play").innerHTML=ph;
+  const unk=Object.keys(state.a).filter(k=>state.a[k]==="u"&&ALL[k]);
+  const FU={"_apply":"How much of our affected estate is patched?","_legacy":"What happens to the legacy versions the fix does not cover?","_tpApply":"Of the third party systems that connect to us or handle our data, how much is patched?","_tpLegacy":"What happens to legacy versions in the third party systems that connect to us or handle our data?"};
+  if(applyRelevant()&&state.apply==="unk")unk.push("_apply");if(legacyRelevant()&&state.legacy==="unk")unk.push("_legacy");
+  if(applyRelevant()&&state.tpApply==="unk")unk.push("_tpApply");if(legacyRelevant()&&state.tpLegacy==="unk")unk.push("_tpLegacy");
+  const isTpU=k=>k.startsWith("_tp")||(!FU[k]&&ALL[k].scope==="tp");
+  const uo=state.hideSer.inh?[]:unk.filter(k=>!isTpU(k)),ut=tpHid()?[]:unk.filter(isTpU);
+  const ul=(arr,t,k)=>arr.length?`<div class="nx-h"><i class="${k}"></i>${t} (${arr.length})</div><ol class="unknowns">${arr.map(k=>`<li>${FU[k]||ALL[k].text}</li>`).join("")}</ol>`:"";
+  $("#unk").innerHTML=unk.length?`<p class="dim">“We do not know” is not a status. It is a deadline for discovery.</p>${ul(uo,"My org","k-org")}${ul(ut,"Third parties","k-tp")}`
+    :`<p class="dim">No unknowns. Every answer is backed by evidence.</p>`;
+  const red=W.org?Math.round((1-W.orgR/W.org)*100):0;
+  const setK=(id,v,col)=>{const el=$(id);el.querySelector("b").textContent=v;if(col)el.style.setProperty("--k",col);};
+  const [,tlo]=tierOf(W.orgR),[,tlt]=tierOf(W.tpR);
+  setK("#kOrg",W.orgR,color(W.orgR));$("#kOrg span").textContent=tlo+(W.orgR<W.org?` · ${W.org} before actions`:"");
+  setK("#kTp",W.tpR,color(W.tpR));$("#kTp span").textContent=tlt+(W.tpR<W.tp?` · ${W.tp} before actions`:"");
+  setK("#kRed",red+"%");setK("#kTrig",W.fired);setK("#kUnk",unk.length);{const na=notAssessed("org")+(TPON()?notAssessed("tp"):0);$("#kUnkSub").textContent=na?`${na} more not assessed yet`:"deadlines for discovery";}
+  {const tp=!tpHid(),so=!state.hideSer.inh;$("#kPatchTp").hidden=!tp;$("#kPatch").hidden=!so;$("#ptiles").classList.toggle("one",!(tp&&so));$("#ptiles").hidden=!(tp||so);
+   const fill=(id,sc,dk)=>{const el=$(id+" b"),sub=$(id+" > span");
+     if(done(dk)){el.className="sm";el.textContent="Decommissioned";sub.textContent="system no longer exists";return;}
+     const f=patchFacets(sc);el.className="pr";sub.textContent="";
+     el.innerHTML=f.map(([l,v],i)=>`<span class="pline${i?"":" rel"}"><em>${l}</em><span>${esc(v)}</span></span>`).join("");};
+   fill("#kPatch","org","r_decom");fill("#kPatchTp","tp","rt_decom");}
+  const [mt,ml]=tierOf(Math.max(W.orgR,W.tpR));
+  $("#mOrg b").textContent=W.orgR;$("#mTp b").textContent=W.tpR;$("#mOrg").hidden=!!state.hideSer.inh;$("#mTp").hidden=tpHid();$("#mTier").className="tier t"+mt;$("#mTier").textContent=ml;
+  renderTabs();save();
+}
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(["patch","apply","legacy","tpApply","tpLegacy"].includes(t.name)){state[t.name]=t.value;state.at=Date.now();if(state.preset)state.edited=true;renderPanel();update();return;}
+  if(ALL[t.name]||t.name==="patch"){state.at=Date.now();}
+  if(ALL[t.name]){state.a[t.name]=t.value;if(state.preset)state.edited=true;update();}
+});
+document.addEventListener("click",e=>{if(e.target.id==="nextReset"){state.next="";update();}});
+document.addEventListener("input",e=>{if(e.target.id==="nextEval"){state.next=e.target.value||"";update();return;}if(e.target.id==="vname")state.name=e.target.value;if(e.target.id==="vasset")state.asset=e.target.value;save();});
+function toggleAx(k){state.hideAx[k]=!state.hideAx[k];update();}
+document.addEventListener("keydown",e=>{const a=e.target.closest&&e.target.closest(".axl");if(a&&(e.key==="Enter"||e.key===" ")){e.preventDefault();toggleAx(a.dataset.ax);}});
+/* Clicking the selected answer again clears it: the question goes back to unanswered and leaves the score. */
+document.addEventListener("click",e=>{const t=e.target;if(!(t instanceof HTMLInputElement)||t.type!=="radio")return;
+  if(ALL[t.name]&&state.a[t.name]===t.value){t.checked=false;delete state.a[t.name];if(state.preset)state.edited=true;state.at=Date.now();update();}
+  else if(["patch","apply","legacy","tpApply","tpLegacy"].includes(t.name)&&state[t.name]===t.value){t.checked=false;state[t.name]="";state.at=Date.now();renderPanel();update();}});
+document.addEventListener("click",e=>{
+  const ser=e.target.closest("[data-ser]");if(ser){state.hideSer[ser.dataset.ser]=!state.hideSer[ser.dataset.ser];update();return;}
+  const ax=e.target.closest("[data-ax]");if(ax){toggleAx(ax.dataset.ax);return;}
+  const tab=e.target.closest(".tab");if(tab){state.tab=+tab.dataset.i;state.scope="org";renderPanel();save();return;}
+  const go=e.target.closest("[data-go]");if(go){state.tab=+go.dataset.go;state.scope=go.dataset.sc||"org";renderPanel();save();$("#tabs").scrollIntoView({behavior:"smooth",block:"start"});return;}
+  const scb=e.target.closest("[data-scope]");if(scb){state.scope=scb.dataset.scope;renderPanel();save();return;}
+  const nav=e.target.closest("[data-nav]");if(nav){const dir=+nav.dataset.nav,cur=SECTIONS[state.tab];
+    if(hasScope(cur)&&dir>0&&state.scope==="org"){state.scope="tp";renderPanel();save();$("#tabs").scrollIntoView({behavior:"smooth",block:"start"});return;}
+    if(hasScope(cur)&&dir<0&&state.scope==="tp"){state.scope="org";renderPanel();save();return;}
+    const n=state.tab+dir;if(n>=0&&n<SECTIONS.length&&hasScope(SECTIONS[n]))state.scope=dir>0?"org":"tp";
+    if(n>=SECTIONS.length){$("#results").scrollIntoView({behavior:"smooth"});return;}
+    state.tab=Math.max(0,n);renderPanel();save();$("#tabs").scrollIntoView({behavior:"smooth",block:"start"});}
+});
+$("#ddBtn").addEventListener("click",()=>ddOpen($("#ddList").hidden,false));
+$("#ddBtn").addEventListener("keydown",e=>{if(["ArrowDown","Enter"," "].includes(e.key)){e.preventDefault();ddOpen(true,true);}});
+$("#ddList").addEventListener("click",e=>{const o=e.target.closest(".dd-o");if(o)ddPick(o.dataset.v);});
+$("#ddList").addEventListener("keydown",e=>{const os=[...$("#ddList").querySelectorAll(".dd-o")],i=os.indexOf(document.activeElement);
+  if(e.key==="ArrowDown"){e.preventDefault();os[Math.min(i+1,os.length-1)].focus();}
+  else if(e.key==="ArrowUp"){e.preventDefault();os[Math.max(i-1,0)].focus();}
+  else if(e.key==="Enter"||e.key===" "){e.preventDefault();if(i>=0)ddPick(os[i].dataset.v);}
+  else if(e.key==="Escape"||e.key==="Tab"){ddOpen(false);if(e.key==="Escape")$("#ddBtn").focus();}});
+document.addEventListener("click",e=>{if(!e.target.closest("#dd"))ddOpen(false);},true);
+$("#tpSwitch").addEventListener("click",()=>{state.tpOn=!TPON();if(!TPON())state.scope="org";renderPanel();update();});
+$("#reset").addEventListener("click",()=>{applyPreset("blank");});
+$("#scnClear").addEventListener("click",()=>{applyPreset("blank");});
+/* PDF export: results and blank questionnaires, per scope. */
+const AL={y:"Yes",p:"Partial",n:"No",u:"Unknown",x:"N/A"};
+const san=t=>String(t).replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[−–—]/g,"-").replace(/→/g,"to").replace(/…/g,"...");
+const PAL={ink:[18,26,43],muted:[95,108,130],line:[210,217,228],org:[30,111,217],tp:[217,105,22],low:[31,138,92],crit:[200,38,48],high:[217,105,22],med:[176,135,0],unk:[122,79,209]};
+const HEX={org:"#1e6fd9",tp:"#d96916",unk:"#7a4fd1",line:"#d2d9e4",ink:"#121a2b",res:"#1f8a5c",tpres:"#6a9a12"};
+const tierRGB=s=>s>=75?PAL.crit:s>=55?PAL.high:s>=35?PAL.med:PAL.low;
+function toast(m){const d=document.createElement("div");d.className="toast";d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
+function radarPNG(series){return new Promise(res=>{const W=520,H=440,cx=260,cy=220,R=150,n=AXES.length;
+  const pt=(i,v)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [cx+Math.cos(a)*R*v/100,cy+Math.sin(a)*R*v/100];};
+  let g=`<rect width="${W}" height="${H}" fill="#ffffff"/>`;
+  [25,50,75,100].forEach(r=>{g+=`<polygon points="${AXES.map((_,i)=>pt(i,r).join(",")).join(" ")}" fill="none" stroke="${HEX.line}"/>`;});
+  AXES.forEach((_,i)=>{const [x,y]=pt(i,100);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${HEX.line}"/>`;});
+  series.forEach(s=>{const p=AXES.map((a,i)=>pt(i,Math.max(s.vals[a.k],2)).join(",")).join(" ");
+    g+=`<polygon points="${p}" fill="${s.col}" fill-opacity="${s.fill?.15:0}" stroke="${s.col}" stroke-width="2.4" ${s.dash?'stroke-dasharray="7 5"':""}/>`;
+    if(!s.nodots)AXES.forEach((a,i)=>{const [x,y]=pt(i,Math.max(s.vals[a.k],2));g+=`<circle cx="${x}" cy="${y}" r="4" fill="${s.col}"/>`;});});
+  AXES.forEach((a,i)=>{const [x,y]=pt(i,118);const an=Math.abs(x-cx)<5?"middle":x>cx?"start":"end";const dy=y<cy-60?-6:y>cy+60?14:4;
+    g+=`<text x="${x}" y="${y+dy}" text-anchor="${an}" font-family="Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="${HEX.ink}">${a.label}</text>`;});
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W*2}" height="${H*2}">${g}</svg>`;
+  const img=new Image();img.onload=()=>{try{const c=document.createElement("canvas");c.width=W*2;c.height=H*2;c.getContext("2d").drawImage(img,0,0,W*2,H*2);res(c.toDataURL("image/png"));}catch(e){res(null);}};
+  img.onerror=()=>res(null);img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);});}
+function newDoc(){const doc=new window.jspdf.jsPDF({unit:"pt",format:"a4"});const P={doc,x:48,y:56,w:595-96,H:842};
+  P.need=h=>{if(P.y+h>P.H-60){doc.addPage();P.y=56;}};
+  P.text=(t,o={})=>{const {size=10,color=PAL.ink,bold=false,font="helvetica",gap=4,indent=0}=o;doc.setFont(font,bold?"bold":"normal");doc.setFontSize(size);doc.setTextColor(...color);
+    const lines=doc.splitTextToSize(san(t),P.w-indent),lh=size*1.3;lines.forEach(l=>{P.need(lh);doc.text(l,P.x+indent,P.y+size);P.y+=lh;});P.y+=gap;};
+  P.label=(t,color=PAL.muted)=>P.text(t.toUpperCase(),{size:8,color,font:"courier",bold:true,gap:3});
+  P.rule=()=>{P.need(10);doc.setDrawColor(...PAL.line);doc.setLineWidth(.6);doc.line(P.x,P.y,P.x+P.w,P.y);P.y+=12;};
+  return P;}
+function pdfHeader(P,title,sub,scope){const c=scope==="tp"?PAL.tp:PAL.org;P.doc.setFillColor(...c);P.doc.rect(0,0,595,6,"F");
+  P.label("Cybersecurity Compass  //  Vulnpocalypse  //  Six dimensions  //  VulnOps",c);P.text(title,{size:18,bold:true,gap:2});P.text(sub,{size:10,color:PAL.muted,gap:8});P.rule();}
+function pdfFooter(P){const d=P.doc,n=d.getNumberOfPages();for(let i=1;i<=n;i++){d.setPage(i);d.setFont("helvetica","normal");d.setFontSize(7.5);d.setTextColor(...PAL.muted);
+  d.text(d.splitTextToSize("Built on the six dimension framework from the article Vulnerability Prioritization in the Age of the Vulnpocalypse: Avoiding the Anything2Shell Hype. A static snapshot that supports judgment. It does not replace a Cyber Risk Index (CRI) with a documented methodology, built on your own data.",430),48,842-34);
+  d.text(`${i} / ${n}`,595-48,842-34,{align:"right"});}}
+function ansRow(P,t,v){const d=P.doc;d.setFont("helvetica","normal");d.setFontSize(9.5);const lines=d.splitTextToSize(san(t),P.w-90),h=lines.length*12+5;P.need(h);
+  d.setTextColor(...PAL.ink);d.text(lines,P.x,P.y+9);d.setFont("courier","bold");d.setFontSize(9);d.setTextColor(...(v==="u"?PAL.unk:v?PAL.ink:PAL.muted));
+  d.text(v?(AL[v]||san(v)):"Not answered",P.x+P.w,P.y+9,{align:"right"});P.y+=h;}
+function qRow(P,t){const d=P.doc;d.setFont("helvetica","normal");d.setFontSize(9.5);const lines=d.splitTextToSize(san(t),P.w),h=lines.length*12+34;P.need(h);
+  d.setTextColor(...PAL.ink);d.text(lines,P.x,P.y+9);const y=P.y+lines.length*12+6;let x=P.x;
+  ["Yes","Partial","No","Unknown","N/A"].forEach(o=>{d.setDrawColor(...PAL.muted);d.setLineWidth(.7);d.rect(x,y,8,8);d.setFontSize(8.5);d.setTextColor(...PAL.muted);d.text(o,x+12,y+7);x+=66;});
+  d.setDrawColor(...PAL.line);d.line(x+6,y+8,P.x+P.w,y+8);d.setFontSize(7);d.text("Evidence and owner",x+6,y+17);P.y+=h;}
+function boxLine(P,t){const d=P.doc;P.need(15);d.setDrawColor(...PAL.muted);d.rect(P.x,P.y+2,8,8);d.setFont("helvetica","normal");d.setFontSize(9.5);d.setTextColor(...PAL.ink);d.text(san(t),P.x+14,P.y+9);P.y+=15;}
+async function buildReport(scope){
+  const W=compute("worst"),B=compute("best"),P=newDoc(),d=P.doc,org=scope==="org",col=org?PAL.org:PAL.tp;
+  const when=new Date(state.at||Date.now()).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});
+  pdfHeader(P,`Cyber Risk Profile: ${state.name||"Unnamed vulnerability"}`,`${org?"My org":"Third parties"}  |  ${state.asset||"Scope not set"}`,scope);
+  {const ne=nextEval(),at=new Date(state.at||Date.now()),gw=10,bw=(P.w-gw)/2,bh=50,y0=P.y;P.need(bh+12);
+   const box=(x,lab,val,sub,c)=>{d.setDrawColor(...PAL.line);d.setLineWidth(.8);d.roundedRect(x,y0,bw,bh,3,3,"S");d.setFillColor(...c);d.rect(x,y0,3,bh,"F");
+     d.setFont("helvetica","normal");d.setFontSize(7.5);d.setTextColor(...PAL.muted);d.text(lab.toUpperCase(),x+12,y0+13);
+     d.setFont("helvetica","bold");d.setFontSize(13);d.setTextColor(...PAL.ink);d.text(san(val),x+12,y0+30);
+     d.setFont("helvetica","normal");d.setFontSize(8);d.setTextColor(...PAL.muted);d.text(san(sub),x+12,y0+43);};
+   box(P.x,"Assessed on",at.toLocaleDateString(undefined,{dateStyle:"medium"}),`at ${at.toLocaleTimeString(undefined,{timeStyle:"short"})}, answers as of then`,PAL.muted);
+   box(P.x+bw+gw,"Next evaluation",fmtDate(ne.t),ne.set?`set by the assessor, suggested ${fmtDate(ne.sug)}`:`suggested for ${ne.tl}, within ${ne.days} day${ne.days>1?"s":""}`,col);
+   P.y=y0+bh+12;}
+  if(state.preset)P.text(`Scenario: ${scnName(state.preset)}. ${state.edited?"Some answers were changed by the assessor.":"These are example answers, not an organization's own evidence."}`,{size:9,color:PAL.high});
+  const inh=org?W.org:W.tp,res=org?W.orgR:W.tpR,[,tl,tt]=tierOf(res,!org);
+  P.need(72);d.setDrawColor(...col);d.setLineWidth(1.2);d.roundedRect(P.x,P.y,P.w,62,4,4,"S");
+  d.setFont("helvetica","bold");d.setFontSize(34);d.setTextColor(...tierRGB(res));d.text(String(res),P.x+16,P.y+43);
+  d.setFontSize(12);d.text(tl.toUpperCase(),P.x+92,P.y+22);d.setFont("helvetica","normal");d.setFontSize(9.5);d.setTextColor(...PAL.muted);
+  d.text(d.splitTextToSize(san(`${res<inh?`Reduced from ${inh} by the actions applied. `:""}${tt}`),P.w-110),P.x+92,P.y+37);P.y+=76;
+  const ds=org?W.ds:W.tds,f=org?W.fo:W.ft,mk=a=>{const o={};DIMS.forEach((dm,i)=>o[dm.id]=a[i]);return o;};
+  const ser=[{vals:mk(ds),col:org?HEX.org:HEX.tp,fill:true}];
+  if(org)ser.push({vals:mk(B.ds),col:HEX.unk,dash:true});
+  if(f<1)ser.push({vals:mk(ds.map(x=>Math.round(x*f))),col:org?HEX.res:HEX.tpres,dash:true});
+  const png=await radarPNG(ser),iw=P.w-140,ih=iw*440/520;
+  if(png){P.need(ih+20);d.addImage(png,"PNG",P.x+70,P.y,iw,ih);P.y+=ih+4;
+    P.text(`Solid: before actions.${f<1?" Green dashed: after actions.":""}${org?" Purple dashed: if every unknown is confirmed safe.":""}`,{size:8,color:PAL.muted,gap:8});}
+  P.label("Six dimensions",col);
+  DIMS.forEach((dm,i)=>{P.need(16);d.setFont("helvetica","normal");d.setFontSize(10);d.setTextColor(...PAL.ink);d.text(`${i+1}. ${san(dm.name)}`,P.x,P.y+10);
+    d.setFont("helvetica","bold");d.setTextColor(...tierRGB(ds[i]));d.text(String(ds[i]),P.x+P.w-50,P.y+10,{align:"right"});
+    if(f<1){const r=Math.round(ds[i]*f);d.setTextColor(...tierRGB(r));d.text(String(r),P.x+P.w,P.y+10,{align:"right"});}P.y+=16;});
+  if(f<1)P.text("Left: before actions. Right: after actions.",{size:8,color:PAL.muted});P.y+=6;
+  P.label(org?"Patch status":"Third party patch status",col);patchFacets(scope).forEach(([k,v])=>P.text(`${k}: ${v}`,{gap:1}));P.y+=4;
+  if(org){
+    const fired=TRIG.filter(t=>t[1]());P.label(`Escalation triggers confirmed (${fired.length} of ${TRIG.length})`,col);if(fired.length)fired.forEach(t=>P.text("- "+t[0],{gap:1}));else P.text("None");P.y+=6;
+    if(state.patch&&PLAY[state.patch]){P.label("Recommended path: "+PLAY[state.patch][0],col);PLAY[state.patch][1].forEach((x,i)=>P.text(`${i+1}. ${x}`,{gap:1}));P.y+=6;}}
+  const applied=ACT[scope].filter(a=>state.a[a[0]]==="y"||state.a[a[0]]==="p");P.label("Actions applied",col);
+  if(applied.length)applied.forEach(a=>P.text(`- ${a[1]} ${AL[state.a[a[0]]]}.`,{gap:1}));else P.text("None");P.y+=6;
+  const nx=nextActions(ACT[scope],res);if(nx.length&&nx[0][1]>0){P.label("Biggest remaining reductions",col);nx.forEach(([a,g])=>P.text(`- ${a[1]} (${g} points)`,{gap:1}));P.y+=6;}
+  const unk=Object.keys(state.a).filter(k=>state.a[k]==="u"&&ALL[k]&&ALL[k].scope===scope);{const na=notAssessed(scope);if(na){P.label(`Not assessed yet: ${na} questions, counted as exposed`,PAL.high);P.y+=2;}}P.label(`Discovery deadline: ${unk.length} unknown answers`,PAL.unk);
+  if(unk.length)unk.forEach(k=>P.text("- "+ALL[k].text,{gap:1}));else P.text("None. Every answer is backed by evidence.");
+  d.addPage();P.y=56;P.label("Answers by dimension",col);
+  DIMS.forEach((dm,i)=>{P.need(30);P.text(`Dimension ${i+1}. ${dm.name}`,{size:12,bold:true,gap:3});(org?dm.blocks.flatMap(b=>b.items):dm.tp).forEach(([id,t])=>ansRow(P,t,state.a[id]));P.y+=8;});
+  {P.need(40);P.text(org?"Patch status":"Third party patch status",{size:12,bold:true,gap:3});patchFacets(scope).forEach(([k,v])=>ansRow(P,k,v));P.y+=8;}
+  P.need(30);P.text("Remediation actions applied",{size:12,bold:true,gap:3});ACT[scope].forEach(([id,t])=>ansRow(P,t,state.a[id]));
+  P.y+=10;P.text(`Snapshot, not a status. These answers reflect the estate as of ${when}. Next evaluation: ${fmtDate(nextEval().t)}, or sooner. Refresh them whenever an asset, identity, container, API, AI agent or third party changes.`,{size:9,color:PAL.muted});
+  pdfFooter(P);return d;}
+function buildBlank(scope){const P=newDoc(),d=P.doc,org=scope==="org",col=org?PAL.org:PAL.tp;
+  pdfHeader(P,"Vulnerability prioritization questionnaire",`${org?"My org":"Third parties"}  |  Six dimensions, exposure first`,scope);
+  ["Vulnerability","Affected asset or scope","Assessor","Assessment date","Next evaluation date"].forEach(l=>{P.need(22);d.setFont("helvetica","normal");d.setFontSize(9);d.setTextColor(...PAL.muted);d.text(l,P.x,P.y+10);d.setDrawColor(...PAL.line);d.line(P.x+130,P.y+12,P.x+P.w,P.y+12);P.y+=22;});
+  if(!org)P.text("Scope: third party systems that connect to our environment or handle our data, including SaaS platforms, managed service and security providers, integrations and APIs, and the subprocessors behind them. Not a third party's whole estate.",{size:9.5,bold:true,gap:6});
+  P.y+=4;P.text("Answer each question with evidence, not opinion: Yes, Partial, No, Unknown or N/A. An Unknown is not a failure. It is a finding, and a deadline for discovery. This questionnaire scopes the problem the first time. Keep the answers current as assets, identities, containers, APIs, AI agents and third parties change.",{size:9.5,color:PAL.muted,gap:10});
+  DIMS.forEach((dm,i)=>{P.need(60);P.text(`Dimension ${i+1}. ${dm.name}`,{size:12,bold:true,gap:1});P.text(dm.q,{size:9,color:PAL.muted,gap:5});
+    if(org){if(dm.patch){P.label("1. Patch release (choose one)",col);PATCH.forEach(p=>boxLine(P,p[1]));P.y+=4;P.label("2. Application scope (if a patch or workaround exists)",col);APPLY.forEach(a=>boxLine(P,a[1]));P.y+=4;P.label("3. Legacy systems (if the fix leaves versions out or is still pending)",col);LEGACY.forEach(a=>boxLine(P,a[1]));P.y+=6;}
+      dm.blocks.forEach(b=>{if(b.title)P.label(b.title,col);b.items.forEach(([,t])=>qRow(P,t));});}
+    else{if(dm.patch){P.label("Third party patch application: systems that connect to us or handle our data (choose one)",col);APPLY.forEach(a=>boxLine(P,a[1]));P.y+=4;P.label("Third party legacy versions (choose one)",col);LEGACY.forEach(a=>boxLine(P,a[1]));P.y+=6;}P.label(dm.short+" through our third parties",col);dm.tp.forEach(([,t])=>qRow(P,t));}
+    P.y+=8;});
+  P.need(60);P.text("Remediation actions applied",{size:12,bold:true,gap:5});ACT[scope].forEach(([,t])=>qRow(P,t));
+  pdfFooter(P);return d;}
+let DL;
+async function getDL(){if(DL!==undefined)return DL;try{DL=window.claude&&window.claude.use?await window.claude.use("downloads"):null;}catch(e){DL=null;}return DL;}
+async function doExport(kind){const [type,scope]=kind.split(":");const dl=await getDL();
+  if(!dl||!window.jspdf){toast("PDF export is not available in this view");return;}
+  try{const doc=type==="res"?await buildReport(scope):buildBlank(scope);
+    const slug=(state.name||"vulnerability").replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40)||"vulnerability";
+    const who=scope==="org"?"organization":"third-parties";
+    await dl.save({filename:type==="res"?`${slug}-${who}-cyber-risk-profile.pdf`:`questionnaire-${who}.pdf`,data:doc.output("blob")});toast("PDF saved");}
+  catch(e){if(e&&e.code==="declined")return;toast(e&&e.code==="host_unavailable"?"Open this page in a browser to save the PDF":e&&e.code==="rate_limited"?"Another save is open. Try again in a moment":"The PDF could not be saved here");}}
+function renderExp(){const tp=TPON();$("#expList").innerHTML=`<li class="dd-g" role="presentation">Results</li><li class="dd-o" role="menuitem" tabindex="-1" data-exp="res:org"><i class="k-org"></i>My org</li>${tp?`<li class="dd-o" role="menuitem" tabindex="-1" data-exp="res:tp"><i class="k-tp"></i>Third parties</li>`:""}
+  <li class="dd-g" role="presentation">Blank questionnaire</li><li class="dd-o" role="menuitem" tabindex="-1" data-exp="blank:org"><i class="k-org"></i>My org</li>${tp?`<li class="dd-o" role="menuitem" tabindex="-1" data-exp="blank:tp"><i class="k-tp"></i>Third parties</li>`:""}`;}
+function expOpen(on){$("#expList").hidden=!on;$("#expBtn").setAttribute("aria-expanded",on);if(on){renderExp();const f=$("#expList .dd-o");f&&f.focus();}}
+$("#expBtn").addEventListener("click",()=>expOpen($("#expList").hidden));
+$("#expList").addEventListener("click",e=>{const o=e.target.closest("[data-exp]");if(o){expOpen(false);doExport(o.dataset.exp);}});
+$("#expList").addEventListener("keydown",e=>{const os=[...$("#expList").querySelectorAll(".dd-o")],i=os.indexOf(document.activeElement);
+  if(e.key==="ArrowDown"){e.preventDefault();os[Math.min(i+1,os.length-1)].focus();}else if(e.key==="ArrowUp"){e.preventDefault();os[Math.max(i-1,0)].focus();}
+  else if(e.key==="Enter"||e.key===" "){e.preventDefault();if(i>=0){expOpen(false);doExport(os[i].dataset.exp);}}else if(e.key==="Escape"){expOpen(false);$("#expBtn").focus();}});
+document.addEventListener("click",e=>{if(!e.target.closest("#expWrap"))expOpen(false);},true);
+getDL().then(dl=>{if(!dl){$("#expBtn").disabled=true;$("#expBtn").title="PDF export is not available in this view";}});
+
+renderPanel();update();
+</script>
+
+</body></html>
